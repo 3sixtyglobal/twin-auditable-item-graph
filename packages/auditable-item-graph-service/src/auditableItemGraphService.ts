@@ -69,17 +69,19 @@ import type { IAuditableItemGraphServiceContext } from "./models/IAuditableItemG
  */
 export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	/**
-	 * The namespace for the service.
-	 */
-	public static readonly NAMESPACE: string = "aig";
-
-	/**
 	 * The namespace for the service changeset.
 	 */
 	public static readonly NAMESPACE_CHANGESET: string = "changeset";
 
 	/**
+	 * The namespace for the service.
+	 * @internal
+	 */
+	private static readonly _NAMESPACE: string = "aig";
+
+	/**
 	 * The keys to pick when creating the proof for the stream.
+	 * @internal
 	 */
 	private static readonly _PROOF_KEYS_CHANGESET: (keyof AuditableItemGraphChangeset)[] = [
 		"id",
@@ -220,7 +222,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				...this.buildIndexes(vertexModel)
 			});
 
-			const fullId = new Urn(AuditableItemGraphService.NAMESPACE, id).toString();
+			const fullId = new Urn(AuditableItemGraphService._NAMESPACE, id).toString();
 
 			await this._eventBusComponent?.publish<IAuditableItemGraphEventBusVertexCreated>(
 				AuditableItemGraphTopics.VertexCreated,
@@ -255,9 +257,9 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 		const urnParsed = Urn.fromValidString(id);
 
-		if (urnParsed.namespaceIdentifier() !== AuditableItemGraphService.NAMESPACE) {
+		if (urnParsed.namespaceIdentifier() !== AuditableItemGraphService._NAMESPACE) {
 			throw new GeneralError(this.CLASS_NAME, "namespaceMismatch", {
-				namespace: AuditableItemGraphService.NAMESPACE,
+				namespace: AuditableItemGraphService._NAMESPACE,
 				id
 			});
 		}
@@ -365,9 +367,9 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 		const urnParsed = Urn.fromValidString(vertex.id);
 
-		if (urnParsed.namespaceIdentifier() !== AuditableItemGraphService.NAMESPACE) {
+		if (urnParsed.namespaceIdentifier() !== AuditableItemGraphService._NAMESPACE) {
 			throw new GeneralError(this.CLASS_NAME, "namespaceMismatch", {
-				namespace: AuditableItemGraphService.NAMESPACE,
+				namespace: AuditableItemGraphService._NAMESPACE,
 				id: vertex.id
 			});
 		}
@@ -440,9 +442,9 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 		const urnParsed = Urn.fromValidString(id);
 
-		if (urnParsed.namespaceIdentifier() !== AuditableItemGraphService.NAMESPACE) {
+		if (urnParsed.namespaceIdentifier() !== AuditableItemGraphService._NAMESPACE) {
 			throw new GeneralError(this.CLASS_NAME, "namespaceMismatch", {
-				namespace: AuditableItemGraphService.NAMESPACE,
+				namespace: AuditableItemGraphService._NAMESPACE,
 				id
 			});
 		}
@@ -611,7 +613,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				SchemaOrgContexts.ContextRoot
 			],
 			type: AuditableItemGraphTypes.Vertex,
-			id: new Urn(AuditableItemGraphService.NAMESPACE, vertexEntity.id).toString(),
+			id: new Urn(AuditableItemGraphService._NAMESPACE, vertexEntity.id).toString(),
 			dateCreated: vertexEntity.dateCreated,
 			dateModified: vertexEntity.dateModified,
 			nodeIdentity: vertexEntity.nodeIdentity,
@@ -1034,7 +1036,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 					changesetEntity,
 					AuditableItemGraphService._PROOF_KEYS_CHANGESET
 				) as AuditableItemGraphChangeset),
-				id: `${AuditableItemGraphService.NAMESPACE}:${updated.id}:${AuditableItemGraphService.NAMESPACE_CHANGESET}:${changesetEntity.id}`
+				id: `${AuditableItemGraphService._NAMESPACE}:${updated.id}:${AuditableItemGraphService.NAMESPACE_CHANGESET}:${changesetEntity.id}`
 			});
 
 			// Create the proof for the changeset object
