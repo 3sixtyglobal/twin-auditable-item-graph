@@ -1,5 +1,19 @@
 # @twin.org/auditable-item-graph-rest-client - Changelog
 
+## [0.0.2-next.3](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-rest-client-v0.0.2-next.2...auditable-item-graph-rest-client-v0.0.2-next.3) (2025-08-29)
+
+
+### Features
+
+* eslint migration to flat config ([1b42a3a](https://github.com/twinfoundation/auditable-item-graph/commit/1b42a3a27bd6e32d7816de406b92b6332472edf6))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/auditable-item-graph-models bumped from 0.0.2-next.2 to 0.0.2-next.3
+
 ## [0.0.2-next.2](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-rest-client-v0.0.2-next.1...auditable-item-graph-rest-client-v0.0.2-next.2) (2025-08-20)
 
 
