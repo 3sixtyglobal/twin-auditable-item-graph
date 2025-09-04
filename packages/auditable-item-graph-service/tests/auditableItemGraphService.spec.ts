@@ -54,7 +54,6 @@ async function waitForProofGeneration(proofCount: number = 1): Promise<void> {
 		await new Promise(resolve => setTimeout(resolve, 200));
 	} while (verifiableStorage.getStore().length < proofCount && count++ < proofCount * 40);
 	if (count >= proofCount * 40) {
-		// eslint-disable-next-line no-restricted-syntax
 		throw new Error("Proof generation timed out");
 	}
 }
