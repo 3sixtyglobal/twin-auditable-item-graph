@@ -1,5 +1,12 @@
 # @twin.org/auditable-item-graph-models - Changelog
 
+## [0.0.2-next.4](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-models-v0.0.2-next.3...auditable-item-graph-models-v0.0.2-next.4) (2025-09-24)
+
+
+### Features
+
+* add unique flag for alias, and exact match option for id query ([33dbd19](https://github.com/twinfoundation/auditable-item-graph/commit/33dbd19cabd9fbfaba81032f1d1a6527584c3f5a))
+
 ## [0.0.2-next.3](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-models-v0.0.2-next.2...auditable-item-graph-models-v0.0.2-next.3) (2025-08-29)
 
 
