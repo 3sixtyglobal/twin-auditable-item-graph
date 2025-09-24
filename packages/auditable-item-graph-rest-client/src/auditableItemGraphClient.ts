@@ -59,6 +59,7 @@ export class AuditableItemGraphClient
 		aliases?: {
 			id: string;
 			aliasFormat?: string;
+			unique?: boolean;
 			annotationObject?: IJsonLdNodeObject;
 		}[];
 		resources?: {
@@ -138,6 +139,7 @@ export class AuditableItemGraphClient
 		aliases?: {
 			id: string;
 			aliasFormat?: string;
+			unique?: boolean;
 			annotationObject?: IJsonLdNodeObject;
 		}[];
 		resources?: {
@@ -178,6 +180,7 @@ export class AuditableItemGraphClient
 	 * @param options The query options.
 	 * @param options.id The optional id to look for.
 	 * @param options.idMode Look in id, alias or both, defaults to both.
+	 * @param options.idExact Find only exact matches, default to false meaning partial matching.
 	 * @param options.resourceTypes Include vertices with specific resource types.
 	 * @param conditions Conditions to use in the query.
 	 * @param orderBy The order for the results, defaults to created.
@@ -191,6 +194,7 @@ export class AuditableItemGraphClient
 		options?: {
 			id?: string;
 			idMode?: "id" | "alias" | "both";
+			idExact?: boolean;
 			resourceTypes?: string[];
 		},
 		conditions?: IComparator[],
@@ -210,6 +214,7 @@ export class AuditableItemGraphClient
 			query: {
 				id: options?.id,
 				idMode: options?.idMode,
+				idExact: options?.idExact,
 				resourceTypes: HttpParameterHelper.arrayToString(options?.resourceTypes),
 				conditions: HttpParameterHelper.objectToString(conditions),
 				orderBy,

@@ -162,6 +162,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			aliases?: {
 				id: string;
 				aliasFormat?: string;
+				unique?: boolean;
 				annotationObject?: IJsonLdNodeObject;
 			}[];
 			resources?: {
@@ -493,6 +494,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	 * @param options The query options.
 	 * @param options.id The optional id to look for.
 	 * @param options.idMode Look in id, alias or both, defaults to both.
+	 * @param options.idExact Find only exact matches, default to false meaning partial matching.
 	 * @param options.includesResourceTypes Include vertices with specific resource types.
 	 * @param conditions Conditions to use in the query.
 	 * @param orderBy The order for the results, defaults to created.
@@ -506,6 +508,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 		options?: {
 			id?: string;
 			idMode?: "id" | "alias" | "both";
+			idExact?: boolean;
 			includesResourceTypes?: string[];
 		},
 		conditions?: IComparator[],
@@ -526,6 +529,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			const combinedConditions = conditions ?? [];
 			const orderProperty = orderBy ?? "dateCreated";
 			const orderDirection = orderByDirection ?? SortDirection.Descending;
+			const idExact = options?.idExact ?? false;
 
 			const idOrAlias = options?.id;
 			if (Is.stringValue(idOrAlias)) {
@@ -533,7 +537,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				if (idMode === "id" || idMode === "both") {
 					combinedConditions.push({
 						property: "id",
-						comparison: ComparisonOperator.Includes,
+						comparison: idExact ? ComparisonOperator.Equals : ComparisonOperator.Includes,
 						value: idOrAlias
 					});
 				}
@@ -541,7 +545,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 					combinedConditions.push({
 						property: "aliasIndex",
 						comparison: ComparisonOperator.Includes,
-						value: idOrAlias.toLowerCase()
+						value: idExact ? `||${idOrAlias.toLowerCase()}||` : idOrAlias.toLowerCase()
 					});
 				}
 			}
@@ -551,7 +555,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 					combinedConditions.push({
 						property: "resourceTypeIndex",
 						comparison: ComparisonOperator.Includes,
-						value: resourceType.toLowerCase()
+						value: `||${resourceType.toLowerCase()}||`
 					});
 				}
 			}
@@ -769,11 +773,19 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 		alias: {
 			id: string;
 			aliasFormat?: string;
+			unique?: boolean;
 			annotationObject?: IJsonLdNodeObject;
 		}
 	): Promise<void> {
 		Guards.object(this.CLASS_NAME, nameof(alias), alias);
 		Guards.stringValue(this.CLASS_NAME, nameof(alias.id), alias.id);
+
+		if (alias.unique ?? false) {
+			const existingVertices = await this.findMatchingVertices(vertex.id, alias.id);
+			if (existingVertices) {
+				throw new GeneralError(this.CLASS_NAME, "aliasNotUnique", { aliasId: alias.id });
+			}
+		}
 
 		if (Is.object(alias.annotationObject)) {
 			const validationFailures: IValidationFailure[] = [];
@@ -1190,8 +1202,35 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 		const resourceTypeIndex = resourceTypes.join("||").toLowerCase();
 
 		return {
-			aliasIndex: Is.stringValue(aliasIndex) ? aliasIndex : undefined,
-			resourceTypeIndex: Is.stringValue(resourceTypeIndex) ? resourceTypeIndex : undefined
+			aliasIndex: Is.stringValue(aliasIndex) ? `||${aliasIndex}||` : undefined,
+			resourceTypeIndex: Is.stringValue(resourceTypeIndex) ? `||${resourceTypeIndex}||` : undefined
 		};
+	}
+
+	/**
+	 * Find vertices with matching aliases.
+	 * @param vertexId The id of the vertex to exclude from the search.
+	 * @param aliasId The alias id to try and find.
+	 * @returns True if any other vertices have matching aliases.
+	 * @internal
+	 */
+	private async findMatchingVertices(vertexId: string, aliasId: string): Promise<boolean> {
+		const results = await this._vertexStorage.query({
+			conditions: [
+				{
+					property: "aliasIndex",
+					comparison: ComparisonOperator.Includes,
+					value: `||${aliasId.toLowerCase()}||`
+				},
+				{
+					property: "id",
+					value: vertexId,
+					comparison: ComparisonOperator.NotEquals
+				}
+			],
+			logicalOperator: LogicalOperator.And
+		});
+
+		return results.entities.length > 0;
 	}
 }

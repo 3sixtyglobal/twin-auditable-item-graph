@@ -238,7 +238,7 @@ describe("AuditableItemGraphService", () => {
 			id: "0101010101010101010101010101010101010101010101010101010101010101",
 			dateCreated: "2024-08-22T11:55:16.271Z",
 			nodeIdentity: TEST_NODE_IDENTITY,
-			aliasIndex: "foo123||bar456",
+			aliasIndex: "||foo123||bar456||",
 			aliases: [
 				{
 					id: "foo123",
@@ -3187,7 +3187,7 @@ describe("AuditableItemGraphService", () => {
 		});
 	});
 
-	test("Can query for a vertex by alias", async () => {
+	test("Can query for a vertex by alias with partial match", async () => {
 		const service = new AuditableItemGraphService({ config: {} });
 		await service.create(
 			{
@@ -6312,6 +6312,33 @@ describe("AuditableItemGraphService", () => {
 					}
 				}
 			]
+		});
+	});
+
+	test("Can fail to create a vertex with an alias that already exists and the unique flag set", async () => {
+		const service = new AuditableItemGraphService({ config: {} });
+		const id = await service.create(
+			{
+				aliases: [{ id: "foo123" }, { id: "bar456" }]
+			},
+			TEST_USER_IDENTITY,
+			TEST_NODE_IDENTITY
+		);
+		expect(id.startsWith("aig:")).toEqual(true);
+
+		await expect(
+			service.create(
+				{
+					aliases: [{ id: "foo123", unique: true }, { id: "bar456" }]
+				},
+				TEST_USER_IDENTITY,
+				TEST_NODE_IDENTITY
+			)
+		).rejects.toMatchObject({
+			message: "auditableItemGraphService.createFailed",
+			cause: {
+				message: "auditableItemGraphService.aliasNotUnique"
+			}
 		});
 	});
 });

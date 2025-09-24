@@ -603,6 +603,7 @@ export async function auditableItemGraphList(
 		{
 			id: request.query?.id,
 			idMode: request.query?.idMode,
+			idExact: Coerce.boolean(request.query?.idExact),
 			resourceTypes: HttpParameterHelper.arrayFromString(request.query?.resourceTypes)
 		},
 		HttpParameterHelper.objectFromString(request.query?.conditions),

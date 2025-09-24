@@ -8,7 +8,8 @@
 			"queryingFailed": "Querying the Auditable Item Graph failed",
 			"removeVerifiableFailed": "Removing the verifiable data the Auditable Item Graph vertex failed",
 			"vertexNotFound": "The vertex with the Id \"{notFoundId}\" was not found",
-			"resourceIdMissing": "You must provide either the id, or the resourceObject must contain an id property for index \"{index}\""
+			"resourceIdMissing": "You must provide either the id, or the resourceObject must contain an id property for index \"{index}\"",
+			"aliasNotUnique": "The alias id \"{aliasId}\" is already in use on another vertex and the unique flag was set"
 		},
 		"validation": {
 			"auditableItemGraphService": {

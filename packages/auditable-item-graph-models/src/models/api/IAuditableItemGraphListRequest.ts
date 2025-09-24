@@ -30,6 +30,11 @@ export interface IAuditableItemGraphListRequest {
 		idMode?: "id" | "alias" | "both";
 
 		/**
+		 * Find only exact matches, default to false meaning partial matching.
+		 */
+		idExact?: boolean;
+
+		/**
 		 * Include vertices with specific resource types, comma separated.
 		 */
 		resourceTypes?: string;
