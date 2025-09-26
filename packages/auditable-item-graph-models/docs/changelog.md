@@ -1,5 +1,12 @@
 # @twin.org/auditable-item-graph-models - Changelog
 
+## [0.0.2-next.5](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-models-v0.0.2-next.4...auditable-item-graph-models-v0.0.2-next.5) (2025-09-26)
+
+
+### Features
+
+* update edges to use targetId instead of id ([6c5d0e3](https://github.com/twinfoundation/auditable-item-graph/commit/6c5d0e31b6e2ea74bfa2f3344e4be628e5f237af))
+
 ## [0.0.2-next.4](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-models-v0.0.2-next.3...auditable-item-graph-models-v0.0.2-next.4) (2025-09-24)
 
 
