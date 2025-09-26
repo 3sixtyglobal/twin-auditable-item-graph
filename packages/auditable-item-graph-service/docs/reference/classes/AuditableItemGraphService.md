@@ -36,6 +36,14 @@ The namespace for the service changeset.
 
 ***
 
+### NAMESPACE\_EDGE
+
+> `readonly` `static` **NAMESPACE\_EDGE**: `string` = `"edge"`
+
+The namespace for the service edge.
+
+***
+
 ### CLASS\_NAME
 
 > `readonly` **CLASS\_NAME**: `string`

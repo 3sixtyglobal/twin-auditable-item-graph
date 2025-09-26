@@ -87,7 +87,7 @@
 										],
 										"edges": [
 											{
-												"id": "edge1",
+												"targetId": "aig:1234567890",
 												"edgeRelationships": [
 													"frenemy"
 												],
@@ -98,7 +98,7 @@
 												}
 											},
 											{
-												"id": "edge2",
+												"targetId": "aig:45678901234",
 												"edgeRelationships": [
 													"end"
 												],
@@ -768,6 +768,7 @@
 										"edges": [
 											{
 												"id": "edge1",
+												"targetId": "aig:1234567890",
 												"edgeRelationships": [
 													"frenemy"
 												],
@@ -779,6 +780,7 @@
 											},
 											{
 												"id": "edge2",
+												"targetId": "aig:45678901234",
 												"edgeRelationships": [
 													"end"
 												],
@@ -882,6 +884,9 @@
 									"aliasFormat": {
 										"type": "string"
 									},
+									"unique": {
+										"type": "boolean"
+									},
 									"annotationObject": {
 										"$ref": "https://schema.twindev.org/json-ld/JsonLdNodeObject"
 									}
@@ -920,7 +925,7 @@
 							{
 								"type": "object",
 								"properties": {
-									"id": {
+									"targetId": {
 										"type": "string"
 									},
 									"edgeRelationships": {
@@ -934,7 +939,7 @@
 									}
 								},
 								"required": [
-									"id",
+									"targetId",
 									"edgeRelationships"
 								],
 								"additionalProperties": false
@@ -965,6 +970,9 @@
 									"aliasFormat": {
 										"type": "string"
 									},
+									"unique": {
+										"type": "boolean"
+									},
 									"annotationObject": {
 										"$ref": "https://schema.twindev.org/json-ld/JsonLdNodeObject"
 									}
@@ -1006,6 +1014,9 @@
 									"id": {
 										"type": "string"
 									},
+									"targetId": {
+										"type": "string"
+									},
 									"edgeRelationships": {
 										"type": "array",
 										"items": {
@@ -1018,6 +1029,7 @@
 								},
 								"required": [
 									"id",
+									"targetId",
 									"edgeRelationships"
 								],
 								"additionalProperties": false

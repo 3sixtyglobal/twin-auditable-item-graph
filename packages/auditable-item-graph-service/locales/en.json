@@ -9,11 +9,12 @@
 			"removeVerifiableFailed": "Removing the verifiable data the Auditable Item Graph vertex failed",
 			"vertexNotFound": "The vertex with the Id \"{notFoundId}\" was not found",
 			"resourceIdMissing": "You must provide either the id, or the resourceObject must contain an id property for index \"{index}\"",
-			"aliasNotUnique": "The alias id \"{aliasId}\" is already in use on another vertex and the unique flag was set"
+			"aliasNotUnique": "The alias id \"{aliasId}\" is already in use on another vertex and the unique flag was set",
+			"invalidEdgeId": "The edge id \"{edgeId}\" is not valid"
 		},
 		"validation": {
 			"auditableItemGraphService": {
-				"edgeIdSameAsVertexId": "The edge id \"{id}\"can not point to the vertex it belongs to"
+				"edgeIdSameAsVertexId": "The edge with target id \"{targetId}\" can not point to the vertex it belongs to"
 			}
 		}
 	},

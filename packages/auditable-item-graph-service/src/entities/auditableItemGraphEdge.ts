@@ -33,6 +33,12 @@ export class AuditableItemGraphEdge {
 	public dateDeleted?: string;
 
 	/**
+	 * The target id of the edge.
+	 */
+	@property({ type: "string" })
+	public targetId!: string;
+
+	/**
 	 * The relationships between the two vertices.
 	 */
 	@property({ type: "array" })

@@ -22,6 +22,11 @@ export interface IAuditableItemGraphEdge extends IAuditableItemGraphAuditedEleme
 	id: string;
 
 	/**
+	 * The target vertex id the edge connects to.
+	 */
+	targetId: string;
+
+	/**
 	 * JSON-LD Type.
 	 */
 	type: typeof AuditableItemGraphTypes.Edge;

@@ -69,15 +69,20 @@ import type { IAuditableItemGraphServiceContext } from "./models/IAuditableItemG
  */
 export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	/**
+	 * The namespace for the service.
+	 * @internal
+	 */
+	public static readonly NAMESPACE: string = "aig";
+
+	/**
 	 * The namespace for the service changeset.
 	 */
 	public static readonly NAMESPACE_CHANGESET: string = "changeset";
 
 	/**
-	 * The namespace for the service.
-	 * @internal
+	 * The namespace for the service edge.
 	 */
-	private static readonly _NAMESPACE: string = "aig";
+	public static readonly NAMESPACE_EDGE: string = "edge";
 
 	/**
 	 * The keys to pick when creating the proof for the stream.
@@ -170,7 +175,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				resourceObject?: IJsonLdNodeObject;
 			}[];
 			edges?: {
-				id: string;
+				targetId: string;
 				edgeRelationships: string[];
 				annotationObject?: IJsonLdNodeObject;
 			}[];
@@ -223,7 +228,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				...this.buildIndexes(vertexModel)
 			});
 
-			const fullId = new Urn(AuditableItemGraphService._NAMESPACE, id).toString();
+			const fullId = new Urn(AuditableItemGraphService.NAMESPACE, id).toString();
 
 			await this._eventBusComponent?.publish<IAuditableItemGraphEventBusVertexCreated>(
 				AuditableItemGraphTopics.VertexCreated,
@@ -258,9 +263,9 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 		const urnParsed = Urn.fromValidString(id);
 
-		if (urnParsed.namespaceIdentifier() !== AuditableItemGraphService._NAMESPACE) {
+		if (urnParsed.namespaceIdentifier() !== AuditableItemGraphService.NAMESPACE) {
 			throw new GeneralError(this.CLASS_NAME, "namespaceMismatch", {
-				namespace: AuditableItemGraphService._NAMESPACE,
+				namespace: AuditableItemGraphService.NAMESPACE,
 				id
 			});
 		}
@@ -354,6 +359,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			}[];
 			edges?: {
 				id: string;
+				targetId: string;
 				edgeRelationships: string[];
 				annotationObject?: IJsonLdNodeObject;
 			}[];
@@ -368,9 +374,9 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 		const urnParsed = Urn.fromValidString(vertex.id);
 
-		if (urnParsed.namespaceIdentifier() !== AuditableItemGraphService._NAMESPACE) {
+		if (urnParsed.namespaceIdentifier() !== AuditableItemGraphService.NAMESPACE) {
 			throw new GeneralError(this.CLASS_NAME, "namespaceMismatch", {
-				namespace: AuditableItemGraphService._NAMESPACE,
+				namespace: AuditableItemGraphService.NAMESPACE,
 				id: vertex.id
 			});
 		}
@@ -443,9 +449,9 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 		const urnParsed = Urn.fromValidString(id);
 
-		if (urnParsed.namespaceIdentifier() !== AuditableItemGraphService._NAMESPACE) {
+		if (urnParsed.namespaceIdentifier() !== AuditableItemGraphService.NAMESPACE) {
 			throw new GeneralError(this.CLASS_NAME, "namespaceMismatch", {
-				namespace: AuditableItemGraphService._NAMESPACE,
+				namespace: AuditableItemGraphService.NAMESPACE,
 				id
 			});
 		}
@@ -617,7 +623,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				SchemaOrgContexts.ContextRoot
 			],
 			type: AuditableItemGraphTypes.Vertex,
-			id: new Urn(AuditableItemGraphService._NAMESPACE, vertexEntity.id).toString(),
+			id: new Urn(AuditableItemGraphService.NAMESPACE, vertexEntity.id).toString(),
 			dateCreated: vertexEntity.dateCreated,
 			dateModified: vertexEntity.dateModified,
 			nodeIdentity: vertexEntity.nodeIdentity,
@@ -675,7 +681,8 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 						SchemaOrgContexts.ContextRoot
 					],
 					type: AuditableItemGraphTypes.Edge,
-					id: edgeEntity.id,
+					id: this.fullEdgeId(vertexEntity.id, edgeEntity.id),
+					targetId: edgeEntity.targetId,
 					dateCreated: edgeEntity.dateCreated,
 					dateModified: edgeEntity.dateModified,
 					dateDeleted: edgeEntity.dateDeleted,
@@ -691,11 +698,13 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 	/**
 	 * Map the changeset entity to a JSON-LD.
+	 * @param vertexId The id of the vertex the changeset belongs to.
 	 * @param changesetEntity The changeset entity.
 	 * @returns The model.
 	 * @internal
 	 */
 	private changesetEntityToJsonLd(
+		vertexId: string,
 		changesetEntity: AuditableItemGraphChangeset
 	): IAuditableItemGraphChangeset {
 		const model: IAuditableItemGraphChangeset = {
@@ -705,7 +714,11 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				SchemaOrgContexts.ContextRoot
 			],
 			type: AuditableItemGraphTypes.Changeset,
-			id: changesetEntity.id,
+			id: new Urn(AuditableItemGraphService.NAMESPACE, [
+				vertexId,
+				AuditableItemGraphService.NAMESPACE_CHANGESET,
+				changesetEntity.id
+			]).toString(),
 			dateCreated: changesetEntity.dateCreated,
 			userIdentity: changesetEntity.userIdentity,
 			patches: changesetEntity.patches.map(p => ({
@@ -926,7 +939,8 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 		context: IAuditableItemGraphServiceContext,
 		vertex: AuditableItemGraphVertex,
 		edges?: {
-			id: string;
+			id?: string;
+			targetId: string;
 			edgeRelationships: string[];
 			annotationObject?: IJsonLdNodeObject;
 		}[]
@@ -936,7 +950,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 		// The active edges that are not in the update list should be marked as deleted.
 		if (Is.arrayValue(active)) {
 			for (const edge of active) {
-				if (!edges?.find(a => a.id === edge.id)) {
+				if (!edges?.find(e => Is.stringValue(e.id) && this.reduceEdgeId(e.id) === edge.id)) {
 					edge.dateDeleted = context.now;
 				}
 			}
@@ -960,22 +974,23 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 		context: IAuditableItemGraphServiceContext,
 		vertex: AuditableItemGraphVertex,
 		edge: {
-			id: string;
+			id?: string;
+			targetId: string;
 			edgeRelationships: string[];
 			annotationObject?: IJsonLdNodeObject;
 		}
 	): Promise<void> {
 		Guards.object(this.CLASS_NAME, nameof(edge), edge);
-		Guards.stringValue(this.CLASS_NAME, nameof(edge.id), edge.id);
+		Guards.stringValue(this.CLASS_NAME, nameof(edge.targetId), edge.targetId);
 		Guards.arrayValue(this.CLASS_NAME, nameof(edge.edgeRelationships), edge.edgeRelationships);
 
 		const validationFailures: IValidationFailure[] = [];
-		if (edge.id === vertex.id) {
+		if (edge.targetId === vertex.id) {
 			validationFailures.push({
 				property: "id",
 				reason: `validation.${StringHelper.camelCase(this.CLASS_NAME)}.edgeIdSameAsVertexId`,
 				properties: {
-					id: edge.id
+					targetId: edge.targetId
 				}
 			});
 		}
@@ -988,15 +1003,21 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			validationFailures
 		);
 
+		let findId = Is.stringValue(edge.id) ? this.reduceEdgeId(edge.id) : undefined;
+		if (Is.empty(findId)) {
+			findId = Converter.bytesToHex(RandomHelper.generate(32), false);
+		}
+
 		// Try to find an existing edge with the same id.
-		const existing = vertex.edges?.find(r => r.id === edge.id);
+		const existing = vertex.edges?.find(r => r.id === findId);
 
 		if (Is.empty(existing) || !Is.empty(existing?.dateDeleted)) {
 			// Did not find a matching item, or found one which is deleted.
 			vertex.edges ??= [];
 
 			const model: AuditableItemGraphEdge = {
-				id: edge.id,
+				id: findId,
+				targetId: edge.targetId,
 				dateCreated: context.now,
 				annotationObject: edge.annotationObject,
 				edgeRelationships: edge.edgeRelationships
@@ -1004,10 +1025,12 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 			vertex.edges.push(model);
 		} else if (
+			existing.targetId !== edge.targetId ||
 			!ArrayHelper.matches(existing.edgeRelationships, edge.edgeRelationships) ||
 			!ObjectHelper.equal(existing.annotationObject, edge.annotationObject, false)
 		) {
-			// Existing resource found, update the annotationObject.
+			// Existing edge found, update the properties.
+			existing.targetId = edge.targetId;
 			existing.dateModified = context.now;
 			existing.edgeRelationships = edge.edgeRelationships;
 			existing.annotationObject = edge.annotationObject;
@@ -1043,13 +1066,13 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 			// Create the JSON-LD object we want to use for the proof
 			// this is a subset of fixed properties from the changeset object.
-			const reducedChangesetJsonLd = await this.changesetEntityToJsonLd({
-				...(ObjectHelper.pick(
+			const reducedChangesetJsonLd = await this.changesetEntityToJsonLd(
+				original.id,
+				ObjectHelper.pick(
 					changesetEntity,
 					AuditableItemGraphService._PROOF_KEYS_CHANGESET
-				) as AuditableItemGraphChangeset),
-				id: `${AuditableItemGraphService._NAMESPACE}:${updated.id}:${AuditableItemGraphService.NAMESPACE_CHANGESET}:${changesetEntity.id}`
-			});
+				) as AuditableItemGraphChangeset
+			);
 
 			// Create the proof for the changeset object
 			changesetEntity.proofId = await this._immutableProofComponent.create(
@@ -1110,7 +1133,10 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				for (let i = 0; i < storedChangesets.length; i++) {
 					const storedChangeset = storedChangesets[i];
 
-					const storedChangesetJsonLd = this.changesetEntityToJsonLd(storedChangeset);
+					const storedChangesetJsonLd = this.changesetEntityToJsonLd(
+						vertexId.namespaceSpecific(),
+						storedChangeset
+					);
 					changesets.push(storedChangesetJsonLd);
 
 					// If we are verifying all signatures
@@ -1232,5 +1258,44 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 		});
 
 		return results.entities.length > 0;
+	}
+
+	/**
+	 * Reduce the edge ID from a URN.
+	 * @param urn The URN to reduce.
+	 * @returns The edge ID.
+	 * @throws GeneralError if the URN is not valid or not an edge URN.
+	 * @internal
+	 */
+	private reduceEdgeId(urn: string): string {
+		const urnParsed = Urn.fromValidString(urn);
+		if (urnParsed.namespaceIdentifier() !== AuditableItemGraphService.NAMESPACE) {
+			throw new GeneralError(this.CLASS_NAME, "namespaceMismatch", {
+				namespace: AuditableItemGraphService.NAMESPACE,
+				id: urn
+			});
+		}
+		if (urnParsed.namespaceSpecificParts().length !== 3) {
+			throw new GeneralError(this.CLASS_NAME, "invalidEdgeId", { id: urn });
+		}
+		if (urnParsed.namespaceSpecificParts()[1] !== AuditableItemGraphService.NAMESPACE_EDGE) {
+			throw new GeneralError(this.CLASS_NAME, "invalidEdgeId", { id: urn });
+		}
+		return urnParsed.namespaceSpecificParts()[2];
+	}
+
+	/**
+	 * Create a full edge ID URN from a vertex ID and edge ID.
+	 * @param vertexId The vertex id the edge belongs to.
+	 * @param edgeId The edge id.
+	 * @returns The full edge ID URN.
+	 * @internal
+	 */
+	private fullEdgeId(vertexId: string, edgeId: string): string {
+		return new Urn(AuditableItemGraphService.NAMESPACE, [
+			vertexId,
+			AuditableItemGraphService.NAMESPACE_EDGE,
+			edgeId
+		]).toString();
 	}
 }

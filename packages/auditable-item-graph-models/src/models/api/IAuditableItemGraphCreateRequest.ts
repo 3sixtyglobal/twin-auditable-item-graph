@@ -21,6 +21,7 @@ export interface IAuditableItemGraphCreateRequest {
 		aliases?: {
 			id: string;
 			aliasFormat?: string;
+			unique?: boolean;
 			annotationObject?: IJsonLdNodeObject;
 		}[];
 
@@ -36,7 +37,7 @@ export interface IAuditableItemGraphCreateRequest {
 		 * The edges connected to the vertex.
 		 */
 		edges?: {
-			id: string;
+			targetId: string;
 			edgeRelationships: string[];
 			annotationObject?: IJsonLdNodeObject;
 		}[];

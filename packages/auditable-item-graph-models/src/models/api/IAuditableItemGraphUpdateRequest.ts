@@ -31,6 +31,7 @@ export interface IAuditableItemGraphUpdateRequest {
 		aliases?: {
 			id: string;
 			aliasFormat?: string;
+			unique?: boolean;
 			annotationObject?: IJsonLdNodeObject;
 		}[];
 
@@ -47,6 +48,7 @@ export interface IAuditableItemGraphUpdateRequest {
 		 */
 		edges?: {
 			id: string;
+			targetId: string;
 			edgeRelationships: string[];
 			annotationObject?: IJsonLdNodeObject;
 		}[];

@@ -42,6 +42,10 @@
 			],
 			"description": "JSON-LD Context."
 		},
+		"targetId": {
+			"type": "string",
+			"description": "The target vertex id the edge connects to."
+		},
 		"type": {
 			"type": "string",
 			"const": "AuditableItemGraphEdge",
@@ -65,6 +69,7 @@
 	"required": [
 		"@context",
 		"id",
+		"targetId",
 		"type",
 		"edgeRelationships"
 	],

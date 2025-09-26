@@ -64,6 +64,14 @@ The id of the element.
 
 ***
 
+### targetId
+
+> **targetId**: `string`
+
+The target vertex id the edge connects to.
+
+***
+
 ### type
 
 > **type**: `"AuditableItemGraphEdge"`

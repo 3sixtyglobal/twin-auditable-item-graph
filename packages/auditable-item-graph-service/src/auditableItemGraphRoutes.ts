@@ -107,7 +107,7 @@ export function generateRestRoutesAuditableItemGraph(
 							],
 							edges: [
 								{
-									id: "edge1",
+									targetId: "aig:1234567890",
 									edgeRelationships: ["frenemy"],
 									annotationObject: {
 										"@context": "https://schema.org",
@@ -116,7 +116,7 @@ export function generateRestRoutesAuditableItemGraph(
 									}
 								},
 								{
-									id: "edge2",
+									targetId: "aig:45678901234",
 									edgeRelationships: ["end"],
 									annotationObject: {
 										"@context": "https://schema.org",
@@ -319,6 +319,7 @@ export function generateRestRoutesAuditableItemGraph(
 							edges: [
 								{
 									id: "edge1",
+									targetId: "aig:1234567890",
 									edgeRelationships: ["frenemy"],
 									annotationObject: {
 										"@context": "https://schema.org",
@@ -328,6 +329,7 @@ export function generateRestRoutesAuditableItemGraph(
 								},
 								{
 									id: "edge2",
+									targetId: "aig:45678901234",
 									edgeRelationships: ["end"],
 									annotationObject: {
 										"@context": "https://schema.org",
