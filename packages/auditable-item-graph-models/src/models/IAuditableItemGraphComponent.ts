@@ -72,7 +72,7 @@ export interface IAuditableItemGraphComponent extends IComponent {
 				resourceObject?: IJsonLdNodeObject;
 			}[];
 			edges?: {
-				id: string;
+				id?: string;
 				targetId: string;
 				edgeRelationships: string[];
 				annotationObject?: IJsonLdNodeObject;

@@ -357,7 +357,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				resourceObject?: IJsonLdNodeObject;
 			}[];
 			edges?: {
-				id: string;
+				id?: string;
 				targetId: string;
 				edgeRelationships: string[];
 				annotationObject?: IJsonLdNodeObject;

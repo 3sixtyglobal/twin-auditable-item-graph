@@ -68,7 +68,6 @@
 	},
 	"required": [
 		"@context",
-		"id",
 		"targetId",
 		"type",
 		"edgeRelationships"

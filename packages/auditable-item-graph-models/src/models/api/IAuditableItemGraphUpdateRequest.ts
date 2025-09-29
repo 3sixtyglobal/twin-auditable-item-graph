@@ -47,7 +47,7 @@ export interface IAuditableItemGraphUpdateRequest {
 		 * The edges connected to the vertex.
 		 */
 		edges?: {
-			id: string;
+			id?: string;
 			targetId: string;
 			edgeRelationships: string[];
 			annotationObject?: IJsonLdNodeObject;

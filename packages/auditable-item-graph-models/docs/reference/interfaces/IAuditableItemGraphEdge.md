@@ -52,9 +52,9 @@ JSON-LD Context.
 
 ***
 
-### id
+### id?
 
-> **id**: `string`
+> `optional` **id**: `string`
 
 The id of the element.
 

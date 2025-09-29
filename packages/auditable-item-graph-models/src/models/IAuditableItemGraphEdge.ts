@@ -19,7 +19,7 @@ export interface IAuditableItemGraphEdge extends IAuditableItemGraphAuditedEleme
 	/**
 	 * The id of the element.
 	 */
-	id: string;
+	id?: string;
 
 	/**
 	 * The target vertex id the edge connects to.
