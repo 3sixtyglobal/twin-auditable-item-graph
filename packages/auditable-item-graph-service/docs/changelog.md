@@ -1,5 +1,19 @@
 # @twin.org/auditable-item-graph-service - Changelog
 
+## [0.0.2-next.7](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.2-next.6...auditable-item-graph-service-v0.0.2-next.7) (2025-09-29)
+
+
+### Features
+
+* id optional in edge updates ([6b63fe3](https://github.com/twinfoundation/auditable-item-graph/commit/6b63fe34553104843ae15aa5066775f5872859e9))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/auditable-item-graph-models bumped from 0.0.2-next.6 to 0.0.2-next.7
+
 ## [0.0.2-next.6](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.2-next.5...auditable-item-graph-service-v0.0.2-next.6) (2025-09-29)
 
 
