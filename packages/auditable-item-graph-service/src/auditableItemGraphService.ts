@@ -50,7 +50,7 @@ import {
 	ImmutableProofTypes,
 	type IImmutableProofComponent
 } from "@twin.org/immutable-proof-models";
-import { nameof } from "@twin.org/nameof";
+import { nameof, nameofKebabCase } from "@twin.org/nameof";
 import {
 	SchemaOrgContexts,
 	SchemaOrgDataTypes,
@@ -135,12 +135,11 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 		);
 
 		this._vertexStorage = EntityStorageConnectorFactory.get(
-			options?.vertexEntityStorageType ?? StringHelper.kebabCase(nameof<AuditableItemGraphVertex>())
+			options?.vertexEntityStorageType ?? nameofKebabCase<AuditableItemGraphVertex>()
 		);
 
 		this._changesetStorage = EntityStorageConnectorFactory.get(
-			options?.changesetEntityStorageType ??
-				StringHelper.kebabCase(nameof<AuditableItemGraphChangeset>())
+			options?.changesetEntityStorageType ?? nameofKebabCase<AuditableItemGraphChangeset>()
 		);
 
 		if (Is.stringValue(options?.eventBusComponentType)) {
