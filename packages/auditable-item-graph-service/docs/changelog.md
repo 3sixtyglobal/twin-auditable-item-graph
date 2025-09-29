@@ -1,5 +1,19 @@
 # @twin.org/auditable-item-graph-service - Changelog
 
+## [0.0.2-next.6](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.2-next.5...auditable-item-graph-service-v0.0.2-next.6) (2025-09-29)
+
+
+### Features
+
+* use new nameof operators ([3921c4c](https://github.com/twinfoundation/auditable-item-graph/commit/3921c4c9ac53e42459e45f10d9e702afb2797a23))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/auditable-item-graph-models bumped from 0.0.2-next.5 to 0.0.2-next.6
+
 ## [0.0.2-next.5](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.2-next.4...auditable-item-graph-service-v0.0.2-next.5) (2025-09-26)
 
 
