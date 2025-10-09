@@ -1,5 +1,12 @@
 # @twin.org/auditable-item-graph-models - Changelog
 
+## [0.0.2-next.8](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-models-v0.0.2-next.7...auditable-item-graph-models-v0.0.2-next.8) (2025-10-09)
+
+
+### Features
+
+* add validate-locales ([e76e6f6](https://github.com/twinfoundation/auditable-item-graph/commit/e76e6f6b3ec9c447a04315d353442e32233601d3))
+
 ## [0.0.2-next.7](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-models-v0.0.2-next.6...auditable-item-graph-models-v0.0.2-next.7) (2025-09-29)
 
 

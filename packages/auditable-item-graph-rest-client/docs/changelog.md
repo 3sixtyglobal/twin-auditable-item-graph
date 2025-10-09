@@ -1,5 +1,19 @@
 # @twin.org/auditable-item-graph-rest-client - Changelog
 
+## [0.0.2-next.8](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-rest-client-v0.0.2-next.7...auditable-item-graph-rest-client-v0.0.2-next.8) (2025-10-09)
+
+
+### Features
+
+* add validate-locales ([e76e6f6](https://github.com/twinfoundation/auditable-item-graph/commit/e76e6f6b3ec9c447a04315d353442e32233601d3))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/auditable-item-graph-models bumped from 0.0.2-next.7 to 0.0.2-next.8
+
 ## [0.0.2-next.7](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-rest-client-v0.0.2-next.6...auditable-item-graph-rest-client-v0.0.2-next.7) (2025-09-29)
 
 
