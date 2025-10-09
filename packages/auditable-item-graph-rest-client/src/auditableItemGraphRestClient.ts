@@ -28,21 +28,21 @@ import { HeaderTypes, MimeTypes } from "@twin.org/web";
 /**
  * Client for performing auditable item graph through to REST endpoints.
  */
-export class AuditableItemGraphClient
+export class AuditableItemGraphRestClient
 	extends BaseRestClient
 	implements IAuditableItemGraphComponent
 {
 	/**
 	 * Runtime name for the class.
 	 */
-	public readonly CLASS_NAME: string = nameof<AuditableItemGraphClient>();
+	public static readonly CLASS_NAME: string = nameof<AuditableItemGraphRestClient>();
 
 	/**
-	 * Create a new instance of AuditableItemGraphClient.
+	 * Create a new instance of AuditableItemGraphRestClient.
 	 * @param config The configuration for the client.
 	 */
 	constructor(config: IBaseRestClientConfig) {
-		super(nameof<AuditableItemGraphClient>(), config, "auditable-item-graph");
+		super(nameof<AuditableItemGraphRestClient>(), config, "auditable-item-graph");
 	}
 
 	/**
@@ -101,7 +101,7 @@ export class AuditableItemGraphClient
 			verifySignatureDepth?: VerifyDepth;
 		}
 	): Promise<IAuditableItemGraphVertex> {
-		Guards.stringValue(this.CLASS_NAME, nameof(id), id);
+		Guards.stringValue(AuditableItemGraphRestClient.CLASS_NAME, nameof(id), id);
 
 		const response = await this.fetch<
 			IAuditableItemGraphGetRequest,
@@ -153,8 +153,8 @@ export class AuditableItemGraphClient
 			annotationObject?: IJsonLdNodeObject;
 		}[];
 	}): Promise<void> {
-		Guards.object(this.CLASS_NAME, nameof(vertex), vertex);
-		Guards.stringValue(this.CLASS_NAME, nameof(vertex.id), vertex.id);
+		Guards.object(AuditableItemGraphRestClient.CLASS_NAME, nameof(vertex), vertex);
+		Guards.stringValue(AuditableItemGraphRestClient.CLASS_NAME, nameof(vertex.id), vertex.id);
 
 		const { id, ...rest } = vertex;
 
@@ -173,7 +173,9 @@ export class AuditableItemGraphClient
 	 * @throws NotFoundError if the vertex is not found.
 	 */
 	public async removeVerifiable(id: string): Promise<void> {
-		throw new NotSupportedError(this.CLASS_NAME, "removeVerifiable");
+		throw new NotSupportedError(AuditableItemGraphRestClient.CLASS_NAME, "notSupportedOnClient", {
+			methodName: "removeVerifiable"
+		});
 	}
 
 	/**
@@ -187,8 +189,8 @@ export class AuditableItemGraphClient
 	 * @param orderBy The order for the results, defaults to created.
 	 * @param orderByDirection The direction for the order, defaults to descending.
 	 * @param properties The properties to return, if not provided defaults to id, created, aliases and object.
-	 * @param cursor The cursor to request the next page of entities.
-	 * @param pageSize The maximum number of entities in a page.
+	 * @param cursor The cursor to request the next chunk of entities.
+	 * @param limit Limit the number of entities to return.
 	 * @returns The entities, which can be partial if a limited keys list was provided.
 	 */
 	public async query(
@@ -203,7 +205,7 @@ export class AuditableItemGraphClient
 		orderByDirection?: SortDirection,
 		properties?: (keyof IAuditableItemGraphVertex)[],
 		cursor?: string,
-		pageSize?: number
+		limit?: number
 	): Promise<IAuditableItemGraphVertexList> {
 		const response = await this.fetch<
 			IAuditableItemGraphListRequest,
@@ -222,7 +224,7 @@ export class AuditableItemGraphClient
 				orderByDirection,
 				properties: HttpParameterHelper.arrayToString(properties),
 				cursor,
-				pageSize: Coerce.integer(pageSize)
+				limit: Coerce.string(limit)
 			}
 		});
 

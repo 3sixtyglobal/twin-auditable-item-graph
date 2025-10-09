@@ -613,7 +613,7 @@ export async function auditableItemGraphList(
 		request.query?.orderByDirection,
 		HttpParameterHelper.arrayFromString(request.query?.properties),
 		request.query?.cursor,
-		Coerce.integer(request.query?.pageSize)
+		Coerce.integer(request.query?.limit)
 	);
 
 	return {

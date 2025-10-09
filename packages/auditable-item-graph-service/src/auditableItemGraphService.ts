@@ -69,6 +69,11 @@ import type { IAuditableItemGraphServiceContext } from "./models/IAuditableItemG
  */
 export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	/**
+	 * Runtime name for the class.
+	 */
+	public static readonly CLASS_NAME: string = nameof<AuditableItemGraphService>();
+
+	/**
 	 * The namespace for the service.
 	 * @internal
 	 */
@@ -95,11 +100,6 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 		"dateCreated",
 		"patches"
 	];
-
-	/**
-	 * Runtime name for the class.
-	 */
-	public readonly CLASS_NAME: string = nameof<AuditableItemGraphService>();
 
 	/**
 	 * The immutable proof component.
@@ -182,16 +182,16 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 		userIdentity?: string,
 		nodeIdentity?: string
 	): Promise<string> {
-		Guards.object(this.CLASS_NAME, nameof(vertex), vertex);
-		Guards.stringValue(this.CLASS_NAME, nameof(userIdentity), userIdentity);
-		Guards.stringValue(this.CLASS_NAME, nameof(nodeIdentity), nodeIdentity);
+		Guards.object(AuditableItemGraphService.CLASS_NAME, nameof(vertex), vertex);
+		Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(userIdentity), userIdentity);
+		Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(nodeIdentity), nodeIdentity);
 
 		try {
 			if (Is.object(vertex.annotationObject)) {
 				const validationFailures: IValidationFailure[] = [];
 				await JsonLdHelper.validate(vertex.annotationObject, validationFailures);
 				Validation.asValidationError(
-					this.CLASS_NAME,
+					AuditableItemGraphService.CLASS_NAME,
 					nameof(vertex.annotationObject),
 					validationFailures
 				);
@@ -236,7 +236,12 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 			return fullId;
 		} catch (error) {
-			throw new GeneralError(this.CLASS_NAME, "createFailed", undefined, error);
+			throw new GeneralError(
+				AuditableItemGraphService.CLASS_NAME,
+				"createFailed",
+				undefined,
+				error
+			);
 		}
 	}
 
@@ -258,12 +263,12 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			verifySignatureDepth?: VerifyDepth;
 		}
 	): Promise<IAuditableItemGraphVertex> {
-		Guards.stringValue(this.CLASS_NAME, nameof(id), id);
+		Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(id), id);
 
 		const urnParsed = Urn.fromValidString(id);
 
 		if (urnParsed.namespaceIdentifier() !== AuditableItemGraphService.NAMESPACE) {
-			throw new GeneralError(this.CLASS_NAME, "namespaceMismatch", {
+			throw new GeneralError(AuditableItemGraphService.CLASS_NAME, "namespaceMismatch", {
 				namespace: AuditableItemGraphService.NAMESPACE,
 				id
 			});
@@ -274,7 +279,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			const vertexEntity = await this._vertexStorage.get(vertexId);
 
 			if (Is.empty(vertexEntity)) {
-				throw new NotFoundError(this.CLASS_NAME, "vertexNotFound", id);
+				throw new NotFoundError(AuditableItemGraphService.CLASS_NAME, "vertexNotFound", id);
 			}
 
 			const vertexModel = this.vertexEntityToJsonLd(vertexEntity);
@@ -327,7 +332,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 			return JsonLdProcessor.compact(vertexModel, vertexModel["@context"]);
 		} catch (error) {
-			throw new GeneralError(this.CLASS_NAME, "getFailed", undefined, error);
+			throw new GeneralError(AuditableItemGraphService.CLASS_NAME, "getFailed", undefined, error);
 		}
 	}
 
@@ -366,15 +371,15 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 		userIdentity?: string,
 		nodeIdentity?: string
 	): Promise<void> {
-		Guards.object(this.CLASS_NAME, nameof(vertex), vertex);
-		Guards.stringValue(this.CLASS_NAME, nameof(vertex.id), vertex.id);
-		Guards.stringValue(this.CLASS_NAME, nameof(userIdentity), userIdentity);
-		Guards.stringValue(this.CLASS_NAME, nameof(nodeIdentity), nodeIdentity);
+		Guards.object(AuditableItemGraphService.CLASS_NAME, nameof(vertex), vertex);
+		Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(vertex.id), vertex.id);
+		Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(userIdentity), userIdentity);
+		Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(nodeIdentity), nodeIdentity);
 
 		const urnParsed = Urn.fromValidString(vertex.id);
 
 		if (urnParsed.namespaceIdentifier() !== AuditableItemGraphService.NAMESPACE) {
-			throw new GeneralError(this.CLASS_NAME, "namespaceMismatch", {
+			throw new GeneralError(AuditableItemGraphService.CLASS_NAME, "namespaceMismatch", {
 				namespace: AuditableItemGraphService.NAMESPACE,
 				id: vertex.id
 			});
@@ -385,14 +390,14 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			const vertexEntity = await this._vertexStorage.get(vertexId);
 
 			if (Is.empty(vertexEntity)) {
-				throw new NotFoundError(this.CLASS_NAME, "vertexNotFound", vertex.id);
+				throw new NotFoundError(AuditableItemGraphService.CLASS_NAME, "vertexNotFound", vertex.id);
 			}
 
 			if (Is.object(vertex.annotationObject)) {
 				const validationFailures: IValidationFailure[] = [];
 				await JsonLdHelper.validate(vertex.annotationObject, validationFailures);
 				Validation.asValidationError(
-					this.CLASS_NAME,
+					AuditableItemGraphService.CLASS_NAME,
 					nameof(vertex.annotationObject),
 					validationFailures
 				);
@@ -431,7 +436,12 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				);
 			}
 		} catch (error) {
-			throw new GeneralError(this.CLASS_NAME, "updateFailed", undefined, error);
+			throw new GeneralError(
+				AuditableItemGraphService.CLASS_NAME,
+				"updatingFailed",
+				undefined,
+				error
+			);
 		}
 	}
 
@@ -443,13 +453,13 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	 * @throws NotFoundError if the vertex is not found.
 	 */
 	public async removeVerifiable(id: string, nodeIdentity?: string): Promise<void> {
-		Guards.stringValue(this.CLASS_NAME, nameof(id), id);
-		Guards.stringValue(this.CLASS_NAME, nameof(nodeIdentity), nodeIdentity);
+		Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(id), id);
+		Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(nodeIdentity), nodeIdentity);
 
 		const urnParsed = Urn.fromValidString(id);
 
 		if (urnParsed.namespaceIdentifier() !== AuditableItemGraphService.NAMESPACE) {
-			throw new GeneralError(this.CLASS_NAME, "namespaceMismatch", {
+			throw new GeneralError(AuditableItemGraphService.CLASS_NAME, "namespaceMismatch", {
 				namespace: AuditableItemGraphService.NAMESPACE,
 				id
 			});
@@ -460,7 +470,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			const vertexEntity = await this._vertexStorage.get(vertexId);
 
 			if (Is.empty(vertexEntity)) {
-				throw new NotFoundError(this.CLASS_NAME, "vertexNotFound", id);
+				throw new NotFoundError(AuditableItemGraphService.CLASS_NAME, "vertexNotFound", id);
 			}
 
 			let changesetsResult;
@@ -490,7 +500,12 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				}
 			} while (Is.stringValue(changesetsResult.cursor));
 		} catch (error) {
-			throw new GeneralError(this.CLASS_NAME, "removeVerifiableFailed", undefined, error);
+			throw new GeneralError(
+				AuditableItemGraphService.CLASS_NAME,
+				"removeVerifiableFailed",
+				undefined,
+				error
+			);
 		}
 	}
 
@@ -505,8 +520,8 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	 * @param orderBy The order for the results, defaults to created.
 	 * @param orderByDirection The direction for the order, defaults to desc.
 	 * @param properties The properties to return, if not provided defaults to id, created, aliases and object.
-	 * @param cursor The cursor to request the next page of entities.
-	 * @param pageSize The maximum number of entities in a page.
+	 * @param cursor The cursor to request the next chunk of entities.
+	 * @param limit Limit the number of entities to return.
 	 * @returns The entities, which can be partial if a limited keys list was provided.
 	 */
 	public async query(
@@ -521,7 +536,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 		orderByDirection?: SortDirection,
 		properties?: (keyof IAuditableItemGraphVertex)[],
 		cursor?: string,
-		pageSize?: number
+		limit?: number
 	): Promise<IAuditableItemGraphVertexList> {
 		try {
 			const propertiesToReturn: (keyof IAuditableItemGraphVertex)[] = properties ?? [
@@ -584,7 +599,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				],
 				propertiesToReturn as (keyof AuditableItemGraphVertex)[],
 				cursor,
-				pageSize
+				limit
 			);
 
 			const models: IAuditableItemGraphVertex[] = results.entities.map(e =>
@@ -604,7 +619,12 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 			return JsonLdProcessor.compact(vertexList, vertexList["@context"]);
 		} catch (error) {
-			throw new GeneralError(this.CLASS_NAME, "queryingFailed", undefined, error);
+			throw new GeneralError(
+				AuditableItemGraphService.CLASS_NAME,
+				"queryingFailed",
+				undefined,
+				error
+			);
 		}
 	}
 
@@ -789,13 +809,15 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			annotationObject?: IJsonLdNodeObject;
 		}
 	): Promise<void> {
-		Guards.object(this.CLASS_NAME, nameof(alias), alias);
-		Guards.stringValue(this.CLASS_NAME, nameof(alias.id), alias.id);
+		Guards.object(AuditableItemGraphService.CLASS_NAME, nameof(alias), alias);
+		Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(alias.id), alias.id);
 
 		if (alias.unique ?? false) {
 			const existingVertices = await this.findMatchingVertices(vertex.id, alias.id);
 			if (existingVertices) {
-				throw new GeneralError(this.CLASS_NAME, "aliasNotUnique", { aliasId: alias.id });
+				throw new GeneralError(AuditableItemGraphService.CLASS_NAME, "aliasNotUnique", {
+					aliasId: alias.id
+				});
 			}
 		}
 
@@ -803,7 +825,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			const validationFailures: IValidationFailure[] = [];
 			await JsonLdHelper.validate(alias.annotationObject, validationFailures);
 			Validation.asValidationError(
-				this.CLASS_NAME,
+				AuditableItemGraphService.CLASS_NAME,
 				nameof(alias.annotationObject),
 				validationFailures
 			);
@@ -854,7 +876,9 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			for (let i = 0; i < resources.length; i++) {
 				const id = this.getResourceId(resources[i]);
 				if (Is.empty(id)) {
-					throw new GeneralError(this.CLASS_NAME, "resourceIdMissing", { index: i });
+					throw new GeneralError(AuditableItemGraphService.CLASS_NAME, "resourceIdMissing", {
+						index: i
+					});
 				}
 			}
 		}
@@ -892,13 +916,13 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			resourceObject?: IJsonLdNodeObject;
 		}
 	): Promise<void> {
-		Guards.object(this.CLASS_NAME, nameof(resource), resource);
+		Guards.object(AuditableItemGraphService.CLASS_NAME, nameof(resource), resource);
 
 		if (Is.object(resource.resourceObject)) {
 			const validationFailures: IValidationFailure[] = [];
 			await JsonLdHelper.validate(resource.resourceObject, validationFailures);
 			Validation.asValidationError(
-				this.CLASS_NAME,
+				AuditableItemGraphService.CLASS_NAME,
 				nameof(resource.resourceObject),
 				validationFailures
 			);
@@ -979,15 +1003,19 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			annotationObject?: IJsonLdNodeObject;
 		}
 	): Promise<void> {
-		Guards.object(this.CLASS_NAME, nameof(edge), edge);
-		Guards.stringValue(this.CLASS_NAME, nameof(edge.targetId), edge.targetId);
-		Guards.arrayValue(this.CLASS_NAME, nameof(edge.edgeRelationships), edge.edgeRelationships);
+		Guards.object(AuditableItemGraphService.CLASS_NAME, nameof(edge), edge);
+		Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(edge.targetId), edge.targetId);
+		Guards.arrayValue(
+			AuditableItemGraphService.CLASS_NAME,
+			nameof(edge.edgeRelationships),
+			edge.edgeRelationships
+		);
 
 		const validationFailures: IValidationFailure[] = [];
 		if (edge.targetId === vertex.id) {
 			validationFailures.push({
 				property: "id",
-				reason: `validation.${StringHelper.camelCase(this.CLASS_NAME)}.edgeIdSameAsVertexId`,
+				reason: `validation.${StringHelper.camelCase(AuditableItemGraphService.CLASS_NAME)}.edgeIdSameAsVertexId`,
 				properties: {
 					targetId: edge.targetId
 				}
@@ -997,7 +1025,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			await JsonLdHelper.validate(edge.annotationObject, validationFailures);
 		}
 		Validation.asValidationError(
-			this.CLASS_NAME,
+			AuditableItemGraphService.CLASS_NAME,
 			nameof(edge.annotationObject),
 			validationFailures
 		);
@@ -1269,16 +1297,20 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	private reduceEdgeId(urn: string): string {
 		const urnParsed = Urn.fromValidString(urn);
 		if (urnParsed.namespaceIdentifier() !== AuditableItemGraphService.NAMESPACE) {
-			throw new GeneralError(this.CLASS_NAME, "namespaceMismatch", {
+			throw new GeneralError(AuditableItemGraphService.CLASS_NAME, "namespaceMismatch", {
 				namespace: AuditableItemGraphService.NAMESPACE,
 				id: urn
 			});
 		}
 		if (urnParsed.namespaceSpecificParts().length !== 3) {
-			throw new GeneralError(this.CLASS_NAME, "invalidEdgeId", { id: urn });
+			throw new GeneralError(AuditableItemGraphService.CLASS_NAME, "invalidEdgeId", {
+				edgeId: urn
+			});
 		}
 		if (urnParsed.namespaceSpecificParts()[1] !== AuditableItemGraphService.NAMESPACE_EDGE) {
-			throw new GeneralError(this.CLASS_NAME, "invalidEdgeId", { id: urn });
+			throw new GeneralError(AuditableItemGraphService.CLASS_NAME, "invalidEdgeId", {
+				edgeId: urn
+			});
 		}
 		return urnParsed.namespaceSpecificParts()[2];
 	}

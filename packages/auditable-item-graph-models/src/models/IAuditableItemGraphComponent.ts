@@ -121,8 +121,8 @@ export interface IAuditableItemGraphComponent extends IComponent {
 	 * @param orderBy The order for the results, defaults to dateCreated.
 	 * @param orderByDirection The direction for the order, defaults to descending.
 	 * @param properties The properties to return, if not provided defaults to id, dateCreated, aliases and object.
-	 * @param cursor The cursor to request the next page of entities.
-	 * @param pageSize The maximum number of entities in a page.
+	 * @param cursor The cursor to request the next chunk of entities.
+	 * @param limit Limit the number of entities to return.
 	 * @returns The entities, which can be partial if a limited keys list was provided.
 	 */
 	query(
@@ -137,6 +137,6 @@ export interface IAuditableItemGraphComponent extends IComponent {
 		orderByDirection?: SortDirection,
 		properties?: (keyof IAuditableItemGraphVertex)[],
 		cursor?: string,
-		pageSize?: number
+		limit?: number
 	): Promise<IAuditableItemGraphVertexList>;
 }

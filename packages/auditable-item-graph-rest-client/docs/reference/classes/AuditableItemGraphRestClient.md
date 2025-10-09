@@ -1,4 +1,4 @@
-# Class: AuditableItemGraphClient
+# Class: AuditableItemGraphRestClient
 
 Client for performing auditable item graph through to REST endpoints.
 
@@ -14,9 +14,9 @@ Client for performing auditable item graph through to REST endpoints.
 
 ### Constructor
 
-> **new AuditableItemGraphClient**(`config`): `AuditableItemGraphClient`
+> **new AuditableItemGraphRestClient**(`config`): `AuditableItemGraphRestClient`
 
-Create a new instance of AuditableItemGraphClient.
+Create a new instance of AuditableItemGraphRestClient.
 
 #### Parameters
 
@@ -28,7 +28,7 @@ The configuration for the client.
 
 #### Returns
 
-`AuditableItemGraphClient`
+`AuditableItemGraphRestClient`
 
 #### Overrides
 
@@ -38,13 +38,9 @@ The configuration for the client.
 
 ### CLASS\_NAME
 
-> `readonly` **CLASS\_NAME**: `string`
+> `readonly` `static` **CLASS\_NAME**: `string`
 
 Runtime name for the class.
-
-#### Implementation of
-
-`IAuditableItemGraphComponent.CLASS_NAME`
 
 ## Methods
 
@@ -234,7 +230,7 @@ NotFoundError if the vertex is not found.
 
 ### query()
 
-> **query**(`options?`, `conditions?`, `orderBy?`, `orderByDirection?`, `properties?`, `cursor?`, `pageSize?`): `Promise`\<`IAuditableItemGraphVertexList`\>
+> **query**(`options?`, `conditions?`, `orderBy?`, `orderByDirection?`, `properties?`, `cursor?`, `limit?`): `Promise`\<`IAuditableItemGraphVertexList`\>
 
 Query the graph for vertices.
 
@@ -296,13 +292,13 @@ The properties to return, if not provided defaults to id, created, aliases and o
 
 `string`
 
-The cursor to request the next page of entities.
+The cursor to request the next chunk of entities.
 
-##### pageSize?
+##### limit?
 
 `number`
 
-The maximum number of entities in a page.
+Limit the number of entities to return.
 
 #### Returns
 

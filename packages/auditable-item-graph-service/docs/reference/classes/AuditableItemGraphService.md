@@ -28,6 +28,14 @@ The dependencies for the auditable item graph connector.
 
 ## Properties
 
+### CLASS\_NAME
+
+> `readonly` `static` **CLASS\_NAME**: `string`
+
+Runtime name for the class.
+
+***
+
 ### NAMESPACE\_CHANGESET
 
 > `readonly` `static` **NAMESPACE\_CHANGESET**: `string` = `"changeset"`
@@ -41,18 +49,6 @@ The namespace for the service changeset.
 > `readonly` `static` **NAMESPACE\_EDGE**: `string` = `"edge"`
 
 The namespace for the service edge.
-
-***
-
-### CLASS\_NAME
-
-> `readonly` **CLASS\_NAME**: `string`
-
-Runtime name for the class.
-
-#### Implementation of
-
-`IAuditableItemGraphComponent.CLASS_NAME`
 
 ## Methods
 
@@ -272,7 +268,7 @@ NotFoundError if the vertex is not found.
 
 ### query()
 
-> **query**(`options?`, `conditions?`, `orderBy?`, `orderByDirection?`, `properties?`, `cursor?`, `pageSize?`): `Promise`\<`IAuditableItemGraphVertexList`\>
+> **query**(`options?`, `conditions?`, `orderBy?`, `orderByDirection?`, `properties?`, `cursor?`, `limit?`): `Promise`\<`IAuditableItemGraphVertexList`\>
 
 Query the graph for vertices.
 
@@ -334,13 +330,13 @@ The properties to return, if not provided defaults to id, created, aliases and o
 
 `string`
 
-The cursor to request the next page of entities.
+The cursor to request the next chunk of entities.
 
-##### pageSize?
+##### limit?
 
 `number`
 
-The maximum number of entities in a page.
+Limit the number of entities to return.
 
 #### Returns
 

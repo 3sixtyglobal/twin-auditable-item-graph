@@ -6,6 +6,14 @@ Interface describing an auditable item graph contract.
 
 - `IComponent`
 
+## Indexable
+
+\[`key`: `string`\]: `any`
+
+All methods are optional, so we introduce an index signature to allow
+any additional properties or methods, which removes the TypeScript error where
+the class has no properties in common with the type.
+
 ## Methods
 
 ### create()
@@ -208,7 +216,7 @@ NotFoundError if the vertex is not found.
 
 ### query()
 
-> **query**(`options?`, `conditions?`, `orderBy?`, `orderByDirection?`, `properties?`, `cursor?`, `pageSize?`): `Promise`\<[`IAuditableItemGraphVertexList`](IAuditableItemGraphVertexList.md)\>
+> **query**(`options?`, `conditions?`, `orderBy?`, `orderByDirection?`, `properties?`, `cursor?`, `limit?`): `Promise`\<[`IAuditableItemGraphVertexList`](IAuditableItemGraphVertexList.md)\>
 
 Query the graph for vertices.
 
@@ -270,13 +278,13 @@ The properties to return, if not provided defaults to id, dateCreated, aliases a
 
 `string`
 
-The cursor to request the next page of entities.
+The cursor to request the next chunk of entities.
 
-##### pageSize?
+##### limit?
 
 `number`
 
-The maximum number of entities in a page.
+Limit the number of entities to return.
 
 #### Returns
 
