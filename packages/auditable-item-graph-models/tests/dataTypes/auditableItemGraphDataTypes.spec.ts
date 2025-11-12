@@ -3,9 +3,9 @@
 import type { IValidationFailure } from "@twin.org/core";
 import { DataTypeHelper } from "@twin.org/data-core";
 import { JsonLdDataTypes } from "@twin.org/data-json-ld";
-import { AuditableItemGraphDataTypes } from "../../src/dataTypes/auditableItemGraphDataTypes";
-import { AuditableItemGraphContexts } from "../../src/models/auditableItemGraphContexts";
-import { AuditableItemGraphTypes } from "../../src/models/auditableItemGraphTypes";
+import { AuditableItemGraphDataTypes } from "../../src/dataTypes/auditableItemGraphDataTypes.js";
+import { AuditableItemGraphContexts } from "../../src/models/auditableItemGraphContexts.js";
+import { AuditableItemGraphTypes } from "../../src/models/auditableItemGraphTypes.js";
 
 describe("AuditableItemGraphDataTypes", () => {
 	beforeAll(async () => {

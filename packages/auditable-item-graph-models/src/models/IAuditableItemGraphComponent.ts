@@ -3,9 +3,9 @@
 import type { IComponent } from "@twin.org/core";
 import type { IJsonLdNodeObject } from "@twin.org/data-json-ld";
 import type { IComparator, SortDirection } from "@twin.org/entity";
-import type { IAuditableItemGraphVertex } from "./IAuditableItemGraphVertex";
-import type { IAuditableItemGraphVertexList } from "./IAuditableItemGraphVertexList";
-import type { VerifyDepth } from "./verifyDepth";
+import type { IAuditableItemGraphVertex } from "./IAuditableItemGraphVertex.js";
+import type { IAuditableItemGraphVertexList } from "./IAuditableItemGraphVertexList.js";
+import type { VerifyDepth } from "./verifyDepth.js";
 
 /**
  * Interface describing an auditable item graph contract.
@@ -18,32 +18,26 @@ export interface IAuditableItemGraphComponent extends IComponent {
 	 * @param vertex.aliases Alternative aliases that can be used to identify the vertex.
 	 * @param vertex.resources The resources attached to the vertex.
 	 * @param vertex.edges The edges connected to the vertex.
-	 * @param userIdentity The identity to create the auditable item graph operation with.
-	 * @param nodeIdentity The node identity to use for vault operations.
 	 * @returns The id of the new graph item.
 	 */
-	create(
-		vertex: {
+	create(vertex: {
+		annotationObject?: IJsonLdNodeObject;
+		aliases?: {
+			id: string;
+			aliasFormat?: string;
+			unique?: boolean;
 			annotationObject?: IJsonLdNodeObject;
-			aliases?: {
-				id: string;
-				aliasFormat?: string;
-				unique?: boolean;
-				annotationObject?: IJsonLdNodeObject;
-			}[];
-			resources?: {
-				id?: string;
-				resourceObject?: IJsonLdNodeObject;
-			}[];
-			edges?: {
-				targetId: string;
-				edgeRelationships: string[];
-				annotationObject?: IJsonLdNodeObject;
-			}[];
-		},
-		userIdentity?: string,
-		nodeIdentity?: string
-	): Promise<string>;
+		}[];
+		resources?: {
+			id?: string;
+			resourceObject?: IJsonLdNodeObject;
+		}[];
+		edges?: {
+			targetId: string;
+			edgeRelationships: string[];
+			annotationObject?: IJsonLdNodeObject;
+		}[];
+	}): Promise<string>;
 
 	/**
 	 * Update a graph vertex.
@@ -53,34 +47,28 @@ export interface IAuditableItemGraphComponent extends IComponent {
 	 * @param vertex.aliases Alternative aliases that can be used to identify the vertex.
 	 * @param vertex.resources The resources attached to the vertex.
 	 * @param vertex.edges The edges connected to the vertex.
-	 * @param userIdentity The identity to create the auditable item graph operation with.
-	 * @param nodeIdentity The node identity to use for vault operations.
 	 * @returns Nothing.
 	 */
-	update(
-		vertex: {
+	update(vertex: {
+		id: string;
+		annotationObject?: IJsonLdNodeObject;
+		aliases?: {
 			id: string;
+			aliasFormat?: string;
+			unique?: boolean;
 			annotationObject?: IJsonLdNodeObject;
-			aliases?: {
-				id: string;
-				aliasFormat?: string;
-				unique?: boolean;
-				annotationObject?: IJsonLdNodeObject;
-			}[];
-			resources?: {
-				id?: string;
-				resourceObject?: IJsonLdNodeObject;
-			}[];
-			edges?: {
-				id?: string;
-				targetId: string;
-				edgeRelationships: string[];
-				annotationObject?: IJsonLdNodeObject;
-			}[];
-		},
-		userIdentity?: string,
-		nodeIdentity?: string
-	): Promise<void>;
+		}[];
+		resources?: {
+			id?: string;
+			resourceObject?: IJsonLdNodeObject;
+		}[];
+		edges?: {
+			id?: string;
+			targetId: string;
+			edgeRelationships: string[];
+			annotationObject?: IJsonLdNodeObject;
+		}[];
+	}): Promise<void>;
 
 	/**
 	 * Get a graph vertex.
@@ -104,11 +92,10 @@ export interface IAuditableItemGraphComponent extends IComponent {
 	/**
 	 * Remove the verifiable storage for an item.
 	 * @param id The id of the vertex to remove the storage from.
-	 * @param nodeIdentity The node identity to use for vault operations.
 	 * @returns Nothing.
 	 * @throws NotFoundError if the vertex is not found.
 	 */
-	removeVerifiable(id: string, nodeIdentity?: string): Promise<void>;
+	removeVerifiable(id: string): Promise<void>;
 
 	/**
 	 * Query the graph for vertices.

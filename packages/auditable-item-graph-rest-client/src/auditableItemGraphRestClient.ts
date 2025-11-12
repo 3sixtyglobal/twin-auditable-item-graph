@@ -46,6 +46,14 @@ export class AuditableItemGraphRestClient
 	}
 
 	/**
+	 * Returns the class name of the component.
+	 * @returns The class name of the component.
+	 */
+	public className(): string {
+		return AuditableItemGraphRestClient.CLASS_NAME;
+	}
+
+	/**
 	 * Create a new graph vertex.
 	 * @param vertex The vertex to create.
 	 * @param vertex.annotationObject The annotation object for the vertex as JSON-LD.

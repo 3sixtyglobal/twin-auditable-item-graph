@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0.
 import { EntitySchemaFactory, EntitySchemaHelper } from "@twin.org/entity";
 import { nameof } from "@twin.org/nameof";
-import { AuditableItemGraphAlias } from "./entities/auditableItemGraphAlias";
-import { AuditableItemGraphChangeset } from "./entities/auditableItemGraphChangeset";
-import { AuditableItemGraphEdge } from "./entities/auditableItemGraphEdge";
-import { AuditableItemGraphPatch } from "./entities/auditableItemGraphPatch";
-import { AuditableItemGraphResource } from "./entities/auditableItemGraphResource";
-import { AuditableItemGraphVertex } from "./entities/auditableItemGraphVertex";
+import { AuditableItemGraphAlias } from "./entities/auditableItemGraphAlias.js";
+import { AuditableItemGraphChangeset } from "./entities/auditableItemGraphChangeset.js";
+import { AuditableItemGraphEdge } from "./entities/auditableItemGraphEdge.js";
+import { AuditableItemGraphPatch } from "./entities/auditableItemGraphPatch.js";
+import { AuditableItemGraphResource } from "./entities/auditableItemGraphResource.js";
+import { AuditableItemGraphVertex } from "./entities/auditableItemGraphVertex.js";
 
 /**
  * Initialize the schema for the auditable item graph entity storage connector.

@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0.
 import { JsonLdTypes, type IJsonLdNodeObject } from "@twin.org/data-json-ld";
 import { entity, property, SortDirection } from "@twin.org/entity";
-import type { AuditableItemGraphAlias } from "./auditableItemGraphAlias";
-import type { AuditableItemGraphEdge } from "./auditableItemGraphEdge";
-import type { AuditableItemGraphResource } from "./auditableItemGraphResource";
+import type { AuditableItemGraphAlias } from "./auditableItemGraphAlias.js";
+import type { AuditableItemGraphEdge } from "./auditableItemGraphEdge.js";
+import type { AuditableItemGraphResource } from "./auditableItemGraphResource.js";
 
 /**
  * Class describing the auditable item graph vertex.
@@ -18,10 +18,10 @@ export class AuditableItemGraphVertex {
 	public id!: string;
 
 	/**
-	 * The identity of the node which controls the vertex.
+	 * The identity of the organization which controls the vertex.
 	 */
 	@property({ type: "string", optional: true })
-	public nodeIdentity?: string;
+	public organizationIdentity?: string;
 
 	/**
 	 * The date/time of when the vertex was created.

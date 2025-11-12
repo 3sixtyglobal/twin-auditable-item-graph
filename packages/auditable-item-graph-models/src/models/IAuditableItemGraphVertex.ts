@@ -1,13 +1,13 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
 import type { IJsonLdContextDefinitionElement, IJsonLdNodeObject } from "@twin.org/data-json-ld";
-import type { AuditableItemGraphContexts } from "./auditableItemGraphContexts";
-import type { AuditableItemGraphTypes } from "./auditableItemGraphTypes";
-import type { IAuditableItemGraphAlias } from "./IAuditableItemGraphAlias";
-import type { IAuditableItemGraphAuditedElement } from "./IAuditableItemGraphAuditedElement";
-import type { IAuditableItemGraphChangeset } from "./IAuditableItemGraphChangeset";
-import type { IAuditableItemGraphEdge } from "./IAuditableItemGraphEdge";
-import type { IAuditableItemGraphResource } from "./IAuditableItemGraphResource";
+import type { AuditableItemGraphContexts } from "./auditableItemGraphContexts.js";
+import type { AuditableItemGraphTypes } from "./auditableItemGraphTypes.js";
+import type { IAuditableItemGraphAlias } from "./IAuditableItemGraphAlias.js";
+import type { IAuditableItemGraphAuditedElement } from "./IAuditableItemGraphAuditedElement.js";
+import type { IAuditableItemGraphChangeset } from "./IAuditableItemGraphChangeset.js";
+import type { IAuditableItemGraphEdge } from "./IAuditableItemGraphEdge.js";
+import type { IAuditableItemGraphResource } from "./IAuditableItemGraphResource.js";
 
 /**
  * Interface describing an auditable item graph vertex.
@@ -34,9 +34,9 @@ export interface IAuditableItemGraphVertex
 	type: typeof AuditableItemGraphTypes.Vertex;
 
 	/**
-	 * The identity of the node which controls the vertex.
+	 * The identity of the organization which controls the vertex.
 	 */
-	nodeIdentity?: string;
+	organizationIdentity?: string;
 
 	/**
 	 * The JSON-LD annotation object for the vertex.

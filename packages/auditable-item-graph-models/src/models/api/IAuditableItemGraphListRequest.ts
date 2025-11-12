@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0.
 import type { SortDirection } from "@twin.org/entity";
 import type { HeaderTypes, MimeTypes } from "@twin.org/web";
-import type { IAuditableItemGraphVertex } from "../IAuditableItemGraphVertex";
+import type { IAuditableItemGraphVertex } from "../IAuditableItemGraphVertex.js";
 
 /**
  * Get the a list of the vertices with matching ids or aliases.

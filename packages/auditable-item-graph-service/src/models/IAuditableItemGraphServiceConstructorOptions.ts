@@ -1,6 +1,6 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import type { IAuditableItemGraphServiceConfig } from "./IAuditableItemGraphServiceConfig";
+import type { IAuditableItemGraphServiceConfig } from "./IAuditableItemGraphServiceConfig.js";
 
 /**
  * Options for the constructor of the auditable item graph service.

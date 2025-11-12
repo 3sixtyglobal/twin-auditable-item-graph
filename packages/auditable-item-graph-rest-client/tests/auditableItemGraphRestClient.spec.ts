@@ -1,6 +1,6 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import { AuditableItemGraphRestClient } from "../src/auditableItemGraphRestClient";
+import { AuditableItemGraphRestClient } from "../src/auditableItemGraphRestClient.js";
 
 describe("AuditableItemGraphRestClient", () => {
 	test("Can create an instance", async () => {

@@ -492,11 +492,7 @@ export async function auditableItemGraphCreate(
 	);
 
 	const component = ComponentFactory.get<IAuditableItemGraphComponent>(componentName);
-	const id = await component.create(
-		request.body,
-		httpRequestContext.userIdentity,
-		httpRequestContext.nodeIdentity
-	);
+	const id = await component.create(request.body);
 	return {
 		statusCode: HttpStatusCode.created,
 		headers: {
@@ -568,11 +564,7 @@ export async function auditableItemGraphUpdate(
 	);
 
 	const component = ComponentFactory.get<IAuditableItemGraphComponent>(componentName);
-	await component.update(
-		{ ...request.body, id: request.pathParams.id },
-		httpRequestContext.userIdentity,
-		httpRequestContext.nodeIdentity
-	);
+	await component.update({ ...request.body, id: request.pathParams.id });
 	return {
 		statusCode: HttpStatusCode.noContent
 	};

@@ -6,19 +6,11 @@ Interface describing an auditable item graph contract.
 
 - `IComponent`
 
-## Indexable
-
-\[`key`: `string`\]: `any`
-
-All methods are optional, so we introduce an index signature to allow
-any additional properties or methods, which removes the TypeScript error where
-the class has no properties in common with the type.
-
 ## Methods
 
 ### create()
 
-> **create**(`vertex`, `userIdentity?`, `nodeIdentity?`): `Promise`\<`string`\>
+> **create**(`vertex`): `Promise`\<`string`\>
 
 Create a new graph vertex.
 
@@ -52,18 +44,6 @@ The resources attached to the vertex.
 
 The edges connected to the vertex.
 
-##### userIdentity?
-
-`string`
-
-The identity to create the auditable item graph operation with.
-
-##### nodeIdentity?
-
-`string`
-
-The node identity to use for vault operations.
-
 #### Returns
 
 `Promise`\<`string`\>
@@ -74,7 +54,7 @@ The id of the new graph item.
 
 ### update()
 
-> **update**(`vertex`, `userIdentity?`, `nodeIdentity?`): `Promise`\<`void`\>
+> **update**(`vertex`): `Promise`\<`void`\>
 
 Update a graph vertex.
 
@@ -113,18 +93,6 @@ The resources attached to the vertex.
 `object`[]
 
 The edges connected to the vertex.
-
-##### userIdentity?
-
-`string`
-
-The identity to create the auditable item graph operation with.
-
-##### nodeIdentity?
-
-`string`
-
-The node identity to use for vault operations.
 
 #### Returns
 
@@ -184,7 +152,7 @@ NotFoundError if the vertex is not found.
 
 ### removeVerifiable()
 
-> **removeVerifiable**(`id`, `nodeIdentity?`): `Promise`\<`void`\>
+> **removeVerifiable**(`id`): `Promise`\<`void`\>
 
 Remove the verifiable storage for an item.
 
@@ -195,12 +163,6 @@ Remove the verifiable storage for an item.
 `string`
 
 The id of the vertex to remove the storage from.
-
-##### nodeIdentity?
-
-`string`
-
-The node identity to use for vault operations.
 
 #### Returns
 

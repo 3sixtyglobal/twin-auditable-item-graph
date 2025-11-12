@@ -52,9 +52,27 @@ The namespace for the service edge.
 
 ## Methods
 
+### className()
+
+> **className**(): `string`
+
+Returns the class name of the component.
+
+#### Returns
+
+`string`
+
+The class name of the component.
+
+#### Implementation of
+
+`IAuditableItemGraphComponent.className`
+
+***
+
 ### create()
 
-> **create**(`vertex`, `userIdentity?`, `nodeIdentity?`): `Promise`\<`string`\>
+> **create**(`vertex`): `Promise`\<`string`\>
 
 Create a new graph vertex.
 
@@ -87,18 +105,6 @@ The resources attached to the vertex.
 `object`[]
 
 The edges connected to the vertex.
-
-##### userIdentity?
-
-`string`
-
-The identity to create the auditable item graph operation with.
-
-##### nodeIdentity?
-
-`string`
-
-The node identity to include in the auditable item graph.
 
 #### Returns
 
@@ -166,7 +172,7 @@ NotFoundError if the vertex is not found.
 
 ### update()
 
-> **update**(`vertex`, `userIdentity?`, `nodeIdentity?`): `Promise`\<`void`\>
+> **update**(`vertex`): `Promise`\<`void`\>
 
 Update a graph vertex.
 
@@ -206,18 +212,6 @@ The resources attached to the vertex.
 
 The edges connected to the vertex.
 
-##### userIdentity?
-
-`string`
-
-The identity to create the auditable item graph operation with.
-
-##### nodeIdentity?
-
-`string`
-
-The node identity to include in the auditable item graph.
-
 #### Returns
 
 `Promise`\<`void`\>
@@ -232,7 +226,7 @@ Nothing.
 
 ### removeVerifiable()
 
-> **removeVerifiable**(`id`, `nodeIdentity?`): `Promise`\<`void`\>
+> **removeVerifiable**(`id`): `Promise`\<`void`\>
 
 Remove the verifiable storage for an item.
 
@@ -243,12 +237,6 @@ Remove the verifiable storage for an item.
 `string`
 
 The id of the vertex to get.
-
-##### nodeIdentity?
-
-`string`
-
-The node identity to use for vault operations.
 
 #### Returns
 

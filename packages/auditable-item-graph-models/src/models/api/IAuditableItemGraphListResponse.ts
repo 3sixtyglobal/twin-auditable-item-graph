@@ -1,7 +1,7 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
 import type { HeaderTypes, MimeTypes } from "@twin.org/web";
-import type { IAuditableItemGraphVertexList } from "../IAuditableItemGraphVertexList";
+import type { IAuditableItemGraphVertexList } from "../IAuditableItemGraphVertexList.js";
 
 /**
  * The response to getting the a list of the vertices with matching ids or aliases.

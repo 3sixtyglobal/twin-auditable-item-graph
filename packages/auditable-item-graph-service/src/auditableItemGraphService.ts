@@ -15,6 +15,7 @@ import {
 	type IAuditableItemGraphVertex,
 	type IAuditableItemGraphVertexList
 } from "@twin.org/auditable-item-graph-models";
+import { ContextIdKeys, ContextIdStore } from "@twin.org/context";
 import {
 	ArrayHelper,
 	ComponentFactory,
@@ -56,13 +57,13 @@ import {
 	SchemaOrgDataTypes,
 	SchemaOrgTypes
 } from "@twin.org/standards-schema-org";
-import type { AuditableItemGraphAlias } from "./entities/auditableItemGraphAlias";
-import type { AuditableItemGraphChangeset } from "./entities/auditableItemGraphChangeset";
-import type { AuditableItemGraphEdge } from "./entities/auditableItemGraphEdge";
-import type { AuditableItemGraphResource } from "./entities/auditableItemGraphResource";
-import type { AuditableItemGraphVertex } from "./entities/auditableItemGraphVertex";
-import type { IAuditableItemGraphServiceConstructorOptions } from "./models/IAuditableItemGraphServiceConstructorOptions";
-import type { IAuditableItemGraphServiceContext } from "./models/IAuditableItemGraphServiceContext";
+import type { AuditableItemGraphAlias } from "./entities/auditableItemGraphAlias.js";
+import type { AuditableItemGraphChangeset } from "./entities/auditableItemGraphChangeset.js";
+import type { AuditableItemGraphEdge } from "./entities/auditableItemGraphEdge.js";
+import type { AuditableItemGraphResource } from "./entities/auditableItemGraphResource.js";
+import type { AuditableItemGraphVertex } from "./entities/auditableItemGraphVertex.js";
+import type { IAuditableItemGraphServiceConstructorOptions } from "./models/IAuditableItemGraphServiceConstructorOptions.js";
+import type { IAuditableItemGraphServiceContext } from "./models/IAuditableItemGraphServiceContext.js";
 
 /**
  * Class for performing auditable item graph operations.
@@ -150,41 +151,43 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	}
 
 	/**
+	 * Returns the class name of the component.
+	 * @returns The class name of the component.
+	 */
+	public className(): string {
+		return AuditableItemGraphService.CLASS_NAME;
+	}
+
+	/**
 	 * Create a new graph vertex.
 	 * @param vertex The vertex to create.
 	 * @param vertex.annotationObject The annotation object for the vertex as JSON-LD.
 	 * @param vertex.aliases Alternative aliases that can be used to identify the vertex.
 	 * @param vertex.resources The resources attached to the vertex.
 	 * @param vertex.edges The edges connected to the vertex.
-	 * @param userIdentity The identity to create the auditable item graph operation with.
-	 * @param nodeIdentity The node identity to include in the auditable item graph.
 	 * @returns The id of the new graph item.
 	 */
-	public async create(
-		vertex: {
+	public async create(vertex: {
+		annotationObject?: IJsonLdNodeObject;
+		aliases?: {
+			id: string;
+			aliasFormat?: string;
+			unique?: boolean;
 			annotationObject?: IJsonLdNodeObject;
-			aliases?: {
-				id: string;
-				aliasFormat?: string;
-				unique?: boolean;
-				annotationObject?: IJsonLdNodeObject;
-			}[];
-			resources?: {
-				id?: string;
-				resourceObject?: IJsonLdNodeObject;
-			}[];
-			edges?: {
-				targetId: string;
-				edgeRelationships: string[];
-				annotationObject?: IJsonLdNodeObject;
-			}[];
-		},
-		userIdentity?: string,
-		nodeIdentity?: string
-	): Promise<string> {
+		}[];
+		resources?: {
+			id?: string;
+			resourceObject?: IJsonLdNodeObject;
+		}[];
+		edges?: {
+			targetId: string;
+			edgeRelationships: string[];
+			annotationObject?: IJsonLdNodeObject;
+		}[];
+	}): Promise<string> {
 		Guards.object(AuditableItemGraphService.CLASS_NAME, nameof(vertex), vertex);
-		Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(userIdentity), userIdentity);
-		Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(nodeIdentity), nodeIdentity);
+
+		const contextIds = await ContextIdStore.getContextIds();
 
 		try {
 			if (Is.object(vertex.annotationObject)) {
@@ -201,13 +204,12 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 			const context: IAuditableItemGraphServiceContext = {
 				now: new Date(Date.now()).toISOString(),
-				userIdentity,
-				nodeIdentity
+				contextIds
 			};
 
 			const vertexModel: AuditableItemGraphVertex = {
 				id,
-				nodeIdentity,
+				organizationIdentity: contextIds?.[ContextIdKeys.Organization],
 				dateCreated: context.now
 			};
 			const originalEntity = ObjectHelper.clone(vertexModel);
@@ -276,6 +278,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 		try {
 			const vertexId = urnParsed.namespaceSpecific(0);
+
 			const vertexEntity = await this._vertexStorage.get(vertexId);
 
 			if (Is.empty(vertexEntity)) {
@@ -330,7 +333,8 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				vertexModel.verified = verified;
 			}
 
-			return JsonLdProcessor.compact(vertexModel, vertexModel["@context"]);
+			const result = await JsonLdProcessor.compact(vertexModel, vertexModel["@context"]);
+			return result;
 		} catch (error) {
 			throw new GeneralError(AuditableItemGraphService.CLASS_NAME, "getFailed", undefined, error);
 		}
@@ -344,37 +348,31 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	 * @param vertex.aliases Alternative aliases that can be used to identify the vertex.
 	 * @param vertex.resources The resources attached to the vertex.
 	 * @param vertex.edges The edges connected to the vertex.
-	 * @param userIdentity The identity to create the auditable item graph operation with.
-	 * @param nodeIdentity The node identity to include in the auditable item graph.
 	 * @returns Nothing.
 	 */
-	public async update(
-		vertex: {
+	public async update(vertex: {
+		id: string;
+		annotationObject?: IJsonLdNodeObject;
+		aliases?: {
 			id: string;
+			aliasFormat?: string;
 			annotationObject?: IJsonLdNodeObject;
-			aliases?: {
-				id: string;
-				aliasFormat?: string;
-				annotationObject?: IJsonLdNodeObject;
-			}[];
-			resources?: {
-				id?: string;
-				resourceObject?: IJsonLdNodeObject;
-			}[];
-			edges?: {
-				id?: string;
-				targetId: string;
-				edgeRelationships: string[];
-				annotationObject?: IJsonLdNodeObject;
-			}[];
-		},
-		userIdentity?: string,
-		nodeIdentity?: string
-	): Promise<void> {
+		}[];
+		resources?: {
+			id?: string;
+			resourceObject?: IJsonLdNodeObject;
+		}[];
+		edges?: {
+			id?: string;
+			targetId: string;
+			edgeRelationships: string[];
+			annotationObject?: IJsonLdNodeObject;
+		}[];
+	}): Promise<void> {
 		Guards.object(AuditableItemGraphService.CLASS_NAME, nameof(vertex), vertex);
 		Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(vertex.id), vertex.id);
-		Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(userIdentity), userIdentity);
-		Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(nodeIdentity), nodeIdentity);
+
+		const contextIds = await ContextIdStore.getContextIds();
 
 		const urnParsed = Urn.fromValidString(vertex.id);
 
@@ -405,8 +403,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 			const context: IAuditableItemGraphServiceContext = {
 				now: new Date(Date.now()).toISOString(),
-				userIdentity,
-				nodeIdentity
+				contextIds
 			};
 
 			delete vertexEntity.aliasIndex;
@@ -448,13 +445,11 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	/**
 	 * Remove the verifiable storage for an item.
 	 * @param id The id of the vertex to get.
-	 * @param nodeIdentity The node identity to use for vault operations.
 	 * @returns Nothing.
 	 * @throws NotFoundError if the vertex is not found.
 	 */
-	public async removeVerifiable(id: string, nodeIdentity?: string): Promise<void> {
+	public async removeVerifiable(id: string): Promise<void> {
 		Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(id), id);
-		Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(nodeIdentity), nodeIdentity);
 
 		const urnParsed = Urn.fromValidString(id);
 
@@ -493,7 +488,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 				for (const changeset of changesetsResult.entities) {
 					if (Is.stringValue(changeset.proofId)) {
-						await this._immutableProofComponent.removeVerifiable(changeset.proofId, nodeIdentity);
+						await this._immutableProofComponent.removeVerifiable(changeset.proofId);
 						delete changeset.proofId;
 						await this._changesetStorage.set(changeset as AuditableItemGraphChangeset);
 					}
@@ -617,7 +612,8 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				[SchemaOrgTypes.NextItem]: results.cursor
 			};
 
-			return JsonLdProcessor.compact(vertexList, vertexList["@context"]);
+			const result = await JsonLdProcessor.compact(vertexList, vertexList["@context"]);
+			return result;
 		} catch (error) {
 			throw new GeneralError(
 				AuditableItemGraphService.CLASS_NAME,
@@ -645,7 +641,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			id: new Urn(AuditableItemGraphService.NAMESPACE, vertexEntity.id).toString(),
 			dateCreated: vertexEntity.dateCreated,
 			dateModified: vertexEntity.dateModified,
-			nodeIdentity: vertexEntity.nodeIdentity,
+			organizationIdentity: vertexEntity.organizationIdentity,
 			annotationObject: vertexEntity.annotationObject
 		};
 
@@ -813,7 +809,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 		Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(alias.id), alias.id);
 
 		if (alias.unique ?? false) {
-			const existingVertices = await this.findMatchingVertices(vertex.id, alias.id);
+			const existingVertices = await this.findMatchingVertices(context, vertex.id, alias.id);
 			if (existingVertices) {
 				throw new GeneralError(AuditableItemGraphService.CLASS_NAME, "aliasNotUnique", {
 					aliasId: alias.id
@@ -1087,13 +1083,13 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				id: Converter.bytesToHex(RandomHelper.generate(32), false),
 				vertexId: updated.id,
 				dateCreated: context.now,
-				userIdentity: context.userIdentity,
+				userIdentity: context.contextIds?.[ContextIdKeys.User],
 				patches
 			};
 
 			// Create the JSON-LD object we want to use for the proof
 			// this is a subset of fixed properties from the changeset object.
-			const reducedChangesetJsonLd = await this.changesetEntityToJsonLd(
+			const reducedChangesetJsonLd = this.changesetEntityToJsonLd(
 				original.id,
 				ObjectHelper.pick(
 					changesetEntity,
@@ -1103,9 +1099,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 			// Create the proof for the changeset object
 			changesetEntity.proofId = await this._immutableProofComponent.create(
-				reducedChangesetJsonLd as unknown as IJsonLdNodeObject,
-				context.userIdentity,
-				context.nodeIdentity
+				reducedChangesetJsonLd as unknown as IJsonLdNodeObject
 			);
 
 			// Link the verifiable storage id to the changeset
@@ -1119,14 +1113,15 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 	/**
 	 * Verify the changesets of a vertex.
-	 * @param nodeIdentity The node identity to verify the changesets with.
 	 * @param vertex The vertex to verify.
 	 * @param verifySignatureDepth How many signatures to verify.
+	 * @param contextIds The context ids to perform the operation with.
 	 * @internal
 	 */
 	private async verifyChangesets(
 		vertex: IAuditableItemGraphVertex,
-		verifySignatureDepth: VerifyDepth
+		verifySignatureDepth: VerifyDepth,
+		partitionKey?: string
 	): Promise<{
 		verified: boolean;
 		changesets: IAuditableItemGraphChangeset[];
@@ -1262,12 +1257,17 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 	/**
 	 * Find vertices with matching aliases.
+	 * @param context The context for the operation.
 	 * @param vertexId The id of the vertex to exclude from the search.
 	 * @param aliasId The alias id to try and find.
 	 * @returns True if any other vertices have matching aliases.
 	 * @internal
 	 */
-	private async findMatchingVertices(vertexId: string, aliasId: string): Promise<boolean> {
+	private async findMatchingVertices(
+		context: IAuditableItemGraphServiceContext,
+		vertexId: string,
+		aliasId: string
+	): Promise<boolean> {
 		const results = await this._vertexStorage.query({
 			conditions: [
 				{
