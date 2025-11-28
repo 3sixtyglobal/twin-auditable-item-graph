@@ -99,7 +99,9 @@ export async function setupTestEnv(): Promise<void> {
 	TEST_NODE_IDENTITY = didNode.id;
 	TEST_ORGANIZATION_IDENTITY = didOrganisation.id;
 	TEST_TENANT_IDENTITY = "a".repeat(32);
-	TEST_TENANT_IDENTITY_SHORT = Converter.bytesToBase64(Converter.hexToBytes(TEST_TENANT_IDENTITY));
+	TEST_TENANT_IDENTITY_SHORT = Converter.bytesToBase64Url(
+		Converter.hexToBytes(TEST_TENANT_IDENTITY)
+	);
 	TEST_USER_IDENTITY = didUser.id;
 	TEST_VAULT_KEY = `${TEST_NODE_IDENTITY}/immutable-proof-hash`;
 

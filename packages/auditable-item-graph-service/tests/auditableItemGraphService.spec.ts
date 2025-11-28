@@ -4,11 +4,15 @@ import { TenantIdContextIdHandler } from "@twin.org/api-tenant-processor";
 import { VerifyDepth } from "@twin.org/auditable-item-graph-models";
 import {
 	type BackgroundTask,
-	EntityStorageBackgroundTaskConnector,
+	BackgroundTaskService,
 	initSchema as initSchemaBackgroundTask
-} from "@twin.org/background-task-connector-entity-storage";
-import { BackgroundTaskConnectorFactory } from "@twin.org/background-task-models";
-import { ContextIdHandlerFactory, ContextIdKeys, ContextIdStore } from "@twin.org/context";
+} from "@twin.org/background-task-service";
+import {
+	ContextIdHandlerFactory,
+	ContextIdKeys,
+	ContextIdStore,
+	type IContextIds
+} from "@twin.org/context";
 import { ComponentFactory, Converter, ObjectHelper, RandomHelper } from "@twin.org/core";
 import { ComparisonOperator } from "@twin.org/entity";
 import { MemoryEntityStorageConnector } from "@twin.org/entity-storage-connector-memory";
@@ -87,11 +91,14 @@ describe("AuditableItemGraphService", () => {
 		}));
 
 		// Mock the module helper to execute the method in the same thread, so we don't have to create an engine
-		ModuleHelper.execModuleMethodThread = vi
+		ModuleHelper.execModuleMethodThreadMessage = vi
 			.fn()
-			.mockImplementation(async (module, method, args) =>
-				ModuleHelper.execModuleMethod(module, method, args)
-			);
+			.mockImplementation((module, completed) => ({
+				executeMethod: async (method: string, args?: unknown, contextIds?: IContextIds) => {
+					const res = await ModuleHelper.execModuleMethod(module, method, args as unknown[]);
+					completed(method, res);
+				}
+			}));
 	});
 
 	afterAll(async () => {
@@ -137,8 +144,8 @@ describe("AuditableItemGraphService", () => {
 		});
 		EntityStorageConnectorFactory.register("background-task", () => backgroundTaskStorage);
 
-		const backgroundTask = new EntityStorageBackgroundTaskConnector();
-		BackgroundTaskConnectorFactory.register("background-task", () => backgroundTask);
+		const backgroundTask = new BackgroundTaskService();
+		ComponentFactory.register("background-task", () => backgroundTask);
 		await backgroundTask.start();
 
 		const immutableProofService = new ImmutableProofService();
@@ -196,7 +203,7 @@ describe("AuditableItemGraphService", () => {
 		expect(immutableStore).toEqual([
 			{
 				partitionId: TEST_TENANT_IDENTITY_SHORT,
-				id: "0505050505050505050505050505050505050505050505050505050505050505",
+				id: "0606060606060606060606060606060606060606060606060606060606060606",
 				data: Converter.bytesToBase64(
 					ObjectHelper.toBytes({
 						"@context": [
@@ -316,7 +323,7 @@ describe("AuditableItemGraphService", () => {
 		expect(immutableStore).toEqual([
 			{
 				partitionId: TEST_TENANT_IDENTITY_SHORT,
-				id: "0505050505050505050505050505050505050505050505050505050505050505",
+				id: "0606060606060606060606060606060606060606060606060606060606060606",
 				data: Converter.bytesToBase64(
 					ObjectHelper.toBytes({
 						"@context": [
@@ -480,7 +487,7 @@ describe("AuditableItemGraphService", () => {
 							"aig:0101010101010101010101010101010101010101010101010101010101010101:changeset:0202020202020202020202020202020202020202020202020202020202020202"
 					})
 				),
-				id: "0505050505050505050505050505050505050505050505050505050505050505",
+				id: "0606060606060606060606060606060606060606060606060606060606060606",
 				maxAllowListSize: 100
 			}
 		]);
@@ -731,7 +738,7 @@ describe("AuditableItemGraphService", () => {
 							"aig:0101010101010101010101010101010101010101010101010101010101010101:changeset:0202020202020202020202020202020202020202020202020202020202020202"
 					})
 				),
-				id: "0606060606060606060606060606060606060606060606060606060606060606",
+				id: "0808080808080808080808080808080808080808080808080808080808080808",
 				maxAllowListSize: 100
 			}
 		]);
@@ -931,7 +938,7 @@ describe("AuditableItemGraphService", () => {
 							"aig:0101010101010101010101010101010101010101010101010101010101010101:changeset:0202020202020202020202020202020202020202020202020202020202020202"
 					})
 				),
-				id: "0505050505050505050505050505050505050505050505050505050505050505",
+				id: "0606060606060606060606060606060606060606060606060606060606060606",
 				maxAllowListSize: 100
 			}
 		]);
@@ -1322,7 +1329,7 @@ describe("AuditableItemGraphService", () => {
 							"aig:0101010101010101010101010101010101010101010101010101010101010101:changeset:0202020202020202020202020202020202020202020202020202020202020202"
 					})
 				),
-				id: "0808080808080808080808080808080808080808080808080808080808080808",
+				id: "0909090909090909090909090909090909090909090909090909090909090909",
 				maxAllowListSize: 100
 			},
 			{
@@ -1352,7 +1359,7 @@ describe("AuditableItemGraphService", () => {
 							"aig:0101010101010101010101010101010101010101010101010101010101010101:changeset:0505050505050505050505050505050505050505050505050505050505050505"
 					})
 				),
-				id: "0909090909090909090909090909090909090909090909090909090909090909",
+				id: "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b",
 				maxAllowListSize: 100
 			}
 		]);
@@ -1609,7 +1616,7 @@ describe("AuditableItemGraphService", () => {
 							"aig:0101010101010101010101010101010101010101010101010101010101010101:changeset:0202020202020202020202020202020202020202020202020202020202020202"
 					})
 				),
-				id: "0808080808080808080808080808080808080808080808080808080808080808",
+				id: "0909090909090909090909090909090909090909090909090909090909090909",
 				maxAllowListSize: 100
 			},
 			{
@@ -1639,7 +1646,7 @@ describe("AuditableItemGraphService", () => {
 							"aig:0101010101010101010101010101010101010101010101010101010101010101:changeset:0505050505050505050505050505050505050505050505050505050505050505"
 					})
 				),
-				id: "0909090909090909090909090909090909090909090909090909090909090909",
+				id: "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b",
 				maxAllowListSize: 100
 			}
 		]);
@@ -2088,7 +2095,7 @@ describe("AuditableItemGraphService", () => {
 							"aig:0101010101010101010101010101010101010101010101010101010101010101:changeset:0202020202020202020202020202020202020202020202020202020202020202"
 					})
 				),
-				id: "0808080808080808080808080808080808080808080808080808080808080808",
+				id: "0909090909090909090909090909090909090909090909090909090909090909",
 				maxAllowListSize: 100
 			},
 			{
@@ -2118,7 +2125,7 @@ describe("AuditableItemGraphService", () => {
 							"aig:0101010101010101010101010101010101010101010101010101010101010101:changeset:0505050505050505050505050505050505050505050505050505050505050505"
 					})
 				),
-				id: "0909090909090909090909090909090909090909090909090909090909090909",
+				id: "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b",
 				maxAllowListSize: 100
 			}
 		]);
@@ -3149,7 +3156,7 @@ describe("AuditableItemGraphService", () => {
 							"aig:0101010101010101010101010101010101010101010101010101010101010101:changeset:0404040404040404040404040404040404040404040404040404040404040404"
 					})
 				),
-				id: "0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a",
+				id: "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b",
 				maxAllowListSize: 100
 			},
 			{
@@ -3179,7 +3186,7 @@ describe("AuditableItemGraphService", () => {
 							"aig:0101010101010101010101010101010101010101010101010101010101010101:changeset:0707070707070707070707070707070707070707070707070707070707070707"
 					})
 				),
-				id: "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b",
+				id: "0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d",
 				maxAllowListSize: 100
 			}
 		]);

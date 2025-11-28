@@ -48,7 +48,7 @@
 	"devDependencies": {
 		"@twin.org/api-tenant-processor": "next",
 		"@twin.org/background-task-models": "next",
-		"@twin.org/background-task-connector-entity-storage": "next",
+		"@twin.org/background-task-service": "next",
 		"@twin.org/entity-storage-connector-memory": "next",
 		"@twin.org/identity-connector-entity-storage": "next",
 		"@twin.org/identity-models": "next",

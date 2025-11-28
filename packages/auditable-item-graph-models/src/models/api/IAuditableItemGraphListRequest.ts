@@ -32,7 +32,7 @@ export interface IAuditableItemGraphListRequest {
 		/**
 		 * Find only exact matches, default to false meaning partial matching.
 		 */
-		idExact?: boolean;
+		idExact?: string;
 
 		/**
 		 * Include vertices with specific resource types, comma separated.

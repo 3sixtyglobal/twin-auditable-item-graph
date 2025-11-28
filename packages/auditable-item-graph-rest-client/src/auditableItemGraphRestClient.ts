@@ -122,8 +122,8 @@ export class AuditableItemGraphRestClient
 				id
 			},
 			query: {
-				includeDeleted: options?.includeDeleted,
-				includeChangesets: options?.includeChangesets,
+				includeDeleted: Coerce.string(options?.includeDeleted),
+				includeChangesets: Coerce.string(options?.includeChangesets),
 				verifySignatureDepth: options?.verifySignatureDepth
 			}
 		});
@@ -225,7 +225,7 @@ export class AuditableItemGraphRestClient
 			query: {
 				id: options?.id,
 				idMode: options?.idMode,
-				idExact: options?.idExact,
+				idExact: Coerce.string(options?.idExact),
 				resourceTypes: HttpParameterHelper.arrayToString(options?.resourceTypes),
 				conditions: HttpParameterHelper.objectToString(conditions),
 				orderBy,
