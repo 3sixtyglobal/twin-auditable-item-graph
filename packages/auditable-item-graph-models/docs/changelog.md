@@ -1,5 +1,33 @@
 # @twin.org/auditable-item-graph-models - Changelog
 
+## [0.0.3-next.1](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-models-v0.0.3-next.0...auditable-item-graph-models-v0.0.3-next.1) (2025-11-28)
+
+
+### Features
+
+* add context id features ([#30](https://github.com/twinfoundation/auditable-item-graph/issues/30)) ([a35d37c](https://github.com/twinfoundation/auditable-item-graph/commit/a35d37c0db62a240adde493965c0a9f7971fec45))
+* add data types with fully qualified name ([93e1ee7](https://github.com/twinfoundation/auditable-item-graph/commit/93e1ee7c0f7bad81f003787f797f363864e201af))
+* add unique flag for alias, and exact match option for id query ([33dbd19](https://github.com/twinfoundation/auditable-item-graph/commit/33dbd19cabd9fbfaba81032f1d1a6527584c3f5a))
+* add validate-locales ([e76e6f6](https://github.com/twinfoundation/auditable-item-graph/commit/e76e6f6b3ec9c447a04315d353442e32233601d3))
+* eslint migration to flat config ([1b42a3a](https://github.com/twinfoundation/auditable-item-graph/commit/1b42a3a27bd6e32d7816de406b92b6332472edf6))
+* id optional in edge updates ([6b63fe3](https://github.com/twinfoundation/auditable-item-graph/commit/6b63fe34553104843ae15aa5066775f5872859e9))
+* improve comments ([97f311a](https://github.com/twinfoundation/auditable-item-graph/commit/97f311a9cc4353b5020a48a44420c97a2fa0c8d7))
+* improve JSON schemas ([bec8dc1](https://github.com/twinfoundation/auditable-item-graph/commit/bec8dc1f270c6c9710623a192b984cf46f8a5613))
+* update background task service ([e483ddb](https://github.com/twinfoundation/auditable-item-graph/commit/e483ddbc948f035334f92b8342248caa6abbe441))
+* update dependencies ([6986689](https://github.com/twinfoundation/auditable-item-graph/commit/698668957a1fcb7f85ce2f117914d5980043924f))
+* update edges to use targetId instead of id ([6c5d0e3](https://github.com/twinfoundation/auditable-item-graph/commit/6c5d0e31b6e2ea74bfa2f3344e4be628e5f237af))
+* update framework core ([88ad4e6](https://github.com/twinfoundation/auditable-item-graph/commit/88ad4e6421132c3c6c45579b078d982a26f16990))
+* update ts-to-schema generation ([edce91e](https://github.com/twinfoundation/auditable-item-graph/commit/edce91e8272ab361595489458066040caf582df2))
+* use new nameof operators ([3921c4c](https://github.com/twinfoundation/auditable-item-graph/commit/3921c4c9ac53e42459e45f10d9e702afb2797a23))
+* use shared store mechanism ([#10](https://github.com/twinfoundation/auditable-item-graph/issues/10)) ([da035e5](https://github.com/twinfoundation/auditable-item-graph/commit/da035e5eb8f157482b4eb2bdbc689c6c0647ff7d))
+* use standard list json ld types ([8f53836](https://github.com/twinfoundation/auditable-item-graph/commit/8f53836d4c83a98d64d7f5fe0531bb9af09464ae))
+
+
+### Bug Fixes
+
+* only include alias in index if not deleted ([#6](https://github.com/twinfoundation/auditable-item-graph/issues/6)) ([5da3c41](https://github.com/twinfoundation/auditable-item-graph/commit/5da3c419fafa2afefd34b1c570d103012b888a75))
+* query params force coercion ([2dd9afe](https://github.com/twinfoundation/auditable-item-graph/commit/2dd9afe9ec37e2a91c110317fe289f7495c187a0))
+
 ## [0.0.2-next.8](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-models-v0.0.2-next.7...auditable-item-graph-models-v0.0.2-next.8) (2025-10-09)
 
 
