@@ -14,8 +14,8 @@ export interface IAuditableItemGraphChangeset {
 	 * JSON-LD Context.
 	 */
 	"@context": [
-		typeof AuditableItemGraphContexts.ContextRoot,
-		typeof AuditableItemGraphContexts.ContextRootCommon,
+		typeof AuditableItemGraphContexts.Namespace,
+		typeof AuditableItemGraphContexts.NamespaceCommon,
 		...IJsonLdContextDefinitionElement[]
 	];
 

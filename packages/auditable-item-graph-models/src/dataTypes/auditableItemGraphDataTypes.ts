@@ -20,63 +20,63 @@ export class AuditableItemGraphDataTypes {
 	 */
 	public static registerTypes(): void {
 		DataTypeHandlerFactory.register(
-			`${AuditableItemGraphContexts.ContextRoot}${AuditableItemGraphTypes.Vertex}`,
+			`${AuditableItemGraphContexts.Namespace}${AuditableItemGraphTypes.Vertex}`,
 			() => ({
-				context: AuditableItemGraphContexts.ContextRoot,
+				namespace: AuditableItemGraphContexts.Namespace,
 				type: AuditableItemGraphTypes.Vertex,
 				defaultValue: {},
 				jsonSchema: async () => AuditableItemGraphVertexSchema as IJsonSchema
 			})
 		);
 		DataTypeHandlerFactory.register(
-			`${AuditableItemGraphContexts.ContextRoot}${AuditableItemGraphTypes.VertexList}`,
+			`${AuditableItemGraphContexts.Namespace}${AuditableItemGraphTypes.VertexList}`,
 			() => ({
-				context: AuditableItemGraphContexts.ContextRoot,
+				namespace: AuditableItemGraphContexts.Namespace,
 				type: AuditableItemGraphTypes.VertexList,
 				defaultValue: {},
 				jsonSchema: async () => AuditableItemGraphVertexListSchema as IJsonSchema
 			})
 		);
 		DataTypeHandlerFactory.register(
-			`${AuditableItemGraphContexts.ContextRoot}${AuditableItemGraphTypes.Alias}`,
+			`${AuditableItemGraphContexts.Namespace}${AuditableItemGraphTypes.Alias}`,
 			() => ({
-				context: AuditableItemGraphContexts.ContextRoot,
+				namespace: AuditableItemGraphContexts.Namespace,
 				type: AuditableItemGraphTypes.Alias,
 				defaultValue: {},
 				jsonSchema: async () => AuditableItemGraphAliasSchema as IJsonSchema
 			})
 		);
 		DataTypeHandlerFactory.register(
-			`${AuditableItemGraphContexts.ContextRoot}${AuditableItemGraphTypes.Resource}`,
+			`${AuditableItemGraphContexts.Namespace}${AuditableItemGraphTypes.Resource}`,
 			() => ({
-				context: AuditableItemGraphContexts.ContextRoot,
+				namespace: AuditableItemGraphContexts.Namespace,
 				type: AuditableItemGraphTypes.Resource,
 				defaultValue: {},
 				jsonSchema: async () => AuditableItemGraphResourceSchema as IJsonSchema
 			})
 		);
 		DataTypeHandlerFactory.register(
-			`${AuditableItemGraphContexts.ContextRoot}${AuditableItemGraphTypes.Edge}`,
+			`${AuditableItemGraphContexts.Namespace}${AuditableItemGraphTypes.Edge}`,
 			() => ({
-				context: AuditableItemGraphContexts.ContextRoot,
+				namespace: AuditableItemGraphContexts.Namespace,
 				type: AuditableItemGraphTypes.Edge,
 				defaultValue: {},
 				jsonSchema: async () => AuditableItemGraphEdgeSchema as IJsonSchema
 			})
 		);
 		DataTypeHandlerFactory.register(
-			`${AuditableItemGraphContexts.ContextRoot}${AuditableItemGraphTypes.Changeset}`,
+			`${AuditableItemGraphContexts.Namespace}${AuditableItemGraphTypes.Changeset}`,
 			() => ({
-				context: AuditableItemGraphContexts.ContextRoot,
+				namespace: AuditableItemGraphContexts.Namespace,
 				type: AuditableItemGraphTypes.Changeset,
 				defaultValue: {},
 				jsonSchema: async () => AuditableItemGraphChangesetSchema as IJsonSchema
 			})
 		);
 		DataTypeHandlerFactory.register(
-			`${AuditableItemGraphContexts.ContextRoot}${AuditableItemGraphTypes.PatchOperation}`,
+			`${AuditableItemGraphContexts.Namespace}${AuditableItemGraphTypes.PatchOperation}`,
 			() => ({
-				context: AuditableItemGraphContexts.ContextRoot,
+				namespace: AuditableItemGraphContexts.Namespace,
 				type: AuditableItemGraphTypes.PatchOperation,
 				defaultValue: {},
 				jsonSchema: async () => AuditableItemGraphPatchOperationSchema as IJsonSchema

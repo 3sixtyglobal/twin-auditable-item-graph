@@ -6,14 +6,14 @@ The contexts of auditable item graph data.
 
 ## Type Declaration
 
-### ContextRoot
+### Namespace
 
-> `readonly` **ContextRoot**: `"https://schema.twindev.org/aig/"` = `"https://schema.twindev.org/aig/"`
+> `readonly` **Namespace**: `"https://schema.twindev.org/aig/"` = `"https://schema.twindev.org/aig/"`
 
-The context root for the auditable item graph types.
+The namespace for the auditable item graph types.
 
-### ContextRootCommon
+### NamespaceCommon
 
-> `readonly` **ContextRootCommon**: `"https://schema.twindev.org/common/"` = `"https://schema.twindev.org/common/"`
+> `readonly` **NamespaceCommon**: `"https://schema.twindev.org/common/"` = `"https://schema.twindev.org/common/"`
 
-The context root for the common types.
+The namespace for the common types.

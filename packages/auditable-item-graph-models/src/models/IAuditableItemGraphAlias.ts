@@ -13,8 +13,8 @@ export interface IAuditableItemGraphAlias extends IAuditableItemGraphAuditedElem
 	 * JSON-LD Context.
 	 */
 	"@context":
-		| typeof AuditableItemGraphContexts.ContextRoot
-		| [typeof AuditableItemGraphContexts.ContextRoot, ...IJsonLdContextDefinitionElement[]];
+		| typeof AuditableItemGraphContexts.Namespace
+		| [typeof AuditableItemGraphContexts.Namespace, ...IJsonLdContextDefinitionElement[]];
 
 	/**
 	 * The id of the element.

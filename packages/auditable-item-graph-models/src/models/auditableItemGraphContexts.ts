@@ -7,14 +7,14 @@
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const AuditableItemGraphContexts = {
 	/**
-	 * The context root for the auditable item graph types.
+	 * The namespace for the auditable item graph types.
 	 */
-	ContextRoot: "https://schema.twindev.org/aig/",
+	Namespace: "https://schema.twindev.org/aig/",
 
 	/**
-	 * The context root for the common types.
+	 * The namespace for the common types.
 	 */
-	ContextRootCommon: "https://schema.twindev.org/common/"
+	NamespaceCommon: "https://schema.twindev.org/common/"
 } as const;
 
 /**

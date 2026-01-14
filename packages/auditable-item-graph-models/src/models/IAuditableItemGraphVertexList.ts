@@ -14,8 +14,8 @@ export interface IAuditableItemGraphVertexList {
 	 * JSON-LD Context.
 	 */
 	"@context": [
-		typeof SchemaOrgContexts.ContextRoot,
-		typeof AuditableItemGraphContexts.ContextRoot,
+		typeof SchemaOrgContexts.Namespace,
+		typeof AuditableItemGraphContexts.Namespace,
 		...IJsonLdContextDefinitionElement[]
 	];
 
