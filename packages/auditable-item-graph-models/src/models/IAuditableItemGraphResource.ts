@@ -13,8 +13,8 @@ export interface IAuditableItemGraphResource extends IAuditableItemGraphAuditedE
 	 * JSON-LD Context.
 	 */
 	"@context":
-		| typeof AuditableItemGraphContexts.Namespace
-		| [typeof AuditableItemGraphContexts.Namespace, ...IJsonLdContextDefinitionElement[]];
+		| typeof AuditableItemGraphContexts.Context
+		| [typeof AuditableItemGraphContexts.Context, ...IJsonLdContextDefinitionElement[]];
 
 	/**
 	 * JSON-LD Type.

@@ -18,8 +18,8 @@ export interface IAuditableItemGraphVertex
 	 * JSON-LD Context.
 	 */
 	"@context": [
-		typeof AuditableItemGraphContexts.Namespace,
-		typeof AuditableItemGraphContexts.NamespaceCommon,
+		typeof AuditableItemGraphContexts.Context,
+		typeof AuditableItemGraphContexts.ContextCommon,
 		...IJsonLdContextDefinitionElement[]
 	];
 

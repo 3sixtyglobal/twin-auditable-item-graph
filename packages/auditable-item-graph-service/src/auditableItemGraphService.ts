@@ -301,7 +301,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				const verifyResult = await this.verifyChangesets(vertexModel, verifySignatureDepth);
 				verified = verifyResult.verified;
 				changesets = verifyResult.changesets;
-				vertexModel["@context"].push(ImmutableProofContexts.Namespace);
+				vertexModel["@context"].push(ImmutableProofContexts.Context);
 			}
 
 			if (!(options?.includeDeleted ?? false)) {
@@ -603,9 +603,9 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 			const vertexList: IAuditableItemGraphVertexList = {
 				"@context": [
-					SchemaOrgContexts.Namespace,
-					AuditableItemGraphContexts.Namespace,
-					AuditableItemGraphContexts.NamespaceCommon
+					SchemaOrgContexts.Context,
+					AuditableItemGraphContexts.Context,
+					AuditableItemGraphContexts.ContextCommon
 				],
 				type: [SchemaOrgTypes.ItemList, AuditableItemGraphTypes.VertexList],
 				[SchemaOrgTypes.ItemListElement]: models,
@@ -633,9 +633,9 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	private vertexEntityToJsonLd(vertexEntity: AuditableItemGraphVertex): IAuditableItemGraphVertex {
 		const model: IAuditableItemGraphVertex = {
 			"@context": [
-				AuditableItemGraphContexts.Namespace,
-				AuditableItemGraphContexts.NamespaceCommon,
-				SchemaOrgContexts.Namespace
+				AuditableItemGraphContexts.Context,
+				AuditableItemGraphContexts.ContextCommon,
+				SchemaOrgContexts.Context
 			],
 			type: AuditableItemGraphTypes.Vertex,
 			id: new Urn(AuditableItemGraphService.NAMESPACE, vertexEntity.id).toString(),
@@ -650,9 +650,9 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			for (const aliasEntity of vertexEntity.aliases) {
 				const aliasModel: IAuditableItemGraphAlias = {
 					"@context": [
-						AuditableItemGraphContexts.Namespace,
-						AuditableItemGraphContexts.NamespaceCommon,
-						SchemaOrgContexts.Namespace
+						AuditableItemGraphContexts.Context,
+						AuditableItemGraphContexts.ContextCommon,
+						SchemaOrgContexts.Context
 					],
 					type: AuditableItemGraphTypes.Alias,
 					id: aliasEntity.id,
@@ -671,9 +671,9 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			for (const resourceEntity of vertexEntity.resources) {
 				const resourceModel: IAuditableItemGraphResource = {
 					"@context": [
-						AuditableItemGraphContexts.Namespace,
-						AuditableItemGraphContexts.NamespaceCommon,
-						SchemaOrgContexts.Namespace
+						AuditableItemGraphContexts.Context,
+						AuditableItemGraphContexts.ContextCommon,
+						SchemaOrgContexts.Context
 					],
 					type: AuditableItemGraphTypes.Resource,
 					id: resourceEntity.id,
@@ -691,9 +691,9 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			for (const edgeEntity of vertexEntity.edges) {
 				const edgeModel: IAuditableItemGraphEdge = {
 					"@context": [
-						AuditableItemGraphContexts.Namespace,
-						AuditableItemGraphContexts.NamespaceCommon,
-						SchemaOrgContexts.Namespace
+						AuditableItemGraphContexts.Context,
+						AuditableItemGraphContexts.ContextCommon,
+						SchemaOrgContexts.Context
 					],
 					type: AuditableItemGraphTypes.Edge,
 					id: this.fullEdgeId(vertexEntity.id, edgeEntity.id),
@@ -724,9 +724,9 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	): IAuditableItemGraphChangeset {
 		const model: IAuditableItemGraphChangeset = {
 			"@context": [
-				AuditableItemGraphContexts.Namespace,
-				AuditableItemGraphContexts.NamespaceCommon,
-				SchemaOrgContexts.Namespace
+				AuditableItemGraphContexts.Context,
+				AuditableItemGraphContexts.ContextCommon,
+				SchemaOrgContexts.Context
 			],
 			type: AuditableItemGraphTypes.Changeset,
 			id: new Urn(AuditableItemGraphService.NAMESPACE, [
@@ -738,9 +738,9 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			userIdentity: changesetEntity.userIdentity,
 			patches: changesetEntity.patches.map(p => ({
 				"@context": [
-					AuditableItemGraphContexts.Namespace,
-					AuditableItemGraphContexts.NamespaceCommon,
-					SchemaOrgContexts.Namespace
+					AuditableItemGraphContexts.Context,
+					AuditableItemGraphContexts.ContextCommon,
+					SchemaOrgContexts.Context
 				],
 				type: AuditableItemGraphTypes.PatchOperation,
 				patchOperation: p.op,
