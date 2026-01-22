@@ -1173,7 +1173,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 						if (!Is.stringValue(storedChangeset.proofId)) {
 							verified = false;
 							storedChangesetJsonLd.verification = {
-								"@context": ImmutableProofContexts.Namespace,
+								"@context": ImmutableProofContexts.Context,
 								type: ImmutableProofTypes.ImmutableProofVerification,
 								verified: false,
 								failure: ImmutableProofFailure.ProofMissing
