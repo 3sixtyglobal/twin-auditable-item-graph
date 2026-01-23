@@ -1,5 +1,19 @@
 # @twin.org/auditable-item-graph-service - Changelog
 
+## [0.0.3-next.5](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.4...auditable-item-graph-service-v0.0.3-next.5) (2026-01-23)
+
+
+### Features
+
+* replace nextItem property with Link header ([#39](https://github.com/twinfoundation/auditable-item-graph/issues/39)) ([b29a333](https://github.com/twinfoundation/auditable-item-graph/commit/b29a333ca78ca2091e54e3e6f4355f84c350007d))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/auditable-item-graph-models bumped from 0.0.3-next.4 to 0.0.3-next.5
+
 ## [0.0.3-next.4](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.3...auditable-item-graph-service-v0.0.3-next.4) (2026-01-22)
 
 
