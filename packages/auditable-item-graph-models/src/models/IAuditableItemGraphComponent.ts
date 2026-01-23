@@ -125,5 +125,8 @@ export interface IAuditableItemGraphComponent extends IComponent {
 		properties?: (keyof IAuditableItemGraphVertex)[],
 		cursor?: string,
 		limit?: number
-	): Promise<IAuditableItemGraphVertexList>;
+	): Promise<{
+		entries: IAuditableItemGraphVertexList;
+		cursor?: string;
+	}>;
 }

@@ -23,7 +23,7 @@ import { Coerce, Guards, NotSupportedError } from "@twin.org/core";
 import type { IJsonLdNodeObject } from "@twin.org/data-json-ld";
 import type { IComparator, SortDirection } from "@twin.org/entity";
 import { nameof } from "@twin.org/nameof";
-import { HeaderTypes, MimeTypes } from "@twin.org/web";
+import { HeaderHelper, HeaderTypes, MimeTypes } from "@twin.org/web";
 
 /**
  * Client for performing auditable item graph through to REST endpoints.
@@ -214,7 +214,10 @@ export class AuditableItemGraphRestClient
 		properties?: (keyof IAuditableItemGraphVertex)[],
 		cursor?: string,
 		limit?: number
-	): Promise<IAuditableItemGraphVertexList> {
+	): Promise<{
+		entries: IAuditableItemGraphVertexList;
+		cursor?: string;
+	}> {
 		const response = await this.fetch<
 			IAuditableItemGraphListRequest,
 			IAuditableItemGraphListResponse
@@ -236,6 +239,10 @@ export class AuditableItemGraphRestClient
 			}
 		});
 
-		return response.body;
+		return {
+			entries: response.body,
+			cursor: HeaderHelper.extractLinkHeaderRelation(response.headers?.[HeaderTypes.Link], "next")
+				?.urlQueryParams?.cursor
+		};
 	}
 }

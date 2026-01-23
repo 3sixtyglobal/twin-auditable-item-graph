@@ -19,10 +19,10 @@ import {
 	type IAuditableItemGraphListResponse,
 	type IAuditableItemGraphUpdateRequest
 } from "@twin.org/auditable-item-graph-models";
-import { Coerce, ComponentFactory, Guards } from "@twin.org/core";
+import { Coerce, ComponentFactory, Guards, Is } from "@twin.org/core";
 import { nameof } from "@twin.org/nameof";
 import { SchemaOrgContexts, SchemaOrgTypes } from "@twin.org/standards-schema-org";
-import { HeaderTypes, HttpStatusCode, MimeTypes } from "@twin.org/web";
+import { HeaderHelper, HeaderTypes, HttpStatusCode, MimeTypes } from "@twin.org/web";
 
 /**
  * The source used when communicating about these routes.
@@ -412,8 +412,7 @@ export function generateRestRoutesAuditableItemGraph(
 											}
 										]
 									}
-								],
-								[SchemaOrgTypes.NextItem]: "1"
+								]
 							}
 						}
 					}
@@ -459,8 +458,7 @@ export function generateRestRoutesAuditableItemGraph(
 											}
 										]
 									}
-								],
-								[SchemaOrgTypes.NextItem]: "1"
+								]
 							}
 						}
 					}
@@ -608,10 +606,23 @@ export async function auditableItemGraphList(
 		Coerce.integer(request.query?.limit)
 	);
 
+	const headers: {
+		[HeaderTypes.ContentType]: typeof MimeTypes.Json | typeof MimeTypes.JsonLd;
+		[HeaderTypes.Link]?: string | string[];
+	} = {
+		[HeaderTypes.ContentType]: mimeType === "json" ? MimeTypes.Json : MimeTypes.JsonLd
+	};
+
+	if (Is.stringValue(result.cursor) && Is.stringValue(httpRequestContext.serverRequest?.url)) {
+		headers[HeaderTypes.Link] = HeaderHelper.createLinkHeader(
+			httpRequestContext.serverRequest.url,
+			{ cursor: result.cursor },
+			"next"
+		);
+	}
+
 	return {
-		headers: {
-			[HeaderTypes.ContentType]: mimeType === "json" ? MimeTypes.Json : MimeTypes.JsonLd
-		},
-		body: result
+		headers,
+		body: result.entries
 	};
 }

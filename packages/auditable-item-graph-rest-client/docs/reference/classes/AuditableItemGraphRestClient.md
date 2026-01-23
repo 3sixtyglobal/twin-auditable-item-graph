@@ -248,7 +248,7 @@ NotFoundError if the vertex is not found.
 
 ### query()
 
-> **query**(`options?`, `conditions?`, `orderBy?`, `orderByDirection?`, `properties?`, `cursor?`, `limit?`): `Promise`\<`IAuditableItemGraphVertexList`\>
+> **query**(`options?`, `conditions?`, `orderBy?`, `orderByDirection?`, `properties?`, `cursor?`, `limit?`): `Promise`\<\{ `entries`: `IAuditableItemGraphVertexList`; `cursor?`: `string`; \}\>
 
 Query the graph for vertices.
 
@@ -320,7 +320,7 @@ Limit the number of entities to return.
 
 #### Returns
 
-`Promise`\<`IAuditableItemGraphVertexList`\>
+`Promise`\<\{ `entries`: `IAuditableItemGraphVertexList`; `cursor?`: `string`; \}\>
 
 The entities, which can be partial if a limited keys list was provided.
 

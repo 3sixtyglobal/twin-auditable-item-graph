@@ -25,11 +25,3 @@ JSON-LD Type.
 > **itemListElement**: [`IAuditableItemGraphVertex`](IAuditableItemGraphVertex.md)[]
 
 The list of vertices.
-
-***
-
-### nextItem?
-
-> `optional` **nextItem**: `string`
-
-The cursor to get the next chunk of vertices.

@@ -28,9 +28,4 @@ export interface IAuditableItemGraphVertexList {
 	 * The list of vertices.
 	 */
 	[SchemaOrgTypes.ItemListElement]: IAuditableItemGraphVertex[];
-
-	/**
-	 * The cursor to get the next chunk of vertices.
-	 */
-	[SchemaOrgTypes.NextItem]?: string;
 }

@@ -532,7 +532,10 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 		properties?: (keyof IAuditableItemGraphVertex)[],
 		cursor?: string,
 		limit?: number
-	): Promise<IAuditableItemGraphVertexList> {
+	): Promise<{
+		entries: IAuditableItemGraphVertexList;
+		cursor?: string;
+	}> {
 		try {
 			const propertiesToReturn: (keyof IAuditableItemGraphVertex)[] = properties ?? [
 				"id",
@@ -608,12 +611,14 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 					AuditableItemGraphContexts.ContextCommon
 				],
 				type: [SchemaOrgTypes.ItemList, AuditableItemGraphTypes.VertexList],
-				[SchemaOrgTypes.ItemListElement]: models,
-				[SchemaOrgTypes.NextItem]: results.cursor
+				[SchemaOrgTypes.ItemListElement]: models
 			};
 
 			const result = await JsonLdProcessor.compact(vertexList, vertexList["@context"]);
-			return result;
+			return {
+				entries: result,
+				cursor: results.cursor
+			};
 		} catch (error) {
 			throw new GeneralError(
 				AuditableItemGraphService.CLASS_NAME,

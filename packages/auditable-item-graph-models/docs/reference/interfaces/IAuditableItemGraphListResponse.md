@@ -14,6 +14,10 @@ The headers which can be used to determine the response data type.
 
 > **content-type**: `"application/json"` \| `"application/ld+json"`
 
+#### link?
+
+> `optional` **link**: `string` \| `string`[]
+
 ***
 
 ### body

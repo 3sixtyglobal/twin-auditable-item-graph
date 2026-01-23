@@ -3310,9 +3310,9 @@ describe("AuditableItemGraphService", () => {
 		await service.create({});
 		await service.create({});
 
-		const results = await service.query({ id: "0" });
+		const resultsAndCursor = await service.query({ id: "0" });
 
-		expect(results).toEqual({
+		expect(resultsAndCursor.entries).toEqual({
 			"@context": [
 				"https://schema.org",
 				"https://schema.twindev.org/aig/",
@@ -3343,8 +3343,8 @@ describe("AuditableItemGraphService", () => {
 			aliases: [{ id: "foo456" }, { id: "bar456" }]
 		});
 
-		const results = await service.query({ id: "foo" });
-		expect(results).toEqual({
+		const resultsAndCursor = await service.query({ id: "foo" });
+		expect(resultsAndCursor.entries).toEqual({
 			"@context": [
 				"https://schema.org",
 				"https://schema.twindev.org/aig/",
@@ -3397,8 +3397,8 @@ describe("AuditableItemGraphService", () => {
 		});
 		await service.create({});
 
-		const results = await service.query({ id: "1" });
-		expect(results).toEqual({
+		const resultsAndCursor = await service.query({ id: "1" });
+		expect(resultsAndCursor.entries).toEqual({
 			"@context": [
 				"https://schema.org",
 				"https://schema.twindev.org/aig/",
@@ -3425,8 +3425,8 @@ describe("AuditableItemGraphService", () => {
 		});
 		await service.create({});
 
-		const results = await service.query({ id: "5", idMode: "id" });
-		expect(results).toEqual({
+		const resultsAndCursor = await service.query({ id: "5", idMode: "id" });
+		expect(resultsAndCursor.entries).toEqual({
 			"@context": [
 				"https://schema.org",
 				"https://schema.twindev.org/aig/",
@@ -3452,8 +3452,8 @@ describe("AuditableItemGraphService", () => {
 
 		await waitForProofGeneration();
 
-		const results = await service.query({ id: "4", idMode: "alias" });
-		expect(results).toEqual({
+		const resultsAndCursor = await service.query({ id: "4", idMode: "alias" });
+		expect(resultsAndCursor.entries).toEqual({
 			"@context": [
 				"https://schema.org",
 				"https://schema.twindev.org/aig/",
@@ -3520,8 +3520,8 @@ describe("AuditableItemGraphService", () => {
 
 		await waitForProofGeneration();
 
-		const results = await service.query({ includesResourceTypes: ["Create", "Delete"] });
-		expect(results).toEqual({
+		const resultsAndCursor = await service.query({ includesResourceTypes: ["Create", "Delete"] });
+		expect(resultsAndCursor.entries).toEqual({
 			"@context": [
 				"https://schema.org",
 				"https://schema.twindev.org/aig/",
@@ -3563,14 +3563,14 @@ describe("AuditableItemGraphService", () => {
 			}
 		});
 
-		const results = await service.query(undefined, [
+		const resultsAndCursor = await service.query(undefined, [
 			{
 				property: "annotationObject.id",
 				value: "http://example.org/notes/1",
 				comparison: ComparisonOperator.Equals
 			}
 		]);
-		expect(results).toEqual({
+		expect(resultsAndCursor.entries).toEqual({
 			"@context": [
 				"https://schema.org",
 				"https://schema.twindev.org/aig/",
