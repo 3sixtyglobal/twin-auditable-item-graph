@@ -589,7 +589,7 @@ export async function auditableItemGraphList(
 		request.query
 	);
 
-	const hostingService = ComponentFactory.get<IHostingComponent>(
+	const hostingComponent = ComponentFactory.get<IHostingComponent>(
 		httpRequestContext.hostingComponentType ?? "hosting"
 	);
 
@@ -617,7 +617,7 @@ export async function auditableItemGraphList(
 
 	if (Is.stringValue(result.cursor)) {
 		headers[HeaderTypes.Link] = HeaderHelper.createLinkHeader(
-			await hostingService.buildPublicUrl(httpRequestContext.serverRequest.url),
+			await hostingComponent.buildPublicUrl(httpRequestContext.serverRequest.url),
 			{ cursor: result.cursor },
 			"next"
 		);
