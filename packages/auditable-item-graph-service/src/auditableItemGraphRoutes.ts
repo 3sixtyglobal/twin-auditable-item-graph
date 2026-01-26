@@ -3,6 +3,7 @@
 import {
 	HttpParameterHelper,
 	type ICreatedResponse,
+	type IHostingComponent,
 	type IHttpRequestContext,
 	type INoContentResponse,
 	type IRestRoute,
@@ -519,8 +520,6 @@ export async function auditableItemGraphGet(
 	);
 	Guards.stringValue(ROUTES_SOURCE, nameof(request.pathParams.id), request.pathParams.id);
 
-	const mimeType = request.headers?.[HeaderTypes.Accept] === MimeTypes.JsonLd ? "jsonld" : "json";
-
 	const component = ComponentFactory.get<IAuditableItemGraphComponent>(componentName);
 	const result = await component.get(request.pathParams.id, {
 		includeDeleted: Coerce.boolean(request.query?.includeDeleted),
@@ -530,7 +529,10 @@ export async function auditableItemGraphGet(
 
 	return {
 		headers: {
-			[HeaderTypes.ContentType]: mimeType === "json" ? MimeTypes.Json : MimeTypes.JsonLd
+			[HeaderTypes.ContentType]:
+				request.headers?.[HeaderTypes.Accept] === MimeTypes.JsonLd
+					? MimeTypes.JsonLd
+					: MimeTypes.Json
 		},
 		body: result
 	};
@@ -587,7 +589,9 @@ export async function auditableItemGraphList(
 		request.query
 	);
 
-	const mimeType = request.headers?.[HeaderTypes.Accept] === MimeTypes.JsonLd ? "jsonld" : "json";
+	const hostingService = ComponentFactory.get<IHostingComponent>(
+		httpRequestContext.hostingComponentType ?? "hosting"
+	);
 
 	const component = ComponentFactory.get<IAuditableItemGraphComponent>(componentName);
 
@@ -606,16 +610,14 @@ export async function auditableItemGraphList(
 		Coerce.integer(request.query?.limit)
 	);
 
-	const headers: {
-		[HeaderTypes.ContentType]: typeof MimeTypes.Json | typeof MimeTypes.JsonLd;
-		[HeaderTypes.Link]?: string | string[];
-	} = {
-		[HeaderTypes.ContentType]: mimeType === "json" ? MimeTypes.Json : MimeTypes.JsonLd
+	const headers: IAuditableItemGraphListResponse["headers"] = {
+		[HeaderTypes.ContentType]:
+			request.headers?.[HeaderTypes.Accept] === MimeTypes.JsonLd ? MimeTypes.JsonLd : MimeTypes.Json
 	};
 
-	if (Is.stringValue(result.cursor) && Is.stringValue(httpRequestContext.serverRequest?.url)) {
+	if (Is.stringValue(result.cursor)) {
 		headers[HeaderTypes.Link] = HeaderHelper.createLinkHeader(
-			httpRequestContext.serverRequest.url,
+			await hostingService.buildPublicUrl(httpRequestContext.serverRequest.url),
 			{ cursor: result.cursor },
 			"next"
 		);
