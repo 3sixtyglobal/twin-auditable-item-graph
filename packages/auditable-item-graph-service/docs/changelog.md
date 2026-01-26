@@ -1,5 +1,19 @@
 # @twin.org/auditable-item-graph-service - Changelog
 
+## [0.0.3-next.6](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.5...auditable-item-graph-service-v0.0.3-next.6) (2026-01-26)
+
+
+### Features
+
+* use new hosting url for cursor links ([809cdc6](https://github.com/twinfoundation/auditable-item-graph/commit/809cdc623491bad91000d0b0f740e40dc019198d))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/auditable-item-graph-models bumped from 0.0.3-next.5 to 0.0.3-next.6
+
 ## [0.0.3-next.5](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.4...auditable-item-graph-service-v0.0.3-next.5) (2026-01-23)
 
 
