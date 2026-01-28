@@ -22,21 +22,25 @@ export interface IAuditableItemGraphPatchOperation {
 
 	/**
 	 * The operation that was performed on the item.
+	 * json-ld type:schema:Text
 	 */
 	patchOperation: "add" | "remove" | "replace" | "move" | "copy" | "test";
 
 	/**
 	 * The path to the object that was changed.
+	 * json-ld type:schema:Text
 	 */
 	patchPath: string;
 
 	/**
 	 * The path the value was copied or moved from.
+	 * json-ld type:schema:Text
 	 */
 	patchFrom?: string;
 
 	/**
 	 * The value to add.
+	 * json-ld type:json
 	 */
 	patchValue?: unknown;
 }

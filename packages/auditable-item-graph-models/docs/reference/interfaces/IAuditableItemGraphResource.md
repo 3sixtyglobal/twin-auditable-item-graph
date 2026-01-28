@@ -25,6 +25,7 @@ The id of the element.
 > `optional` **dateCreated**: `string`
 
 The date/time of when the element was created.
+json-ld namespace:schema
 
 #### Inherited from
 
@@ -37,6 +38,7 @@ The date/time of when the element was created.
 > `optional` **dateModified**: `string`
 
 The date/time of when the element was modified.
+json-ld namespace:schema
 
 #### Inherited from
 
@@ -49,6 +51,7 @@ The date/time of when the element was modified.
 > `optional` **dateDeleted**: `string`
 
 The date/time of when the element was deleted, as we never actually remove items.
+json-ld namespace:schema
 
 #### Inherited from
 
@@ -77,3 +80,4 @@ JSON-LD Type.
 > `optional` **resourceObject**: `IJsonLdNodeObject`
 
 The JSON-LD object for the resource.
+json-ld type:json

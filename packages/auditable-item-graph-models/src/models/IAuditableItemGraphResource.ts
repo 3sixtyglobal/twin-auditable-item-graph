@@ -23,6 +23,7 @@ export interface IAuditableItemGraphResource extends IAuditableItemGraphAuditedE
 
 	/**
 	 * The JSON-LD object for the resource.
+	 * json-ld type:json
 	 */
 	resourceObject?: IJsonLdNodeObject;
 }

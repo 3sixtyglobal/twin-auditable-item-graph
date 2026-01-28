@@ -13,6 +13,7 @@ Interface describing an edge between two vertices in an auditable item graph.
 > `optional` **dateCreated**: `string`
 
 The date/time of when the element was created.
+json-ld namespace:schema
 
 #### Inherited from
 
@@ -25,6 +26,7 @@ The date/time of when the element was created.
 > `optional` **dateModified**: `string`
 
 The date/time of when the element was modified.
+json-ld namespace:schema
 
 #### Inherited from
 
@@ -37,6 +39,7 @@ The date/time of when the element was modified.
 > `optional` **dateDeleted**: `string`
 
 The date/time of when the element was deleted, as we never actually remove items.
+json-ld namespace:schema
 
 #### Inherited from
 
@@ -69,6 +72,7 @@ The id of the element.
 > **targetId**: `string`
 
 The target vertex id the edge connects to.
+json-ld type:schema:identifier
 
 ***
 
@@ -85,6 +89,7 @@ JSON-LD Type.
 > `optional` **annotationObject**: `IJsonLdNodeObject`
 
 The JSON-LD annotation object for the edge.
+json-ld namespace:twin-common
 
 ***
 
@@ -93,3 +98,4 @@ The JSON-LD annotation object for the edge.
 > **edgeRelationships**: `string`[]
 
 The relationships between the two vertices.
+json-ld container:set

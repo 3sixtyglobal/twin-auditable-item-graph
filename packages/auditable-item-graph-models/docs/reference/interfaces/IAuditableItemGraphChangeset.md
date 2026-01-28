@@ -33,6 +33,7 @@ The id of the changeset.
 > **dateCreated**: `string`
 
 The date/time of when the changeset was created.
+json-ld namespace:schema
 
 ***
 
@@ -41,6 +42,7 @@ The date/time of when the changeset was created.
 > `optional` **userIdentity**: `string`
 
 The user identity that created the changes.
+json-ld namespace:twin-common
 
 ***
 
@@ -49,6 +51,7 @@ The user identity that created the changes.
 > **patches**: [`IAuditableItemGraphPatchOperation`](IAuditableItemGraphPatchOperation.md)[]
 
 The patches in the changeset.
+json-ld container:set
 
 ***
 
@@ -57,6 +60,7 @@ The patches in the changeset.
 > `optional` **proofId**: `string`
 
 The immutable proof id which contains the signature for this changeset.
+json-ld type:schema:identifier
 
 ***
 
@@ -65,3 +69,4 @@ The immutable proof id which contains the signature for this changeset.
 > `optional` **verification**: `IImmutableProofVerification`
 
 The verification for the changeset.
+json-ld id

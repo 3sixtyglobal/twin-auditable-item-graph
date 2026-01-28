@@ -41,6 +41,7 @@ JSON-LD Type.
 > `optional` **annotationObject**: `IJsonLdNodeObject`
 
 The JSON-LD annotation object for the alias.
+json-ld namespace:twin-common
 
 ***
 
@@ -49,6 +50,7 @@ The JSON-LD annotation object for the alias.
 > `optional` **aliasFormat**: `string`
 
 The format of the id in the alias.
+json-ld type:schema:Text
 
 ***
 
@@ -57,6 +59,7 @@ The format of the id in the alias.
 > `optional` **dateCreated**: `string`
 
 The date/time of when the element was created.
+json-ld namespace:schema
 
 #### Inherited from
 
@@ -69,6 +72,7 @@ The date/time of when the element was created.
 > `optional` **dateModified**: `string`
 
 The date/time of when the element was modified.
+json-ld namespace:schema
 
 #### Inherited from
 
@@ -81,6 +85,7 @@ The date/time of when the element was modified.
 > `optional` **dateDeleted**: `string`
 
 The date/time of when the element was deleted, as we never actually remove items.
+json-ld namespace:schema
 
 #### Inherited from
 
