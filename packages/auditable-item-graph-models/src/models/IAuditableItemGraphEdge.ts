@@ -23,7 +23,7 @@ export interface IAuditableItemGraphEdge extends IAuditableItemGraphAuditedEleme
 
 	/**
 	 * The target vertex id the edge connects to.
-	 * json-ld type:schema:identifier
+	 * json-ld type:@id
 	 */
 	targetId: string;
 
