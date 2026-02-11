@@ -1,5 +1,14 @@
 # @twin.org/auditable-item-graph-models - Changelog
 
+## [0.0.3-next.7](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-models-v0.0.3-next.6...auditable-item-graph-models-v0.0.3-next.7) (2026-02-11)
+
+
+### Features
+
+* add ts-to-jsonld-context tool ([08d360e](https://github.com/twinfoundation/auditable-item-graph/commit/08d360e05fd7f8c5bbe6ee4d4e691ffd516db418))
+* changeset endpoints ([#44](https://github.com/twinfoundation/auditable-item-graph/issues/44)) ([7c854de](https://github.com/twinfoundation/auditable-item-graph/commit/7c854de39b247d6f24cd94a04a9f99fa9edde51d))
+* update targetid json context type ([1e47ca7](https://github.com/twinfoundation/auditable-item-graph/commit/1e47ca7ec3080251d940fd8e58c44ca4fa9457f7))
+
 ## [0.0.3-next.6](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-models-v0.0.3-next.5...auditable-item-graph-models-v0.0.3-next.6) (2026-01-26)
 
 
