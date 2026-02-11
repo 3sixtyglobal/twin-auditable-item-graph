@@ -142,12 +142,6 @@ Additional options for the get operation.
 
 Whether to include deleted/updated aliases, resource, edges, defaults to false.
 
-###### includeChangesets?
-
-`boolean`
-
-Whether to include the changesets of the vertex, defaults to false.
-
 ###### verifySignatureDepth?
 
 `VerifyDepth`
@@ -167,6 +161,98 @@ NotFoundError if the vertex is not found.
 #### Implementation of
 
 `IAuditableItemGraphComponent.get`
+
+***
+
+### getChangesets()
+
+> **getChangesets**(`id`, `cursor?`, `limit?`, `options?`): `Promise`\<\{ `changesets`: `IAuditableItemGraphChangesetList`; `cursor?`: `string`; \}\>
+
+Get a graph vertex changeset list.
+
+#### Parameters
+
+##### id
+
+`string`
+
+The id of the vertex to get.
+
+##### cursor?
+
+`string`
+
+The optional cursor to get next chunk.
+
+##### limit?
+
+`number`
+
+Limit the number of entities to return.
+
+##### options?
+
+Additional options for the get operation.
+
+###### verifySignatureDepth?
+
+`VerifyDepth`
+
+How many signatures to verify, defaults to "none".
+
+#### Returns
+
+`Promise`\<\{ `changesets`: `IAuditableItemGraphChangesetList`; `cursor?`: `string`; \}\>
+
+The vertex if found.
+
+#### Throws
+
+NotFoundError if the vertex is not found.
+
+#### Implementation of
+
+`IAuditableItemGraphComponent.getChangesets`
+
+***
+
+### getChangeset()
+
+> **getChangeset**(`id`, `options?`): `Promise`\<`IAuditableItemGraphChangeset`\>
+
+Get a graph vertex changeset.
+
+#### Parameters
+
+##### id
+
+`string`
+
+The id of the vertex to get.
+
+##### options?
+
+Additional options for the get operation.
+
+###### verifySignatureDepth?
+
+`VerifyDepth`
+
+How many signatures to verify, defaults to "none".
+
+#### Returns
+
+`Promise`\<`IAuditableItemGraphChangeset`\>
+
+The vertex if found.
+
+#### Throws
+
+NotFoundError if the vertex is not found.
+
+#### Implementation of
+
+`IAuditableItemGraphComponent.getChangeset`
 
 ***
 

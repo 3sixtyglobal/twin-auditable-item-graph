@@ -123,7 +123,7 @@
 								"schema": {
 									"type": "string"
 								},
-								"description": "e.g. aig:1234567890"
+								"description": "e.g. aig%3A1234567890"
 							}
 						}
 					},
@@ -498,15 +498,6 @@
 						}
 					},
 					{
-						"name": "includeChangesets",
-						"description": "Whether to include the changesets of the vertex, defaults to false.",
-						"in": "query",
-						"required": false,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
 						"name": "verifySignatureDepth",
 						"description": "How many signatures to verify, none, current or all, defaults to \"none\".",
 						"in": "query",
@@ -789,6 +780,527 @@
 				"responses": {
 					"204": {
 						"description": "The rest request ended in success with no data."
+					},
+					"400": {
+						"description": "The server cannot process the request, see the content for more details.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								},
+								"examples": {
+									"exampleResponse": {
+										"value": {
+											"name": "GeneralError",
+											"message": "errorMessage",
+											"properties": {
+												"foo": "bar"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "You are not authorized to use the API or no credentials were supplied, see the content for more details.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								},
+								"examples": {
+									"exampleResponse": {
+										"value": {
+											"name": "UnauthorizedError",
+											"message": "errorMessage"
+										}
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "The server has encountered a situation it does not know how to handle, see the content for more details.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								},
+								"examples": {
+									"exampleResponse": {
+										"value": {
+											"name": "InternalServerError",
+											"message": "errorMessage"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/auditable-item-graph/{id}/changesets/{changesetId}": {
+			"get": {
+				"operationId": "auditableItemGraphChangesetGet",
+				"summary": "Get a graph vertex changeset",
+				"tags": [
+					"Auditable Item Graph"
+				],
+				"parameters": [
+					{
+						"name": "id",
+						"description": "The id of the vertex to get the changeset from.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple",
+						"example": "aig:1234567890"
+					},
+					{
+						"name": "changesetId",
+						"description": "The id of the changeset to get.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple",
+						"example": "changeset:1234567890"
+					},
+					{
+						"name": "verifySignatureDepth",
+						"description": "How many signatures to verify, none, current or all, defaults to \"none\".",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/VerifyDepth"
+						}
+					},
+					{
+						"name": "accept",
+						"in": "header",
+						"required": true,
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple",
+						"example": "application/json"
+					}
+				],
+				"security": [
+					{
+						"jwtBearerAuthScheme": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response to getting an auditable item graph vertex changeset.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "https://schema.twindev.org/aig/AuditableItemGraphChangeset"
+								},
+								"examples": {
+									"auditableItemGraphChangesetGetResponseExample": {
+										"value": {
+											"@context": [
+												"https://schema.twindev.org/aig/",
+												"https://schema.twindev.org/common/"
+											],
+											"type": "AuditableItemGraphChangeset",
+											"id": "aig:1234567890",
+											"dateCreated": "2024-08-22T11:55:16.271Z",
+											"patches": [
+												{
+													"type": "AuditableItemGraphPatchOperation",
+													"patchOperation": "add",
+													"patchPath": "/annotationObject",
+													"patchValue": {
+														"@context": "https://www.w3.org/ns/activitystreams",
+														"type": "Create",
+														"actor": {
+															"type": "Person",
+															"id": "acct:person@example.org",
+															"name": "Person"
+														},
+														"object": {
+															"type": "Note",
+															"content": "This is a simple note"
+														},
+														"published": "2015-01-25T12:34:56Z"
+													}
+												},
+												{
+													"type": "AuditableItemGraphPatchOperation",
+													"patchOperation": "add",
+													"patchPath": "/aliases",
+													"patchValue": [
+														{
+															"id": "foo123",
+															"dateCreated": "2015-01-25T12:34:56Z"
+														},
+														{
+															"id": "bar456",
+															"dateCreated": "2015-01-25T12:34:56Z"
+														}
+													]
+												}
+											],
+											"verification": {
+												"@context": "https://schema.twindev.org/immutable-proof/",
+												"type": "ImmutableProofVerification",
+												"verified": true
+											}
+										}
+									}
+								}
+							},
+							"application/ld+json": {
+								"schema": {
+									"$ref": "https://schema.twindev.org/aig/AuditableItemGraphChangeset"
+								},
+								"examples": {
+									"auditableItemGraphChangesetJsonLdGetResponseExample": {
+										"value": {
+											"@context": [
+												"https://schema.twindev.org/aig/",
+												"https://schema.twindev.org/common/",
+												"https://schema.org"
+											],
+											"type": "AuditableItemGraphChangeset",
+											"id": "aig:1234567890",
+											"dateCreated": "2024-08-22T11:55:16.271Z",
+											"patches": [
+												{
+													"type": "AuditableItemGraphPatchOperation",
+													"patchOperation": "add",
+													"patchPath": "/annotationObject",
+													"patchValue": {
+														"@context": "https://www.w3.org/ns/activitystreams",
+														"type": "Create",
+														"actor": {
+															"type": "Person",
+															"id": "acct:person@example.org",
+															"name": "Person"
+														},
+														"object": {
+															"type": "Note",
+															"content": "This is a simple note"
+														},
+														"published": "2015-01-25T12:34:56Z"
+													}
+												},
+												{
+													"type": "AuditableItemGraphPatchOperation",
+													"patchOperation": "add",
+													"patchPath": "/aliases",
+													"patchValue": [
+														{
+															"id": "foo123",
+															"dateCreated": "2015-01-25T12:34:56Z"
+														},
+														{
+															"id": "bar456",
+															"dateCreated": "2015-01-25T12:34:56Z"
+														}
+													]
+												}
+											],
+											"verification": {
+												"@context": "https://schema.twindev.org/immutable-proof/",
+												"type": "ImmutableProofVerification",
+												"verified": true
+											}
+										}
+									}
+								}
+							}
+						},
+						"headers": {
+							"content-type": {
+								"schema": {
+									"type": "string"
+								},
+								"description": "e.g. application/ld+json"
+							}
+						}
+					},
+					"400": {
+						"description": "The server cannot process the request, see the content for more details.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								},
+								"examples": {
+									"exampleResponse": {
+										"value": {
+											"name": "GeneralError",
+											"message": "errorMessage",
+											"properties": {
+												"foo": "bar"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "You are not authorized to use the API or no credentials were supplied, see the content for more details.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								},
+								"examples": {
+									"exampleResponse": {
+										"value": {
+											"name": "UnauthorizedError",
+											"message": "errorMessage"
+										}
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "The server has encountered a situation it does not know how to handle, see the content for more details.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								},
+								"examples": {
+									"exampleResponse": {
+										"value": {
+											"name": "InternalServerError",
+											"message": "errorMessage"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/auditable-item-graph/{id}/changesets": {
+			"get": {
+				"operationId": "auditableItemGraphChangesetList",
+				"summary": "Get a list of graph vertex changesets",
+				"tags": [
+					"Auditable Item Graph"
+				],
+				"parameters": [
+					{
+						"name": "id",
+						"description": "The id of the changeset to get.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple",
+						"example": "aig:1234567890"
+					},
+					{
+						"name": "cursor",
+						"description": "The optional cursor to get next chunk.",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "limit",
+						"description": "Limit the number of entities to return.",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "verifySignatureDepth",
+						"description": "How many signatures to verify, none, current or all, defaults to \"none\".",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/VerifyDepth"
+						}
+					},
+					{
+						"name": "accept",
+						"in": "header",
+						"required": true,
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple",
+						"example": "application/json"
+					}
+				],
+				"security": [
+					{
+						"jwtBearerAuthScheme": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response to getting an auditable item graph vertex changeset.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "https://schema.twindev.org/aig/AuditableItemGraphChangesetList"
+								},
+								"examples": {
+									"auditableItemGraphChangesetListResponseExample": {
+										"value": {
+											"@context": [
+												"https://schema.org",
+												"https://schema.twindev.org/aig/",
+												"https://schema.twindev.org/common/"
+											],
+											"type": [
+												"ItemList",
+												"AuditableItemGraphChangesetList"
+											],
+											"itemListElement": [
+												{
+													"type": "AuditableItemGraphChangeset",
+													"id": "aig:1234567890",
+													"dateCreated": "2024-08-22T11:55:16.271Z",
+													"patches": [
+														{
+															"type": "AuditableItemGraphPatchOperation",
+															"patchOperation": "add",
+															"patchPath": "/annotationObject",
+															"patchValue": {
+																"@context": "https://www.w3.org/ns/activitystreams",
+																"type": "Create",
+																"actor": {
+																	"type": "Person",
+																	"id": "acct:person@example.org",
+																	"name": "Person"
+																},
+																"object": {
+																	"type": "Note",
+																	"content": "This is a simple note"
+																},
+																"published": "2015-01-25T12:34:56Z"
+															}
+														},
+														{
+															"type": "AuditableItemGraphPatchOperation",
+															"patchOperation": "add",
+															"patchPath": "/aliases",
+															"patchValue": [
+																{
+																	"id": "foo123",
+																	"dateCreated": "2015-01-25T12:34:56Z"
+																},
+																{
+																	"id": "bar456",
+																	"dateCreated": "2015-01-25T12:34:56Z"
+																}
+															]
+														}
+													],
+													"verification": {
+														"@context": "https://schema.twindev.org/immutable-proof/",
+														"type": "ImmutableProofVerification",
+														"verified": true
+													}
+												}
+											]
+										}
+									}
+								}
+							},
+							"application/ld+json": {
+								"schema": {
+									"$ref": "https://schema.twindev.org/aig/AuditableItemGraphChangeset"
+								},
+								"examples": {
+									"auditableItemGraphChangesetJsonLdGetResponseExample": {
+										"value": {
+											"@context": [
+												"https://schema.org",
+												"https://schema.twindev.org/aig/",
+												"https://schema.twindev.org/common/",
+												"https://schema.org"
+											],
+											"type": [
+												"ItemList",
+												"AuditableItemGraphChangesetList"
+											],
+											"itemListElement": [
+												{
+													"type": "AuditableItemGraphChangeset",
+													"id": "aig:1234567890",
+													"dateCreated": "2024-08-22T11:55:16.271Z",
+													"patches": [
+														{
+															"type": "AuditableItemGraphPatchOperation",
+															"patchOperation": "add",
+															"patchPath": "/annotationObject",
+															"patchValue": {
+																"@context": "https://www.w3.org/ns/activitystreams",
+																"type": "Create",
+																"actor": {
+																	"type": "Person",
+																	"id": "acct:person@example.org",
+																	"name": "Person"
+																},
+																"object": {
+																	"type": "Note",
+																	"content": "This is a simple note"
+																},
+																"published": "2015-01-25T12:34:56Z"
+															}
+														},
+														{
+															"type": "AuditableItemGraphPatchOperation",
+															"patchOperation": "add",
+															"patchPath": "/aliases",
+															"patchValue": [
+																{
+																	"id": "foo123",
+																	"dateCreated": "2015-01-25T12:34:56Z"
+																},
+																{
+																	"id": "bar456",
+																	"dateCreated": "2015-01-25T12:34:56Z"
+																}
+															]
+														}
+													],
+													"verification": {
+														"@context": "https://schema.twindev.org/immutable-proof/",
+														"type": "ImmutableProofVerification",
+														"verified": true
+													}
+												}
+											]
+										}
+									}
+								}
+							}
+						},
+						"headers": {
+							"content-type": {
+								"schema": {
+									"type": "string"
+								},
+								"description": "e.g. application/ld+json"
+							}
+						}
 					},
 					"400": {
 						"description": "The server cannot process the request, see the content for more details.",

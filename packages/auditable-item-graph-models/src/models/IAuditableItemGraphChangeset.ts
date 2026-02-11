@@ -13,7 +13,7 @@ export interface IAuditableItemGraphChangeset {
 	/**
 	 * JSON-LD Context.
 	 */
-	"@context": [
+	"@context"?: [
 		typeof AuditableItemGraphContexts.Context,
 		typeof AuditableItemGraphContexts.ContextCommon,
 		...IJsonLdContextDefinitionElement[]

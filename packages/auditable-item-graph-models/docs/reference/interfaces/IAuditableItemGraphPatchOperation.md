@@ -4,9 +4,9 @@ The patch operation for JSON diffs.
 
 ## Properties
 
-### @context
+### @context?
 
-> **@context**: `"https://schema.twindev.org/aig/"` \| \[`"https://schema.twindev.org/aig/"`, `...IJsonLdContextDefinitionElement[]`\]
+> `optional` **@context**: `"https://schema.twindev.org/aig/"` \| \[`"https://schema.twindev.org/aig/"`, `...IJsonLdContextDefinitionElement[]`\]
 
 JSON-LD Context.
 

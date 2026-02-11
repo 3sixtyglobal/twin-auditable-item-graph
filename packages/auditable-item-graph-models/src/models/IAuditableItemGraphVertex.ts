@@ -5,7 +5,6 @@ import type { AuditableItemGraphContexts } from "./auditableItemGraphContexts.js
 import type { AuditableItemGraphTypes } from "./auditableItemGraphTypes.js";
 import type { IAuditableItemGraphAlias } from "./IAuditableItemGraphAlias.js";
 import type { IAuditableItemGraphAuditedElement } from "./IAuditableItemGraphAuditedElement.js";
-import type { IAuditableItemGraphChangeset } from "./IAuditableItemGraphChangeset.js";
 import type { IAuditableItemGraphEdge } from "./IAuditableItemGraphEdge.js";
 import type { IAuditableItemGraphResource } from "./IAuditableItemGraphResource.js";
 
@@ -62,12 +61,6 @@ export interface IAuditableItemGraphVertex
 	 * json-ld container:set
 	 */
 	edges?: IAuditableItemGraphEdge[];
-
-	/**
-	 * Changesets for the vertex.
-	 * json-ld container:set
-	 */
-	changesets?: IAuditableItemGraphChangeset[];
 
 	/**
 	 * Is the vertex verified, will only be populated when verification is requested.

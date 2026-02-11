@@ -12,6 +12,10 @@ import {
 import {
 	AuditableItemGraphContexts,
 	AuditableItemGraphTypes,
+	type IAuditableItemGraphChangesetGetRequest,
+	type IAuditableItemGraphChangesetGetResponse,
+	type IAuditableItemGraphChangesetListRequest,
+	type IAuditableItemGraphChangesetListResponse,
 	type IAuditableItemGraphComponent,
 	type IAuditableItemGraphCreateRequest,
 	type IAuditableItemGraphGetRequest,
@@ -141,7 +145,7 @@ export function generateRestRoutesAuditableItemGraph(
 						response: {
 							statusCode: HttpStatusCode.created,
 							headers: {
-								[HeaderTypes.Location]: "aig:1234567890"
+								[HeaderTypes.Location]: "aig%3A1234567890"
 							}
 						}
 					}
@@ -248,6 +252,279 @@ export function generateRestRoutesAuditableItemGraph(
 										type: AuditableItemGraphTypes.Alias,
 										dateCreated: "2024-08-22T11:55:16.271Z",
 										id: "tst:1234567890"
+									}
+								]
+							}
+						}
+					}
+				]
+			}
+		]
+	};
+
+	const getChangesetRoute: IRestRoute<
+		IAuditableItemGraphChangesetGetRequest,
+		IAuditableItemGraphChangesetGetResponse
+	> = {
+		operationId: "auditableItemGraphChangesetGet",
+		summary: "Get a graph vertex changeset",
+		tag: tagsAuditableItemGraph[0].name,
+		method: "GET",
+		path: `${baseRouteName}/:id/changesets/:changesetId`,
+		handler: async (httpRequestContext, request) =>
+			auditableItemGraphChangesetGet(httpRequestContext, componentName, request),
+		requestType: {
+			type: nameof<IAuditableItemGraphChangesetGetRequest>(),
+			examples: [
+				{
+					id: "auditableItemGraphChangesetGetRequestExample",
+					request: {
+						headers: {
+							[HeaderTypes.Accept]: MimeTypes.Json
+						},
+						pathParams: {
+							id: "aig:1234567890",
+							changesetId: "changeset:1234567890"
+						}
+					}
+				}
+			]
+		},
+		responseType: [
+			{
+				type: nameof<IAuditableItemGraphChangesetGetResponse>(),
+				examples: [
+					{
+						id: "auditableItemGraphChangesetGetResponseExample",
+						response: {
+							body: {
+								"@context": [
+									AuditableItemGraphContexts.Context,
+									AuditableItemGraphContexts.ContextCommon
+								],
+								type: AuditableItemGraphTypes.Changeset,
+								id: "aig:1234567890",
+								dateCreated: "2024-08-22T11:55:16.271Z",
+								patches: [
+									{
+										type: "AuditableItemGraphPatchOperation",
+										patchOperation: "add",
+										patchPath: "/annotationObject",
+										patchValue: {
+											"@context": "https://www.w3.org/ns/activitystreams",
+											type: "Create",
+											actor: { type: "Person", id: "acct:person@example.org", name: "Person" },
+											object: { type: "Note", content: "This is a simple note" },
+											published: "2015-01-25T12:34:56Z"
+										}
+									},
+									{
+										type: "AuditableItemGraphPatchOperation",
+										patchOperation: "add",
+										patchPath: "/aliases",
+										patchValue: [
+											{ id: "foo123", dateCreated: "2015-01-25T12:34:56Z" },
+											{ id: "bar456", dateCreated: "2015-01-25T12:34:56Z" }
+										]
+									}
+								],
+								verification: {
+									"@context": "https://schema.twindev.org/immutable-proof/",
+									type: "ImmutableProofVerification",
+									verified: true
+								}
+							}
+						}
+					}
+				]
+			},
+			{
+				type: nameof<IAuditableItemGraphChangesetGetResponse>(),
+				mimeType: MimeTypes.JsonLd,
+				examples: [
+					{
+						id: "auditableItemGraphChangesetJsonLdGetResponseExample",
+						response: {
+							headers: {
+								[HeaderTypes.ContentType]: MimeTypes.JsonLd
+							},
+							body: {
+								"@context": [
+									AuditableItemGraphContexts.Context,
+									AuditableItemGraphContexts.ContextCommon,
+									SchemaOrgContexts.Context
+								],
+								type: AuditableItemGraphTypes.Changeset,
+								id: "aig:1234567890",
+								dateCreated: "2024-08-22T11:55:16.271Z",
+								patches: [
+									{
+										type: "AuditableItemGraphPatchOperation",
+										patchOperation: "add",
+										patchPath: "/annotationObject",
+										patchValue: {
+											"@context": "https://www.w3.org/ns/activitystreams",
+											type: "Create",
+											actor: { type: "Person", id: "acct:person@example.org", name: "Person" },
+											object: { type: "Note", content: "This is a simple note" },
+											published: "2015-01-25T12:34:56Z"
+										}
+									},
+									{
+										type: "AuditableItemGraphPatchOperation",
+										patchOperation: "add",
+										patchPath: "/aliases",
+										patchValue: [
+											{ id: "foo123", dateCreated: "2015-01-25T12:34:56Z" },
+											{ id: "bar456", dateCreated: "2015-01-25T12:34:56Z" }
+										]
+									}
+								],
+								verification: {
+									"@context": "https://schema.twindev.org/immutable-proof/",
+									type: "ImmutableProofVerification",
+									verified: true
+								}
+							}
+						}
+					}
+				]
+			}
+		]
+	};
+
+	const getChangesetListRoute: IRestRoute<
+		IAuditableItemGraphChangesetListRequest,
+		IAuditableItemGraphChangesetListResponse
+	> = {
+		operationId: "auditableItemGraphChangesetList",
+		summary: "Get a list of graph vertex changesets",
+		tag: tagsAuditableItemGraph[0].name,
+		method: "GET",
+		path: `${baseRouteName}/:id/changesets`,
+		handler: async (httpRequestContext, request) =>
+			auditableItemGraphChangesetList(httpRequestContext, componentName, request),
+		requestType: {
+			type: nameof<IAuditableItemGraphChangesetListRequest>(),
+			examples: [
+				{
+					id: "auditableItemGraphChangesetListRequestExample",
+					request: {
+						headers: {
+							[HeaderTypes.Accept]: MimeTypes.Json
+						},
+						pathParams: {
+							id: "aig:1234567890"
+						}
+					}
+				}
+			]
+		},
+		responseType: [
+			{
+				type: nameof<IAuditableItemGraphChangesetListResponse>(),
+				examples: [
+					{
+						id: "auditableItemGraphChangesetListResponseExample",
+						response: {
+							body: {
+								"@context": [
+									SchemaOrgContexts.Context,
+									AuditableItemGraphContexts.Context,
+									AuditableItemGraphContexts.ContextCommon
+								],
+								type: [SchemaOrgTypes.ItemList, AuditableItemGraphTypes.ChangesetList],
+								[SchemaOrgTypes.ItemListElement]: [
+									{
+										type: AuditableItemGraphTypes.Changeset,
+										id: "aig:1234567890",
+										dateCreated: "2024-08-22T11:55:16.271Z",
+										patches: [
+											{
+												type: "AuditableItemGraphPatchOperation",
+												patchOperation: "add",
+												patchPath: "/annotationObject",
+												patchValue: {
+													"@context": "https://www.w3.org/ns/activitystreams",
+													type: "Create",
+													actor: { type: "Person", id: "acct:person@example.org", name: "Person" },
+													object: { type: "Note", content: "This is a simple note" },
+													published: "2015-01-25T12:34:56Z"
+												}
+											},
+											{
+												type: "AuditableItemGraphPatchOperation",
+												patchOperation: "add",
+												patchPath: "/aliases",
+												patchValue: [
+													{ id: "foo123", dateCreated: "2015-01-25T12:34:56Z" },
+													{ id: "bar456", dateCreated: "2015-01-25T12:34:56Z" }
+												]
+											}
+										],
+										verification: {
+											"@context": "https://schema.twindev.org/immutable-proof/",
+											type: "ImmutableProofVerification",
+											verified: true
+										}
+									}
+								]
+							}
+						}
+					}
+				]
+			},
+			{
+				type: nameof<IAuditableItemGraphChangesetGetResponse>(),
+				mimeType: MimeTypes.JsonLd,
+				examples: [
+					{
+						id: "auditableItemGraphChangesetJsonLdGetResponseExample",
+						response: {
+							headers: {
+								[HeaderTypes.ContentType]: MimeTypes.JsonLd
+							},
+							body: {
+								"@context": [
+									SchemaOrgContexts.Context,
+									AuditableItemGraphContexts.Context,
+									AuditableItemGraphContexts.ContextCommon,
+									SchemaOrgContexts.Context
+								],
+								type: [SchemaOrgTypes.ItemList, AuditableItemGraphTypes.ChangesetList],
+								[SchemaOrgTypes.ItemListElement]: [
+									{
+										type: AuditableItemGraphTypes.Changeset,
+										id: "aig:1234567890",
+										dateCreated: "2024-08-22T11:55:16.271Z",
+										patches: [
+											{
+												type: "AuditableItemGraphPatchOperation",
+												patchOperation: "add",
+												patchPath: "/annotationObject",
+												patchValue: {
+													"@context": "https://www.w3.org/ns/activitystreams",
+													type: "Create",
+													actor: { type: "Person", id: "acct:person@example.org", name: "Person" },
+													object: { type: "Note", content: "This is a simple note" },
+													published: "2015-01-25T12:34:56Z"
+												}
+											},
+											{
+												type: "AuditableItemGraphPatchOperation",
+												patchOperation: "add",
+												patchPath: "/aliases",
+												patchValue: [
+													{ id: "foo123", dateCreated: "2015-01-25T12:34:56Z" },
+													{ id: "bar456", dateCreated: "2015-01-25T12:34:56Z" }
+												]
+											}
+										],
+										verification: {
+											"@context": "https://schema.twindev.org/immutable-proof/",
+											type: "ImmutableProofVerification",
+											verified: true
+										}
 									}
 								]
 							}
@@ -468,7 +745,7 @@ export function generateRestRoutesAuditableItemGraph(
 		]
 	};
 
-	return [createRoute, getRoute, updateRoute, listRoute];
+	return [createRoute, getRoute, getChangesetRoute, getChangesetListRoute, updateRoute, listRoute];
 }
 
 /**
@@ -523,7 +800,96 @@ export async function auditableItemGraphGet(
 	const component = ComponentFactory.get<IAuditableItemGraphComponent>(componentName);
 	const result = await component.get(request.pathParams.id, {
 		includeDeleted: Coerce.boolean(request.query?.includeDeleted),
-		includeChangesets: Coerce.boolean(request.query?.includeChangesets),
+		verifySignatureDepth: request.query?.verifySignatureDepth
+	});
+
+	return {
+		headers: {
+			[HeaderTypes.ContentType]:
+				request.headers?.[HeaderTypes.Accept] === MimeTypes.JsonLd
+					? MimeTypes.JsonLd
+					: MimeTypes.Json
+		},
+		body: result
+	};
+}
+
+/**
+ * Get the graph vertex changeset list.
+ * @param httpRequestContext The request context for the API.
+ * @param componentName The name of the component to use in the routes.
+ * @param request The request.
+ * @returns The response object with additional http response properties.
+ */
+export async function auditableItemGraphChangesetList(
+	httpRequestContext: IHttpRequestContext,
+	componentName: string,
+	request: IAuditableItemGraphChangesetListRequest
+): Promise<IAuditableItemGraphChangesetListResponse> {
+	Guards.object<IAuditableItemGraphChangesetListRequest>(ROUTES_SOURCE, nameof(request), request);
+	Guards.object<IAuditableItemGraphChangesetListRequest["pathParams"]>(
+		ROUTES_SOURCE,
+		nameof(request.pathParams),
+		request.pathParams
+	);
+	Guards.stringValue(ROUTES_SOURCE, nameof(request.pathParams.id), request.pathParams.id);
+
+	const component = ComponentFactory.get<IAuditableItemGraphComponent>(componentName);
+	const result = await component.getChangesets(
+		request.pathParams.id,
+		request.query?.cursor,
+		Coerce.integer(request.query?.limit),
+		{
+			verifySignatureDepth: request.query?.verifySignatureDepth
+		}
+	);
+
+	const headers: IAuditableItemGraphListResponse["headers"] = {
+		[HeaderTypes.ContentType]:
+			request.headers?.[HeaderTypes.Accept] === MimeTypes.JsonLd ? MimeTypes.JsonLd : MimeTypes.Json
+	};
+
+	const hostingComponent = ComponentFactory.get<IHostingComponent>(
+		httpRequestContext.hostingComponentType ?? "hosting"
+	);
+
+	if (Is.stringValue(result.cursor)) {
+		headers[HeaderTypes.Link] = HeaderHelper.createLinkHeader(
+			await hostingComponent.buildPublicUrl(httpRequestContext.serverRequest.url),
+			{ cursor: result.cursor },
+			"next"
+		);
+	}
+
+	return {
+		headers,
+		body: result.changesets
+	};
+}
+
+/**
+ * Get the graph vertex changeset.
+ * @param httpRequestContext The request context for the API.
+ * @param componentName The name of the component to use in the routes.
+ * @param request The request.
+ * @returns The response object with additional http response properties.
+ */
+export async function auditableItemGraphChangesetGet(
+	httpRequestContext: IHttpRequestContext,
+	componentName: string,
+	request: IAuditableItemGraphChangesetGetRequest
+): Promise<IAuditableItemGraphChangesetGetResponse> {
+	Guards.object<IAuditableItemGraphChangesetGetRequest>(ROUTES_SOURCE, nameof(request), request);
+	Guards.object<IAuditableItemGraphChangesetGetRequest["pathParams"]>(
+		ROUTES_SOURCE,
+		nameof(request.pathParams),
+		request.pathParams
+	);
+	Guards.stringValue(ROUTES_SOURCE, nameof(request.pathParams.id), request.pathParams.id);
+
+	const component = ComponentFactory.get<IAuditableItemGraphComponent>(componentName);
+	const changesetUrn = `aig:${request.pathParams.id}:changeset:${request.pathParams.changesetId}`;
+	const result = await component.getChangeset(changesetUrn, {
 		verifySignatureDepth: request.query?.verifySignatureDepth
 	});
 

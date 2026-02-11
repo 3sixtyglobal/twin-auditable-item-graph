@@ -40,7 +40,13 @@ Represents auditable item graph edge.
 
 > `readonly` **Changeset**: `"AuditableItemGraphChangeset"` = `"AuditableItemGraphChangeset"`
 
-Represents auditable item graph  changeset.
+Represents auditable item graph changeset.
+
+### ChangesetList
+
+> `readonly` **ChangesetList**: `"AuditableItemGraphChangesetList"` = `"AuditableItemGraphChangesetList"`
+
+Represents auditable item graph changeset list.
 
 ### PatchOperation
 

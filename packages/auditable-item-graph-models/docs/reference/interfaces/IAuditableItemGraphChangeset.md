@@ -4,9 +4,9 @@ Interface describing a set of changes to the vertex.
 
 ## Properties
 
-### @context
+### @context?
 
-> **@context**: \[`"https://schema.twindev.org/aig/"`, `"https://schema.twindev.org/common/"`, `...IJsonLdContextDefinitionElement[]`\]
+> `optional` **@context**: \[`"https://schema.twindev.org/aig/"`, `"https://schema.twindev.org/common/"`, `...IJsonLdContextDefinitionElement[]`\]
 
 JSON-LD Context.
 

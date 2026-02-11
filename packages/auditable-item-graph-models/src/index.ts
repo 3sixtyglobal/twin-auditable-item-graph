@@ -1,6 +1,10 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
 export * from "./dataTypes/auditableItemGraphDataTypes.js";
+export * from "./models/api/IAuditableItemGraphChangesetGetRequest.js";
+export * from "./models/api/IAuditableItemGraphChangesetGetResponse.js";
+export * from "./models/api/IAuditableItemGraphChangesetListRequest.js";
+export * from "./models/api/IAuditableItemGraphChangesetListResponse.js";
 export * from "./models/api/IAuditableItemGraphCreateRequest.js";
 export * from "./models/api/IAuditableItemGraphGetRequest.js";
 export * from "./models/api/IAuditableItemGraphGetResponse.js";
@@ -15,6 +19,7 @@ export * from "./models/eventBus/IAuditableItemGraphEventBusVertexUpdated.js";
 export * from "./models/IAuditableItemGraphAlias.js";
 export * from "./models/IAuditableItemGraphAuditedElement.js";
 export * from "./models/IAuditableItemGraphChangeset.js";
+export * from "./models/IAuditableItemGraphChangesetList.js";
 export * from "./models/IAuditableItemGraphComponent.js";
 export * from "./models/IAuditableItemGraphEdge.js";
 export * from "./models/IAuditableItemGraphPatchOperation.js";

@@ -56,7 +56,6 @@
 		}
 	},
 	"required": [
-		"@context",
 		"type",
 		"id",
 		"dateCreated",

@@ -4,9 +4,9 @@ import type { HeaderTypes, MimeTypes } from "@twin.org/web";
 import type { VerifyDepth } from "../verifyDepth.js";
 
 /**
- * Get an auditable item graph vertex.
+ * Get an auditable item graph changeset.
  */
-export interface IAuditableItemGraphGetRequest {
+export interface IAuditableItemGraphChangesetListRequest {
 	/**
 	 * The headers which can be used to determine the response data type.
 	 */
@@ -19,7 +19,7 @@ export interface IAuditableItemGraphGetRequest {
 	 */
 	pathParams: {
 		/**
-		 * The id of the vertex to get.
+		 * The id of the changeset to get.
 		 */
 		id: string;
 	};
@@ -29,9 +29,14 @@ export interface IAuditableItemGraphGetRequest {
 	 */
 	query?: {
 		/**
-		 * Whether to include deleted aliases, resource, edges, defaults to false.
+		 * The optional cursor to get next chunk.
 		 */
-		includeDeleted?: string;
+		cursor?: string;
+
+		/**
+		 * Limit the number of entities to return.
+		 */
+		limit?: string;
 
 		/**
 		 * How many signatures to verify, none, current or all, defaults to "none".

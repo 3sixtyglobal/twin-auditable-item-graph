@@ -4,6 +4,7 @@ import {
 	AuditableItemGraphContexts,
 	AuditableItemGraphTopics,
 	AuditableItemGraphTypes,
+	type IAuditableItemGraphChangesetList,
 	VerifyDepth,
 	type IAuditableItemGraphAlias,
 	type IAuditableItemGraphChangeset,
@@ -46,6 +47,7 @@ import {
 } from "@twin.org/entity-storage-models";
 import type { IEventBusComponent } from "@twin.org/event-bus-models";
 import {
+	type IImmutableProofVerification,
 	ImmutableProofContexts,
 	ImmutableProofFailure,
 	ImmutableProofTypes,
@@ -252,7 +254,6 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	 * @param id The id of the vertex to get.
 	 * @param options Additional options for the get operation.
 	 * @param options.includeDeleted Whether to include deleted/updated aliases, resource, edges, defaults to false.
-	 * @param options.includeChangesets Whether to include the changesets of the vertex, defaults to false.
 	 * @param options.verifySignatureDepth How many signatures to verify, defaults to "none".
 	 * @returns The vertex if found.
 	 * @throws NotFoundError if the vertex is not found.
@@ -261,7 +262,6 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 		id: string,
 		options?: {
 			includeDeleted?: boolean;
-			includeChangesets?: boolean;
 			verifySignatureDepth?: VerifyDepth;
 		}
 	): Promise<IAuditableItemGraphVertex> {
@@ -287,20 +287,16 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 			const vertexModel = this.vertexEntityToJsonLd(vertexEntity);
 
-			const includeChangesets = options?.includeChangesets ?? false;
-			const verifySignatureDepth = options?.verifySignatureDepth ?? "none";
+			const verifySignatureDepth = options?.verifySignatureDepth ?? VerifyDepth.None;
 
 			let verified: boolean | undefined;
-			let changesets: IAuditableItemGraphChangeset[] | undefined;
 
 			if (
 				verifySignatureDepth === VerifyDepth.Current ||
-				verifySignatureDepth === VerifyDepth.All ||
-				includeChangesets
+				verifySignatureDepth === VerifyDepth.All
 			) {
 				const verifyResult = await this.verifyChangesets(vertexModel, verifySignatureDepth);
 				verified = verifyResult.verified;
-				changesets = verifyResult.changesets;
 				vertexModel["@context"].push(ImmutableProofContexts.Context);
 			}
 
@@ -325,15 +321,134 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				}
 			}
 
-			if (includeChangesets) {
-				vertexModel.changesets = changesets;
-			}
-
 			if (verifySignatureDepth !== VerifyDepth.None) {
 				vertexModel.verified = verified;
 			}
 
 			const result = await JsonLdProcessor.compact(vertexModel, vertexModel["@context"]);
+			return result;
+		} catch (error) {
+			throw new GeneralError(AuditableItemGraphService.CLASS_NAME, "getFailed", undefined, error);
+		}
+	}
+
+	/**
+	 * Get a graph vertex changeset list.
+	 * @param id The id of the vertex to get.
+	 * @param cursor The optional cursor to get next chunk.
+	 * @param limit Limit the number of entities to return.
+	 * @param options Additional options for the get operation.
+	 * @param options.verifySignatureDepth How many signatures to verify, defaults to "none".
+	 * @returns The vertex if found.
+	 * @throws NotFoundError if the vertex is not found.
+	 */
+	public async getChangesets(
+		id: string,
+		cursor?: string,
+		limit?: number,
+		options?: {
+			verifySignatureDepth?: VerifyDepth;
+		}
+	): Promise<{
+		changesets: IAuditableItemGraphChangesetList;
+		cursor?: string;
+	}> {
+		Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(id), id);
+
+		const urnParsed = Urn.fromValidString(id);
+
+		if (urnParsed.namespaceIdentifier() !== AuditableItemGraphService.NAMESPACE) {
+			throw new GeneralError(AuditableItemGraphService.CLASS_NAME, "namespaceMismatch", {
+				namespace: AuditableItemGraphService.NAMESPACE,
+				id
+			});
+		}
+
+		try {
+			const vertexId = urnParsed.namespaceSpecific(0);
+
+			const vertexEntity = await this._vertexStorage.get(vertexId);
+
+			if (Is.empty(vertexEntity)) {
+				throw new NotFoundError(AuditableItemGraphService.CLASS_NAME, "vertexNotFound", id);
+			}
+
+			const chunk = await this.verifyChangesetChunk(
+				vertexId,
+				options?.verifySignatureDepth ?? VerifyDepth.None,
+				cursor,
+				limit
+			);
+
+			const changesetList: IAuditableItemGraphChangesetList = {
+				"@context": [
+					SchemaOrgContexts.Context,
+					AuditableItemGraphContexts.Context,
+					AuditableItemGraphContexts.ContextCommon
+				],
+				type: [SchemaOrgTypes.ItemList, AuditableItemGraphTypes.ChangesetList],
+				[SchemaOrgTypes.ItemListElement]: chunk.changesets
+			};
+
+			const result = await JsonLdProcessor.compact(changesetList, changesetList["@context"]);
+			return {
+				changesets: result,
+				cursor: chunk.cursor
+			};
+		} catch (error) {
+			throw new GeneralError(AuditableItemGraphService.CLASS_NAME, "getFailed", undefined, error);
+		}
+	}
+
+	/**
+	 * Get a graph vertex changeset.
+	 * @param id The id of the vertex to get.
+	 * @param options Additional options for the get operation.
+	 * @param options.verifySignatureDepth How many signatures to verify, defaults to "none".
+	 * @returns The vertex if found.
+	 * @throws NotFoundError if the vertex is not found.
+	 */
+	public async getChangeset(
+		id: string,
+		options?: {
+			verifySignatureDepth?: VerifyDepth;
+		}
+	): Promise<IAuditableItemGraphChangeset> {
+		Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(id), id);
+
+		const urnParsed = Urn.fromValidString(id);
+
+		if (urnParsed.namespaceIdentifier() !== AuditableItemGraphService.NAMESPACE) {
+			throw new GeneralError(AuditableItemGraphService.CLASS_NAME, "namespaceMismatch", {
+				namespace: AuditableItemGraphService.NAMESPACE,
+				id
+			});
+		}
+
+		try {
+			const namespaceSpecificParts = urnParsed.namespaceSpecificParts();
+			const vertexId = namespaceSpecificParts[0];
+			const changesetId = namespaceSpecificParts[2];
+
+			const vertexEntity = await this._vertexStorage.get(vertexId);
+			if (Is.empty(vertexEntity)) {
+				throw new NotFoundError(AuditableItemGraphService.CLASS_NAME, "vertexNotFound", id);
+			}
+
+			const changesetEntity = await this._changesetStorage.get(changesetId);
+			if (Is.empty(changesetEntity)) {
+				throw new NotFoundError(AuditableItemGraphService.CLASS_NAME, "changesetNotFound", id);
+			}
+
+			const changesetModel = this.changesetEntityToJsonLd(vertexId, changesetEntity);
+
+			const verifySignatureDepth = options?.verifySignatureDepth ?? VerifyDepth.None;
+			if (verifySignatureDepth !== VerifyDepth.None) {
+				changesetModel["@context"]?.push(ImmutableProofContexts.Context);
+				changesetModel.verification = await this.verifyChangesetSignature(changesetModel);
+			}
+
+			const result = await JsonLdProcessor.compact(changesetModel, changesetModel["@context"]);
 			return result;
 		} catch (error) {
 			throw new GeneralError(AuditableItemGraphService.CLASS_NAME, "getFailed", undefined, error);
@@ -1120,88 +1235,126 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	 * Verify the changesets of a vertex.
 	 * @param vertex The vertex to verify.
 	 * @param verifySignatureDepth How many signatures to verify.
-	 * @param contextIds The context ids to perform the operation with.
 	 * @internal
 	 */
 	private async verifyChangesets(
 		vertex: IAuditableItemGraphVertex,
-		verifySignatureDepth: VerifyDepth,
-		partitionKey?: string
+		verifySignatureDepth: VerifyDepth
 	): Promise<{
 		verified: boolean;
 		changesets: IAuditableItemGraphChangeset[];
 	}> {
 		const changesets: IAuditableItemGraphChangeset[] = [];
 
-		let changesetsResult;
 		let verified = true;
 
-		const vertexId = Urn.fromValidString(vertex.id);
+		const vertexIdUrn = Urn.fromValidString(vertex.id);
+		const vertexId = vertexIdUrn.namespaceSpecific();
+		let cursor;
 
 		do {
-			changesetsResult = await this._changesetStorage.query(
-				{
-					property: "vertexId",
-					value: vertexId.namespaceSpecific(),
-					comparison: ComparisonOperator.Equals
-				},
-				[
-					{
-						property: "dateCreated",
-						sortDirection: SortDirection.Ascending
-					}
-				],
-				undefined,
-				changesetsResult?.cursor
-			);
-
-			const storedChangesets = changesetsResult.entities as AuditableItemGraphChangeset[];
-			if (Is.arrayValue(storedChangesets)) {
-				for (let i = 0; i < storedChangesets.length; i++) {
-					const storedChangeset = storedChangesets[i];
-
-					const storedChangesetJsonLd = this.changesetEntityToJsonLd(
-						vertexId.namespaceSpecific(),
-						storedChangeset
-					);
-					changesets.push(storedChangesetJsonLd);
-
-					// If we are verifying all signatures
-					// or this is the last changeset (cursor is empty)
-					// and the changeset has a proofId, then verify the proof.
-					if (
-						verifySignatureDepth === VerifyDepth.All ||
-						(verifySignatureDepth === VerifyDepth.Current &&
-							!Is.stringValue(changesetsResult.cursor) &&
-							i === storedChangesets.length - 1)
-					) {
-						if (!Is.stringValue(storedChangeset.proofId)) {
-							verified = false;
-							storedChangesetJsonLd.verification = {
-								"@context": ImmutableProofContexts.Context,
-								type: ImmutableProofTypes.ImmutableProofVerification,
-								verified: false,
-								failure: ImmutableProofFailure.ProofMissing
-							};
-						} else {
-							// Verify the proof for the changeset object
-							storedChangesetJsonLd.verification = await this._immutableProofComponent.verify(
-								storedChangeset.proofId
-							);
-
-							if (!storedChangesetJsonLd.verification.verified) {
-								verified = false;
-							}
-						}
-					}
-				}
+			const chunk = await this.verifyChangesetChunk(vertexId, verifySignatureDepth, cursor);
+			cursor = chunk.cursor;
+			if (!chunk.verified) {
+				verified = false;
 			}
-		} while (Is.stringValue(changesetsResult.cursor));
+			changesets.push(...chunk.changesets);
+		} while (Is.stringValue(cursor));
 
 		return {
 			verified,
 			changesets
 		};
+	}
+
+	/**
+	 * Verify a chunk of changesets for a vertex.
+	 * @param vertexId The id of the vertex to verify the changesets for.
+	 * @param verifySignatureDepth How many signatures to verify.
+	 * @param cursor The cursor to request the next chunk of changesets.
+	 * @param limit The maximum number of changesets to verify in this chunk.
+	 * @returns The changesets and whether they were verified.
+	 * @internal
+	 */
+	private async verifyChangesetChunk(
+		vertexId: string,
+		verifySignatureDepth: string,
+		cursor?: string,
+		limit?: number
+	): Promise<{
+		changesets: IAuditableItemGraphChangeset[];
+		verified: boolean;
+		cursor?: string;
+	}> {
+		const changesets: IAuditableItemGraphChangeset[] = [];
+		let verified = true;
+
+		const changesetsResult = await this._changesetStorage.query(
+			{
+				property: "vertexId",
+				value: vertexId,
+				comparison: ComparisonOperator.Equals
+			},
+			[
+				{
+					property: "dateCreated",
+					sortDirection: SortDirection.Ascending
+				}
+			],
+			undefined,
+			cursor,
+			limit
+		);
+
+		const storedChangesets = changesetsResult.entities as AuditableItemGraphChangeset[];
+		if (Is.arrayValue(storedChangesets)) {
+			for (let i = 0; i < storedChangesets.length; i++) {
+				const storedChangeset = storedChangesets[i];
+
+				const storedChangesetJsonLd = this.changesetEntityToJsonLd(vertexId, storedChangeset);
+				changesets.push(storedChangesetJsonLd);
+
+				// If we are verifying all signatures
+				// or this is the last changeset (cursor is empty)
+				// and the changeset has a proofId, then verify the proof.
+				if (
+					verifySignatureDepth === VerifyDepth.All ||
+					(verifySignatureDepth === VerifyDepth.Current &&
+						!Is.stringValue(changesetsResult.cursor) &&
+						i === storedChangesets.length - 1)
+				) {
+					storedChangesetJsonLd.verification =
+						await this.verifyChangesetSignature(storedChangesetJsonLd);
+					if (storedChangesetJsonLd.verification?.verified !== true) {
+						verified = false;
+					}
+				}
+			}
+		}
+		return { changesets, verified, cursor: changesetsResult.cursor };
+	}
+
+	/**
+	 * Verify the signature of a changeset and add the verification result to the changeset JSON-LD.
+	 * @param storedChangeset The changeset to verify.
+	 * @returns Whether the changeset is verified.
+	 */
+	private async verifyChangesetSignature(
+		storedChangeset: IAuditableItemGraphChangeset
+	): Promise<IImmutableProofVerification | undefined> {
+		let verification: IImmutableProofVerification | undefined;
+		if (!Is.stringValue(storedChangeset.proofId)) {
+			verification = {
+				"@context": ImmutableProofContexts.Context,
+				type: ImmutableProofTypes.ImmutableProofVerification,
+				verified: false,
+				failure: ImmutableProofFailure.ProofMissing
+			};
+		} else {
+			// Verify the proof for the changeset object
+			verification = await this._immutableProofComponent.verify(storedChangeset.proofId);
+		}
+		return verification;
 	}
 
 	/**

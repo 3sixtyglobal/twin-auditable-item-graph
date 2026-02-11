@@ -72,7 +72,7 @@ The id of the element.
 > **targetId**: `string`
 
 The target vertex id the edge connects to.
-json-ld type:schema:identifier
+json-ld type:@id
 
 ***
 

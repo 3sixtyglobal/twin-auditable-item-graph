@@ -8,6 +8,12 @@ import {
 	type INoContentResponse
 } from "@twin.org/api-models";
 import type {
+	IAuditableItemGraphChangeset,
+	IAuditableItemGraphChangesetGetRequest,
+	IAuditableItemGraphChangesetGetResponse,
+	IAuditableItemGraphChangesetList,
+	IAuditableItemGraphChangesetListRequest,
+	IAuditableItemGraphChangesetListResponse,
 	IAuditableItemGraphComponent,
 	IAuditableItemGraphCreateRequest,
 	IAuditableItemGraphGetRequest,
@@ -19,7 +25,7 @@ import type {
 	IAuditableItemGraphVertexList,
 	VerifyDepth
 } from "@twin.org/auditable-item-graph-models";
-import { Coerce, Guards, NotSupportedError } from "@twin.org/core";
+import { Coerce, Guards, NotSupportedError, Urn } from "@twin.org/core";
 import type { IJsonLdNodeObject } from "@twin.org/data-json-ld";
 import type { IComparator, SortDirection } from "@twin.org/entity";
 import { nameof } from "@twin.org/nameof";
@@ -96,7 +102,6 @@ export class AuditableItemGraphRestClient
 	 * @param id The id of the vertex to get.
 	 * @param options Additional options for the get operation.
 	 * @param options.includeDeleted Whether to include deleted/updated aliases, resource, edges, defaults to false.
-	 * @param options.includeChangesets Whether to include the changesets of the vertex, defaults to false.
 	 * @param options.verifySignatureDepth How many signatures to verify, defaults to "none".
 	 * @returns The vertex if found.
 	 * @throws NotFoundError if the vertex is not found.
@@ -105,7 +110,6 @@ export class AuditableItemGraphRestClient
 		id: string,
 		options?: {
 			includeDeleted?: boolean;
-			includeChangesets?: boolean;
 			verifySignatureDepth?: VerifyDepth;
 		}
 	): Promise<IAuditableItemGraphVertex> {
@@ -123,7 +127,93 @@ export class AuditableItemGraphRestClient
 			},
 			query: {
 				includeDeleted: Coerce.string(options?.includeDeleted),
-				includeChangesets: Coerce.string(options?.includeChangesets),
+				verifySignatureDepth: options?.verifySignatureDepth
+			}
+		});
+
+		return response.body;
+	}
+
+	/**
+	 * Get a graph vertex changeset list.
+	 * @param id The id of the vertex to get.
+	 * @param cursor The optional cursor to get next chunk.
+	 * @param limit Limit the number of entities to return.
+	 * @param options Additional options for the get operation.
+	 * @param options.verifySignatureDepth How many signatures to verify, defaults to "none".
+	 * @returns The changesets if found.
+	 */
+	public async getChangesets(
+		id: string,
+		cursor?: string,
+		limit?: number,
+		options?: {
+			verifySignatureDepth?: VerifyDepth;
+		}
+	): Promise<{
+		changesets: IAuditableItemGraphChangesetList;
+		cursor?: string;
+	}> {
+		Guards.stringValue(AuditableItemGraphRestClient.CLASS_NAME, nameof(id), id);
+
+		const response = await this.fetch<
+			IAuditableItemGraphChangesetListRequest,
+			IAuditableItemGraphChangesetListResponse
+		>("/:id/changesets", "GET", {
+			headers: {
+				[HeaderTypes.Accept]: MimeTypes.JsonLd
+			},
+			pathParams: {
+				id
+			},
+			query: {
+				cursor,
+				limit: Coerce.string(limit),
+				verifySignatureDepth: options?.verifySignatureDepth
+			}
+		});
+
+		return {
+			changesets: response.body,
+			cursor: HeaderHelper.extractLinkHeaderRelation(response.headers?.[HeaderTypes.Link], "next")
+				?.urlQueryParams?.cursor
+		};
+	}
+
+	/**
+	 * Get a graph vertex changeset.
+	 * @param id The id of the vertex to get.
+	 * @param options Additional options for the get operation.
+	 * @param options.verifySignatureDepth How many signatures to verify, defaults to "none".
+	 * @returns The changeset if found.
+	 * @throws NotFoundError if the vertex or changeset is not found.
+	 */
+	public async getChangeset(
+		id: string,
+		options?: { verifySignatureDepth?: VerifyDepth }
+	): Promise<IAuditableItemGraphChangeset> {
+		Guards.stringValue(AuditableItemGraphRestClient.CLASS_NAME, nameof(id), id);
+
+		const urnParsed = Urn.fromValidString(id);
+		const namespaceSpecificParts = urnParsed.namespaceSpecificParts();
+		const vertexId = namespaceSpecificParts[0];
+		const changesetId = namespaceSpecificParts[2];
+
+		Guards.stringValue(AuditableItemGraphRestClient.CLASS_NAME, "vertexId", vertexId);
+		Guards.stringValue(AuditableItemGraphRestClient.CLASS_NAME, "changesetId", changesetId);
+
+		const response = await this.fetch<
+			IAuditableItemGraphChangesetGetRequest,
+			IAuditableItemGraphChangesetGetResponse
+		>("/:id/changesets/:changesetId", "GET", {
+			headers: {
+				[HeaderTypes.Accept]: MimeTypes.JsonLd
+			},
+			pathParams: {
+				id: vertexId,
+				changesetId
+			},
+			query: {
 				verifySignatureDepth: options?.verifySignatureDepth
 			}
 		});

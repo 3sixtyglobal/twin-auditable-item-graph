@@ -3,6 +3,7 @@
 	"types": [
 		"./src/models/IAuditableItemGraphAlias.ts",
 		"./src/models/IAuditableItemGraphChangeset.ts",
+		"./src/models/IAuditableItemGraphChangesetList.ts",
 		"./src/models/IAuditableItemGraphEdge.ts",
 		"./src/models/IAuditableItemGraphPatchOperation.ts",
 		"./src/models/IAuditableItemGraphResource.ts",

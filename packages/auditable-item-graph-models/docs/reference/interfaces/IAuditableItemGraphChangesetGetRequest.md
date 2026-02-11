@@ -1,6 +1,6 @@
-# Interface: IAuditableItemGraphGetRequest
+# Interface: IAuditableItemGraphChangesetGetRequest
 
-Get an auditable item graph vertex.
+Get an auditable item graph vertex changeset.
 
 ## Properties
 
@@ -26,7 +26,13 @@ The parameters from the path.
 
 > **id**: `string`
 
-The id of the vertex to get.
+The id of the vertex to get the changeset from.
+
+#### changesetId
+
+> **changesetId**: `string`
+
+The id of the changeset to get.
 
 ***
 
@@ -35,12 +41,6 @@ The id of the vertex to get.
 > `optional` **query**: `object`
 
 The query parameters.
-
-#### includeDeleted?
-
-> `optional` **includeDeleted**: `string`
-
-Whether to include deleted aliases, resource, edges, defaults to false.
 
 #### verifySignatureDepth?
 

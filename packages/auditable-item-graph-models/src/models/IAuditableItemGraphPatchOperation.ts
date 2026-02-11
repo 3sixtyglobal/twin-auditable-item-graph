@@ -11,7 +11,7 @@ export interface IAuditableItemGraphPatchOperation {
 	/**
 	 * JSON-LD Context.
 	 */
-	"@context":
+	"@context"?:
 		| typeof AuditableItemGraphContexts.Context
 		| [typeof AuditableItemGraphContexts.Context, ...IJsonLdContextDefinitionElement[]];
 

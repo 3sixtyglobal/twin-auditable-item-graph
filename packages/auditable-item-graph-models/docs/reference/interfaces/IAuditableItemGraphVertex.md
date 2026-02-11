@@ -120,15 +120,6 @@ json-ld container:set
 
 ***
 
-### changesets?
-
-> `optional` **changesets**: [`IAuditableItemGraphChangeset`](IAuditableItemGraphChangeset.md)[]
-
-Changesets for the vertex.
-json-ld container:set
-
-***
-
 ### verified?
 
 > `optional` **verified**: `boolean`

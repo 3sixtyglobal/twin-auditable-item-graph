@@ -3,6 +3,8 @@
 import type { IComponent } from "@twin.org/core";
 import type { IJsonLdNodeObject } from "@twin.org/data-json-ld";
 import type { IComparator, SortDirection } from "@twin.org/entity";
+import type { IAuditableItemGraphChangeset } from "./IAuditableItemGraphChangeset.js";
+import type { IAuditableItemGraphChangesetList } from "./IAuditableItemGraphChangesetList.js";
 import type { IAuditableItemGraphVertex } from "./IAuditableItemGraphVertex.js";
 import type { IAuditableItemGraphVertexList } from "./IAuditableItemGraphVertexList.js";
 import type { VerifyDepth } from "./verifyDepth.js";
@@ -75,7 +77,6 @@ export interface IAuditableItemGraphComponent extends IComponent {
 	 * @param id The id of the vertex to get.
 	 * @param options Additional options for the get operation.
 	 * @param options.includeDeleted Whether to include deleted aliases, resource, edges, defaults to false.
-	 * @param options.includeChangesets Whether to include the changesets of the vertex, defaults to false.
 	 * @param options.verifySignatureDepth How many signatures to verify, defaults to "none".
 	 * @returns The vertex if found.
 	 * @throws NotFoundError if the vertex is not found.
@@ -84,10 +85,44 @@ export interface IAuditableItemGraphComponent extends IComponent {
 		id: string,
 		options?: {
 			includeDeleted?: boolean;
-			includeChangesets?: boolean;
 			verifySignatureDepth?: VerifyDepth;
 		}
 	): Promise<IAuditableItemGraphVertex>;
+
+	/**
+	 * Get a graph vertex changeset list.
+	 * @param id The id of the vertex to get.
+	 * @param cursor The optional cursor to get next chunk.
+	 * @param limit Limit the number of entities to return.
+	 * @param options Additional options for the get operation.
+	 * @param options.verifySignatureDepth How many signatures to verify, defaults to "none".
+	 * @returns The changeset if found.
+	 * @throws NotFoundError if the vertex is not found.
+	 */
+	getChangesets(
+		id: string,
+		cursor?: string,
+		limit?: number,
+		options?: {
+			verifySignatureDepth?: VerifyDepth;
+		}
+	): Promise<{
+		changesets: IAuditableItemGraphChangesetList;
+		cursor?: string;
+	}>;
+
+	/**
+	 * Get a graph vertex changeset.
+	 * @param id The id of the vertex to get.
+	 * @param options Additional options for the get operation.
+	 * @param options.verifySignatureDepth How many signatures to verify, defaults to "none".
+	 * @returns The changeset if found.
+	 * @throws NotFoundError if the vertex or changeset is not found.
+	 */
+	getChangeset(
+		id: string,
+		options?: { verifySignatureDepth?: VerifyDepth }
+	): Promise<IAuditableItemGraphChangeset>;
 
 	/**
 	 * Remove the verifiable storage for an item.
