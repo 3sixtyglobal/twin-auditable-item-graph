@@ -55,6 +55,20 @@ let backgroundTaskStorage: MemoryEntityStorageConnector<BackgroundTask>;
 const FIRST_TICK = 1724327716271;
 const SECOND_TICK = 1724327816272;
 
+const HEX_ID_PATTERN = /^[\da-f]+$/;
+const AIG_URN_PATTERN = /^aig:[\da-f]+$/;
+const IMMUTABLE_PROOF_URN_PATTERN = /^immutable-proof:[\da-f]+$/;
+const MULTIBASE_Z_PATTERN = /^z[1-9A-HJ-NP-Za-km-z]+$/;
+
+/**
+ * Extract the vertex ID from the AIG URN.
+ * @param aigUrn The AIG URN to extract the vertex ID from.
+ * @returns The extracted vertex ID.
+ */
+function extractAigId(aigUrn: string): string {
+	return aigUrn.replace(/^aig:/, "");
+}
+
 /**
  * Wait for the proof to be generated.
  * @param proofCount The number of proofs to wait for.
@@ -172,70 +186,68 @@ describe("AuditableItemGraphService", () => {
 	test("Can create a vertex with no properties", async () => {
 		const service = new AuditableItemGraphService();
 		const id = await service.create({});
-		expect(id.startsWith("aig:")).toEqual(true);
+		expect(id).toMatch(AIG_URN_PATTERN);
 
 		await waitForProofGeneration();
 
 		const vertexStore = vertexStorage.getStore();
 		const vertex = vertexStore[0];
+		const storedVertexId = extractAigId(id);
 
-		expect(vertex).toEqual({
-			partitionId: TEST_TENANT_IDENTITY_SHORT,
-			id: "0101010101010101010101010101010101010101010101010101010101010101",
-			dateCreated: expect.any(String),
-			organizationIdentity: TEST_ORGANIZATION_IDENTITY
-		});
+		expect(vertex).toEqual(
+			expect.objectContaining({
+				partitionId: TEST_TENANT_IDENTITY_SHORT,
+				id: expect.stringMatching(HEX_ID_PATTERN),
+				dateCreated: expect.any(String),
+				organizationIdentity: TEST_ORGANIZATION_IDENTITY
+			})
+		);
+		expect(vertex.id).toEqual(storedVertexId);
+		expect(vertex.aliasIndex).toBeUndefined();
+		expect(vertex.annotationObject).toBeUndefined();
+		expect(vertex.resourceTypeIndex).toBeUndefined();
 
 		const changesetStore = changesetStorage.getStore();
-		expect(changesetStore).toEqual([
-			{
+		expect(changesetStore).toHaveLength(1);
+		expect(changesetStore[0]).toEqual(
+			expect.objectContaining({
 				partitionId: TEST_TENANT_IDENTITY_SHORT,
-				id: "0202020202020202020202020202020202020202020202020202020202020202",
-				vertexId: "0101010101010101010101010101010101010101010101010101010101010101",
+				id: expect.stringMatching(HEX_ID_PATTERN),
+				vertexId: storedVertexId,
 				dateCreated: expect.any(String),
 				userIdentity: TEST_USER_IDENTITY,
 				patches: [],
-				proofId: "immutable-proof:019179f26c5073038303030303030303"
-			}
-		]);
+				proofId: expect.stringMatching(IMMUTABLE_PROOF_URN_PATTERN)
+			})
+		);
 
 		const immutableStore = verifiableStorage.getStore();
-		expect(immutableStore).toEqual([
-			{
+		expect(immutableStore).toHaveLength(1);
+		expect(immutableStore[0]).toEqual(
+			expect.objectContaining({
 				partitionId: TEST_TENANT_IDENTITY_SHORT,
-				id: "0606060606060606060606060606060606060606060606060606060606060606",
-				data: Converter.bytesToBase64(
-					ObjectHelper.toBytes({
-						type: "DataIntegrityProof",
-						cryptosuite: "eddsa-jcs-2022",
-						created: "2024-08-22T11:56:56.272Z",
-						verificationMethod:
-							"did:entity-storage:0x0202020202020202020202020202020202020202020202020202020202020202#immutable-proof-assertion",
-						proofPurpose: "assertionMethod",
-						proofValue:
-							"z7bUw29CSZ5GUxn9FAnsZ4R7gjjPaX86JEw37SmkdJzgbF6tT79cexKoAaUfiD6HvroWyz9Q5TwpfTXzVm4BmySW",
-						"@context": "https://w3id.org/security/data-integrity/v2"
-					})
-				),
+				id: expect.stringMatching(HEX_ID_PATTERN),
+				data: expect.any(String),
 				creator: TEST_ORGANIZATION_IDENTITY,
 				allowList: [TEST_ORGANIZATION_IDENTITY],
 				maxAllowListSize: 100
-			}
-		]);
+			})
+		);
 
 		const immutableProof = ObjectHelper.fromBytes<IImmutableProof>(
 			Converter.base64ToBytes(immutableStore[0].data)
 		);
-		expect(immutableProof).toEqual({
-			"@context": "https://w3id.org/security/data-integrity/v2",
-			created: "2024-08-22T11:56:56.272Z",
-			type: "DataIntegrityProof",
-			cryptosuite: "eddsa-jcs-2022",
-			proofPurpose: "assertionMethod",
-			proofValue:
-				"z7bUw29CSZ5GUxn9FAnsZ4R7gjjPaX86JEw37SmkdJzgbF6tT79cexKoAaUfiD6HvroWyz9Q5TwpfTXzVm4BmySW",
-			verificationMethod: `${TEST_ORGANIZATION_IDENTITY}#immutable-proof-assertion`
-		});
+		expect(immutableProof).toEqual(
+			expect.objectContaining({
+				"@context": "https://w3id.org/security/data-integrity/v2",
+				created: "2024-08-22T11:56:56.272Z",
+				type: "DataIntegrityProof",
+				cryptosuite: "eddsa-jcs-2022",
+				proofPurpose: "assertionMethod",
+				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN),
+				verificationMethod: `${TEST_ORGANIZATION_IDENTITY}#immutable-proof-assertion`
+			})
+		);
 	});
 
 	test("Can create a vertex with an alias", async () => {
@@ -243,36 +255,40 @@ describe("AuditableItemGraphService", () => {
 		const id = await service.create({
 			aliases: [{ id: "foo123" }, { id: "bar456" }]
 		});
-		expect(id.startsWith("aig:")).toEqual(true);
+		expect(id).toMatch(AIG_URN_PATTERN);
+		const storedVertexId = extractAigId(id);
 
 		const vertexStore = vertexStorage.getStore();
 		const vertex = vertexStore[0];
 
-		expect(vertex).toEqual({
-			partitionId: TEST_TENANT_IDENTITY_SHORT,
-			id: "0101010101010101010101010101010101010101010101010101010101010101",
-			dateCreated: expect.any(String),
-			organizationIdentity: TEST_ORGANIZATION_IDENTITY,
-			aliasIndex: "||foo123||bar456||",
-			aliases: [
-				{
-					id: "foo123",
-					dateCreated: expect.any(String)
-				},
-				{
-					id: "bar456",
-					dateCreated: expect.any(String)
-				}
-			]
-		});
+		expect(vertex).toEqual(
+			expect.objectContaining({
+				partitionId: TEST_TENANT_IDENTITY_SHORT,
+				id: storedVertexId,
+				dateCreated: expect.any(String),
+				organizationIdentity: TEST_ORGANIZATION_IDENTITY,
+				aliasIndex: "||foo123||bar456||",
+				aliases: [
+					{
+						id: "foo123",
+						dateCreated: expect.any(String)
+					},
+					{
+						id: "bar456",
+						dateCreated: expect.any(String)
+					}
+				]
+			})
+		);
 
 		const changesetStore = changesetStorage.getStore();
 
-		expect(changesetStore).toEqual([
-			{
+		expect(changesetStore).toHaveLength(1);
+		expect(changesetStore[0]).toEqual(
+			expect.objectContaining({
 				partitionId: TEST_TENANT_IDENTITY_SHORT,
-				id: "0202020202020202020202020202020202020202020202020202020202020202",
-				vertexId: "0101010101010101010101010101010101010101010101010101010101010101",
+				id: expect.stringMatching(HEX_ID_PATTERN),
+				vertexId: storedVertexId,
 				dateCreated: expect.any(String),
 				userIdentity: TEST_USER_IDENTITY,
 				patches: [
@@ -291,49 +307,39 @@ describe("AuditableItemGraphService", () => {
 						]
 					}
 				],
-				proofId: "immutable-proof:019179f26c5073038303030303030303"
-			}
-		]);
+				proofId: expect.stringMatching(IMMUTABLE_PROOF_URN_PATTERN)
+			})
+		);
 
 		await waitForProofGeneration();
 
 		const immutableStore = verifiableStorage.getStore();
-		expect(immutableStore).toEqual([
-			{
+		expect(immutableStore).toHaveLength(1);
+		expect(immutableStore[0]).toEqual(
+			expect.objectContaining({
 				partitionId: TEST_TENANT_IDENTITY_SHORT,
-				id: "0606060606060606060606060606060606060606060606060606060606060606",
-				data: Converter.bytesToBase64(
-					ObjectHelper.toBytes({
-						type: "DataIntegrityProof",
-						cryptosuite: "eddsa-jcs-2022",
-						created: "2024-08-22T11:56:56.272Z",
-						verificationMethod:
-							"did:entity-storage:0x0202020202020202020202020202020202020202020202020202020202020202#immutable-proof-assertion",
-						proofPurpose: "assertionMethod",
-						proofValue:
-							"z3ZEE6oZZuyckus3ggD86G36HV7eC6R2RnLw6YJPKYD9JCmECfXfHzuUrjtcdL1DeQQsgqK2gmVuLBx1oZE1hfHEd",
-						"@context": "https://w3id.org/security/data-integrity/v2"
-					})
-				),
+				id: expect.stringMatching(HEX_ID_PATTERN),
+				data: expect.any(String),
 				creator: TEST_ORGANIZATION_IDENTITY,
 				allowList: [TEST_ORGANIZATION_IDENTITY],
 				maxAllowListSize: 100
-			}
-		]);
+			})
+		);
 
 		const immutableProof = ObjectHelper.fromBytes<IImmutableProof>(
 			Converter.base64ToBytes(immutableStore[0].data)
 		);
-		expect(immutableProof).toEqual({
-			"@context": "https://w3id.org/security/data-integrity/v2",
-			type: "DataIntegrityProof",
-			created: "2024-08-22T11:56:56.272Z",
-			cryptosuite: "eddsa-jcs-2022",
-			proofPurpose: "assertionMethod",
-			proofValue:
-				"z3ZEE6oZZuyckus3ggD86G36HV7eC6R2RnLw6YJPKYD9JCmECfXfHzuUrjtcdL1DeQQsgqK2gmVuLBx1oZE1hfHEd",
-			verificationMethod: `${TEST_ORGANIZATION_IDENTITY}#immutable-proof-assertion`
-		});
+		expect(immutableProof).toEqual(
+			expect.objectContaining({
+				"@context": "https://w3id.org/security/data-integrity/v2",
+				type: "DataIntegrityProof",
+				created: "2024-08-22T11:56:56.272Z",
+				cryptosuite: "eddsa-jcs-2022",
+				proofPurpose: "assertionMethod",
+				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN),
+				verificationMethod: `${TEST_ORGANIZATION_IDENTITY}#immutable-proof-assertion`
+			})
+		);
 	});
 
 	test("Can create a vertex with object", async () => {
@@ -354,39 +360,45 @@ describe("AuditableItemGraphService", () => {
 				published: "2015-01-25T12:34:56Z"
 			}
 		});
-		expect(id.startsWith("aig:")).toEqual(true);
+		expect(id).toMatch(AIG_URN_PATTERN);
+		const storedVertexId = extractAigId(id);
 
 		const vertexStore = vertexStorage.getStore();
 		const vertex = vertexStore[0];
 
-		expect(vertex).toEqual({
-			partitionId: TEST_TENANT_IDENTITY_SHORT,
-			id: "0101010101010101010101010101010101010101010101010101010101010101",
-			dateCreated: expect.any(String),
-			organizationIdentity: TEST_ORGANIZATION_IDENTITY,
-			annotationObject: {
-				"@context": "https://www.w3.org/ns/activitystreams",
-				type: "Create",
-				actor: {
-					type: "Person",
-					id: "acct:person@example.org",
-					name: "Person"
-				},
-				object: {
-					type: "Note",
-					content: "This is a simple note"
-				},
-				published: "2015-01-25T12:34:56Z"
-			}
-		});
+		expect(vertex).toEqual(
+			expect.objectContaining({
+				partitionId: TEST_TENANT_IDENTITY_SHORT,
+				id: storedVertexId,
+				dateCreated: expect.any(String),
+				organizationIdentity: TEST_ORGANIZATION_IDENTITY,
+				annotationObject: {
+					"@context": "https://www.w3.org/ns/activitystreams",
+					type: "Create",
+					actor: {
+						type: "Person",
+						id: "acct:person@example.org",
+						name: "Person"
+					},
+					object: {
+						type: "Note",
+						content: "This is a simple note"
+					},
+					published: "2015-01-25T12:34:56Z"
+				}
+			})
+		);
+		expect(vertex.aliasIndex).toBeUndefined();
+		expect(vertex.resourceTypeIndex).toBeUndefined();
 
 		const changesetStore = changesetStorage.getStore();
 
-		expect(changesetStore).toEqual([
-			{
+		expect(changesetStore).toHaveLength(1);
+		expect(changesetStore[0]).toEqual(
+			expect.objectContaining({
 				partitionId: TEST_TENANT_IDENTITY_SHORT,
-				id: "0202020202020202020202020202020202020202020202020202020202020202",
-				vertexId: "0101010101010101010101010101010101010101010101010101010101010101",
+				id: expect.stringMatching(HEX_ID_PATTERN),
+				vertexId: storedVertexId,
 				dateCreated: expect.any(String),
 				userIdentity: TEST_USER_IDENTITY,
 				patches: [
@@ -409,49 +421,39 @@ describe("AuditableItemGraphService", () => {
 						}
 					}
 				],
-				proofId: "immutable-proof:019179f26c5073038303030303030303"
-			}
-		]);
+				proofId: expect.stringMatching(IMMUTABLE_PROOF_URN_PATTERN)
+			})
+		);
 
 		await waitForProofGeneration();
 
 		const immutableStore = verifiableStorage.getStore();
-		expect(immutableStore).toEqual([
-			{
+		expect(immutableStore).toHaveLength(1);
+		expect(immutableStore[0]).toEqual(
+			expect.objectContaining({
 				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				allowList: [TEST_ORGANIZATION_IDENTITY],
 				creator: TEST_ORGANIZATION_IDENTITY,
-				data: Converter.bytesToBase64(
-					ObjectHelper.toBytes({
-						type: "DataIntegrityProof",
-						cryptosuite: "eddsa-jcs-2022",
-						created: "2024-08-22T11:56:56.272Z",
-						verificationMethod:
-							"did:entity-storage:0x0202020202020202020202020202020202020202020202020202020202020202#immutable-proof-assertion",
-						proofPurpose: "assertionMethod",
-						proofValue:
-							"z2oRQBFp5DEtqtGdakuEmj5APVM6ZHftmrZjYyjfoFQphMH7KE9PH1L3UMkGYRfYqsD6CtqfRq1MapLYegycpeUhL",
-						"@context": "https://w3id.org/security/data-integrity/v2"
-					})
-				),
-				id: "0606060606060606060606060606060606060606060606060606060606060606",
+				data: expect.any(String),
+				id: expect.stringMatching(HEX_ID_PATTERN),
 				maxAllowListSize: 100
-			}
-		]);
+			})
+		);
 
 		const immutableProof = ObjectHelper.fromBytes<IImmutableProof>(
 			Converter.base64ToBytes(immutableStore[0].data)
 		);
-		expect(immutableProof).toEqual({
-			"@context": "https://w3id.org/security/data-integrity/v2",
-			type: "DataIntegrityProof",
-			created: "2024-08-22T11:56:56.272Z",
-			cryptosuite: "eddsa-jcs-2022",
-			proofPurpose: "assertionMethod",
-			proofValue:
-				"z2oRQBFp5DEtqtGdakuEmj5APVM6ZHftmrZjYyjfoFQphMH7KE9PH1L3UMkGYRfYqsD6CtqfRq1MapLYegycpeUhL",
-			verificationMethod: `${TEST_ORGANIZATION_IDENTITY}#immutable-proof-assertion`
-		});
+		expect(immutableProof).toEqual(
+			expect.objectContaining({
+				"@context": "https://w3id.org/security/data-integrity/v2",
+				type: "DataIntegrityProof",
+				created: "2024-08-22T11:56:56.272Z",
+				cryptosuite: "eddsa-jcs-2022",
+				proofPurpose: "assertionMethod",
+				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN),
+				verificationMethod: `${TEST_ORGANIZATION_IDENTITY}#immutable-proof-assertion`
+			})
+		);
 	});
 
 	test("Can get a vertex", async () => {
@@ -473,7 +475,7 @@ describe("AuditableItemGraphService", () => {
 			},
 			aliases: [{ id: "foo123" }, { id: "bar456" }]
 		});
-		expect(id.startsWith("aig:")).toEqual(true);
+		expect(id).toMatch(AIG_URN_PATTERN);
 
 		const result = await service.get(id, undefined);
 
@@ -484,7 +486,7 @@ describe("AuditableItemGraphService", () => {
 				"https://schema.org"
 			],
 			type: "AuditableItemGraphVertex",
-			id: "aig:0101010101010101010101010101010101010101010101010101010101010101",
+			id,
 			dateCreated: expect.any(String),
 			organizationIdentity: TEST_ORGANIZATION_IDENTITY,
 			annotationObject: {
@@ -538,9 +540,12 @@ describe("AuditableItemGraphService", () => {
 				{ id: "bar456", aliasFormat: "type2" }
 			]
 		});
-		expect(id.startsWith("aig:")).toEqual(true);
+		expect(id).toMatch(AIG_URN_PATTERN);
+		const storedVertexId = extractAigId(id);
 
 		const result = await service.getChangesets(id);
+		const storedChangesetId = changesetStorage.getStore()[0].id;
+		const changesetUrn = `aig:${storedVertexId}:changeset:${storedChangesetId}`;
 
 		expect(result.changesets).toEqual({
 			"@context": [
@@ -551,7 +556,7 @@ describe("AuditableItemGraphService", () => {
 			type: ["ItemList", "AuditableItemGraphChangesetList"],
 			itemListElement: [
 				{
-					id: "aig:0101010101010101010101010101010101010101010101010101010101010101:changeset:0202020202020202020202020202020202020202020202020202020202020202",
+					id: changesetUrn,
 					type: "AuditableItemGraphChangeset",
 					dateCreated: "2024-08-22T11:56:56.272Z",
 					patches: [
@@ -592,23 +597,23 @@ describe("AuditableItemGraphService", () => {
 							]
 						}
 					],
-					proofId: "immutable-proof:019179f26c5073038303030303030303",
-					userIdentity:
-						"did:entity-storage:0x0303030303030303030303030303030303030303030303030303030303030303"
+					proofId: expect.stringMatching(IMMUTABLE_PROOF_URN_PATTERN),
+					userIdentity: TEST_USER_IDENTITY
 				}
 			]
 		});
 
 		const changesetStore = changesetStorage.getStore();
 
-		expect(changesetStore).toEqual([
-			{
+		expect(changesetStore).toHaveLength(1);
+		expect(changesetStore[0]).toEqual(
+			expect.objectContaining({
 				partitionId: TEST_TENANT_IDENTITY_SHORT,
-				id: "0202020202020202020202020202020202020202020202020202020202020202",
-				vertexId: "0101010101010101010101010101010101010101010101010101010101010101",
+				id: storedChangesetId,
+				vertexId: storedVertexId,
 				dateCreated: expect.any(String),
 				userIdentity: TEST_USER_IDENTITY,
-				proofId: "immutable-proof:019179f26c5073038303030303030303",
+				proofId: expect.stringMatching(IMMUTABLE_PROOF_URN_PATTERN),
 				patches: [
 					{
 						op: "add",
@@ -630,8 +635,8 @@ describe("AuditableItemGraphService", () => {
 						]
 					}
 				]
-			}
-		]);
+			})
+		);
 	});
 
 	test("Can get a vertex changeset", async () => {
@@ -897,7 +902,8 @@ describe("AuditableItemGraphService", () => {
 			aliases: [{ id: "foo123" }, { id: "bar456" }]
 		});
 
-		expect(id.startsWith("aig:")).toEqual(true);
+		expect(id).toMatch(AIG_URN_PATTERN);
+		const storedVertexId = extractAigId(id);
 
 		await waitForProofGeneration();
 
@@ -913,7 +919,7 @@ describe("AuditableItemGraphService", () => {
 				"https://schema.twindev.org/immutable-proof/"
 			],
 			type: "AuditableItemGraphVertex",
-			id: "aig:0101010101010101010101010101010101010101010101010101010101010101",
+			id,
 			dateCreated: expect.any(String),
 			organizationIdentity: TEST_ORGANIZATION_IDENTITY,
 			annotationObject: {
@@ -932,11 +938,12 @@ describe("AuditableItemGraphService", () => {
 
 		const changesetStore = changesetStorage.getStore();
 
-		expect(changesetStore).toEqual([
-			{
+		expect(changesetStore).toHaveLength(1);
+		expect(changesetStore[0]).toEqual(
+			expect.objectContaining({
 				partitionId: TEST_TENANT_IDENTITY_SHORT,
-				id: "0202020202020202020202020202020202020202020202020202020202020202",
-				vertexId: "0101010101010101010101010101010101010101010101010101010101010101",
+				id: expect.stringMatching(HEX_ID_PATTERN),
+				vertexId: storedVertexId,
 				dateCreated: expect.any(String),
 				userIdentity: TEST_USER_IDENTITY,
 				patches: [
@@ -973,49 +980,39 @@ describe("AuditableItemGraphService", () => {
 						]
 					}
 				],
-				proofId: "immutable-proof:019179f26c5073038303030303030303"
-			}
-		]);
+				proofId: expect.stringMatching(IMMUTABLE_PROOF_URN_PATTERN)
+			})
+		);
 
 		await waitForProofGeneration();
 
 		const immutableStore = verifiableStorage.getStore();
-		expect(immutableStore).toEqual([
-			{
+		expect(immutableStore).toHaveLength(1);
+		expect(immutableStore[0]).toEqual(
+			expect.objectContaining({
 				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				allowList: [TEST_ORGANIZATION_IDENTITY],
 				creator: TEST_ORGANIZATION_IDENTITY,
-				data: Converter.bytesToBase64(
-					ObjectHelper.toBytes({
-						type: "DataIntegrityProof",
-						cryptosuite: "eddsa-jcs-2022",
-						created: "2024-08-22T11:56:56.272Z",
-						verificationMethod:
-							"did:entity-storage:0x0202020202020202020202020202020202020202020202020202020202020202#immutable-proof-assertion",
-						proofPurpose: "assertionMethod",
-						proofValue:
-							"z2jazYhLxbsXyzZS2jMBjyHKVXrGr93Y4JRLsTFohMkxuy4Z7SyBYepy94N2UPxv32at5tiKvhJrmHcBTwXZg4ken",
-						"@context": "https://w3id.org/security/data-integrity/v2"
-					})
-				),
-				id: "0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a",
+				data: expect.any(String),
+				id: expect.stringMatching(HEX_ID_PATTERN),
 				maxAllowListSize: 100
-			}
-		]);
+			})
+		);
 
 		const immutableProof = ObjectHelper.fromBytes<IImmutableProof>(
 			Converter.base64ToBytes(immutableStore[0].data)
 		);
-		expect(immutableProof).toEqual({
-			"@context": "https://w3id.org/security/data-integrity/v2",
-			type: "DataIntegrityProof",
-			created: "2024-08-22T11:56:56.272Z",
-			cryptosuite: "eddsa-jcs-2022",
-			proofPurpose: "assertionMethod",
-			proofValue:
-				"z2jazYhLxbsXyzZS2jMBjyHKVXrGr93Y4JRLsTFohMkxuy4Z7SyBYepy94N2UPxv32at5tiKvhJrmHcBTwXZg4ken",
-			verificationMethod: `${TEST_ORGANIZATION_IDENTITY}#immutable-proof-assertion`
-		});
+		expect(immutableProof).toEqual(
+			expect.objectContaining({
+				"@context": "https://w3id.org/security/data-integrity/v2",
+				type: "DataIntegrityProof",
+				created: "2024-08-22T11:56:56.272Z",
+				cryptosuite: "eddsa-jcs-2022",
+				proofPurpose: "assertionMethod",
+				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN),
+				verificationMethod: `${TEST_ORGANIZATION_IDENTITY}#immutable-proof-assertion`
+			})
+		);
 	});
 
 	test("Can create and update with no changes and verify", async () => {
@@ -1070,7 +1067,7 @@ describe("AuditableItemGraphService", () => {
 				"https://schema.org",
 				"https://schema.twindev.org/immutable-proof/"
 			],
-			id: "aig:0101010101010101010101010101010101010101010101010101010101010101",
+			id,
 			type: "AuditableItemGraphVertex",
 			dateCreated: expect.any(String),
 			aliases: [
@@ -1090,11 +1087,13 @@ describe("AuditableItemGraphService", () => {
 
 		const changesetStore = changesetStorage.getStore();
 
-		expect(changesetStore).toEqual([
-			{
+		const storedVertexId = vertexStorage.getStore()[0].id;
+		expect(changesetStore).toHaveLength(1);
+		expect(changesetStore[0]).toEqual(
+			expect.objectContaining({
 				partitionId: TEST_TENANT_IDENTITY_SHORT,
-				id: "0202020202020202020202020202020202020202020202020202020202020202",
-				vertexId: "0101010101010101010101010101010101010101010101010101010101010101",
+				id: expect.stringMatching(HEX_ID_PATTERN),
+				vertexId: storedVertexId,
 				dateCreated: expect.any(String),
 				userIdentity: TEST_USER_IDENTITY,
 				patches: [
@@ -1118,9 +1117,9 @@ describe("AuditableItemGraphService", () => {
 						]
 					}
 				],
-				proofId: "immutable-proof:019179f26c5073038303030303030303"
-			}
-		]);
+				proofId: expect.stringMatching(IMMUTABLE_PROOF_URN_PATTERN)
+			})
+		);
 	});
 
 	test("Can create and update and verify aliases", async () => {
@@ -1176,7 +1175,7 @@ describe("AuditableItemGraphService", () => {
 				"https://schema.org",
 				"https://schema.twindev.org/immutable-proof/"
 			],
-			id: "aig:0101010101010101010101010101010101010101010101010101010101010101",
+			id,
 			type: "AuditableItemGraphVertex",
 			dateCreated: expect.any(String),
 			dateModified: expect.any(String),
@@ -1202,11 +1201,13 @@ describe("AuditableItemGraphService", () => {
 		});
 
 		const changesetStore = changesetStorage.getStore();
-		expect(changesetStore).toEqual([
-			{
+		const storedVertexId = vertexStorage.getStore()[0].id;
+		expect(changesetStore).toHaveLength(2);
+		expect(changesetStore[0]).toEqual(
+			expect.objectContaining({
 				partitionId: TEST_TENANT_IDENTITY_SHORT,
-				id: "0202020202020202020202020202020202020202020202020202020202020202",
-				vertexId: "0101010101010101010101010101010101010101010101010101010101010101",
+				id: expect.stringMatching(HEX_ID_PATTERN),
+				vertexId: storedVertexId,
 				dateCreated: expect.any(String),
 				userIdentity: TEST_USER_IDENTITY,
 				patches: [
@@ -1230,13 +1231,15 @@ describe("AuditableItemGraphService", () => {
 						]
 					}
 				],
-				proofId: "immutable-proof:019179f26c5073038303030303030303"
-			},
-			{
+				proofId: expect.stringMatching(IMMUTABLE_PROOF_URN_PATTERN)
+			})
+		);
+		expect(changesetStore[1]).toEqual(
+			expect.objectContaining({
 				partitionId: TEST_TENANT_IDENTITY_SHORT,
-				vertexId: "0101010101010101010101010101010101010101010101010101010101010101",
+				vertexId: storedVertexId,
 				dateCreated: expect.any(String),
-				id: "0505050505050505050505050505050505050505050505050505050505050505",
+				id: expect.stringMatching(HEX_ID_PATTERN),
 				userIdentity: TEST_USER_IDENTITY,
 				patches: [
 					{ op: "add", path: "/aliases/0/dateDeleted", value: "2024-08-22T11:56:56.272Z" },
@@ -1246,81 +1249,62 @@ describe("AuditableItemGraphService", () => {
 						value: { id: "foo321", dateCreated: expect.any(String) }
 					}
 				],
-				proofId: "immutable-proof:019179f26c5076068606060606060606"
-			}
-		]);
+				proofId: expect.stringMatching(IMMUTABLE_PROOF_URN_PATTERN)
+			})
+		);
 
 		const immutableStore = verifiableStorage.getStore();
-		expect(immutableStore).toEqual([
-			{
+		expect(immutableStore).toHaveLength(2);
+		expect(immutableStore[0]).toEqual(
+			expect.objectContaining({
 				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				allowList: [TEST_ORGANIZATION_IDENTITY],
 				creator: TEST_ORGANIZATION_IDENTITY,
-				data: Converter.bytesToBase64(
-					ObjectHelper.toBytes({
-						type: "DataIntegrityProof",
-						cryptosuite: "eddsa-jcs-2022",
-						created: "2024-08-22T11:56:56.272Z",
-						verificationMethod:
-							"did:entity-storage:0x0202020202020202020202020202020202020202020202020202020202020202#immutable-proof-assertion",
-						proofPurpose: "assertionMethod",
-						proofValue:
-							"z2jazYhLxbsXyzZS2jMBjyHKVXrGr93Y4JRLsTFohMkxuy4Z7SyBYepy94N2UPxv32at5tiKvhJrmHcBTwXZg4ken",
-						"@context": "https://w3id.org/security/data-integrity/v2"
-					})
-				),
-				id: "0909090909090909090909090909090909090909090909090909090909090909",
+				data: expect.any(String),
+				id: expect.stringMatching(HEX_ID_PATTERN),
 				maxAllowListSize: 100
-			},
-			{
+			})
+		);
+		expect(immutableStore[1]).toEqual(
+			expect.objectContaining({
 				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				allowList: [TEST_ORGANIZATION_IDENTITY],
 				creator: TEST_ORGANIZATION_IDENTITY,
-				data: Converter.bytesToBase64(
-					ObjectHelper.toBytes({
-						type: "DataIntegrityProof",
-						cryptosuite: "eddsa-jcs-2022",
-						created: "2024-08-22T11:56:56.272Z",
-						verificationMethod:
-							"did:entity-storage:0x0202020202020202020202020202020202020202020202020202020202020202#immutable-proof-assertion",
-						proofPurpose: "assertionMethod",
-						proofValue:
-							"z4hHupwj4yW1xC1TMsgFnPYXzgPA42WFudeXSx7RE1JCJW37sMUpWbB3JAvTPYUwS6y5uvyVFuWQuEgYwWYgYdReP",
-						"@context": "https://w3id.org/security/data-integrity/v2"
-					})
-				),
-				id: "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b",
+				data: expect.any(String),
+				id: expect.stringMatching(HEX_ID_PATTERN),
 				maxAllowListSize: 100
-			}
-		]);
+			})
+		);
 
 		let immutableProof = ObjectHelper.fromBytes<IImmutableProof>(
 			Converter.base64ToBytes(immutableStore[0].data)
 		);
-		expect(immutableProof).toEqual({
-			"@context": "https://w3id.org/security/data-integrity/v2",
-			type: "DataIntegrityProof",
-			created: "2024-08-22T11:56:56.272Z",
-			cryptosuite: "eddsa-jcs-2022",
-			proofPurpose: "assertionMethod",
-			proofValue:
-				"z2jazYhLxbsXyzZS2jMBjyHKVXrGr93Y4JRLsTFohMkxuy4Z7SyBYepy94N2UPxv32at5tiKvhJrmHcBTwXZg4ken",
-			verificationMethod: `${TEST_ORGANIZATION_IDENTITY}#immutable-proof-assertion`
-		});
+		expect(immutableProof).toEqual(
+			expect.objectContaining({
+				"@context": "https://w3id.org/security/data-integrity/v2",
+				type: "DataIntegrityProof",
+				created: "2024-08-22T11:56:56.272Z",
+				cryptosuite: "eddsa-jcs-2022",
+				proofPurpose: "assertionMethod",
+				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN),
+				verificationMethod: `${TEST_ORGANIZATION_IDENTITY}#immutable-proof-assertion`
+			})
+		);
 
 		immutableProof = ObjectHelper.fromBytes<IImmutableProof>(
 			Converter.base64ToBytes(immutableStore[1].data)
 		);
-		expect(immutableProof).toEqual({
-			"@context": "https://w3id.org/security/data-integrity/v2",
-			type: "DataIntegrityProof",
-			created: "2024-08-22T11:56:56.272Z",
-			cryptosuite: "eddsa-jcs-2022",
-			proofPurpose: "assertionMethod",
-			proofValue:
-				"z4hHupwj4yW1xC1TMsgFnPYXzgPA42WFudeXSx7RE1JCJW37sMUpWbB3JAvTPYUwS6y5uvyVFuWQuEgYwWYgYdReP",
-			verificationMethod: `${TEST_ORGANIZATION_IDENTITY}#immutable-proof-assertion`
-		});
+		expect(immutableProof).toEqual(
+			expect.objectContaining({
+				"@context": "https://w3id.org/security/data-integrity/v2",
+				type: "DataIntegrityProof",
+				created: "2024-08-22T11:56:56.272Z",
+				cryptosuite: "eddsa-jcs-2022",
+				proofPurpose: "assertionMethod",
+				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN),
+				verificationMethod: `${TEST_ORGANIZATION_IDENTITY}#immutable-proof-assertion`
+			})
+		);
 	});
 
 	test("Can create and update and verify aliases and object", async () => {
@@ -1375,7 +1359,7 @@ describe("AuditableItemGraphService", () => {
 				"https://schema.org",
 				"https://schema.twindev.org/immutable-proof/"
 			],
-			id: "aig:0101010101010101010101010101010101010101010101010101010101010101",
+			id,
 			type: "AuditableItemGraphVertex",
 			dateCreated: expect.any(String),
 			dateModified: expect.any(String),
@@ -1395,12 +1379,13 @@ describe("AuditableItemGraphService", () => {
 		});
 
 		const changesetStore = changesetStorage.getStore();
-
-		expect(changesetStore).toEqual([
-			{
+		const storedVertexId = vertexStorage.getStore()[0].id;
+		expect(changesetStore).toHaveLength(2);
+		expect(changesetStore[0]).toEqual(
+			expect.objectContaining({
 				partitionId: TEST_TENANT_IDENTITY_SHORT,
-				id: "0202020202020202020202020202020202020202020202020202020202020202",
-				vertexId: "0101010101010101010101010101010101010101010101010101010101010101",
+				id: expect.stringMatching(HEX_ID_PATTERN),
+				vertexId: storedVertexId,
 				dateCreated: expect.any(String),
 				userIdentity: TEST_USER_IDENTITY,
 				patches: [
@@ -1424,15 +1409,17 @@ describe("AuditableItemGraphService", () => {
 						]
 					}
 				],
-				proofId: "immutable-proof:019179f26c5073038303030303030303"
-			},
-			{
+				proofId: expect.stringMatching(IMMUTABLE_PROOF_URN_PATTERN)
+			})
+		);
+		expect(changesetStore[1]).toEqual(
+			expect.objectContaining({
 				partitionId: TEST_TENANT_IDENTITY_SHORT,
-				id: "0505050505050505050505050505050505050505050505050505050505050505",
-				vertexId: "0101010101010101010101010101010101010101010101010101010101010101",
+				id: expect.stringMatching(HEX_ID_PATTERN),
+				vertexId: storedVertexId,
 				dateCreated: expect.any(String),
 				userIdentity: TEST_USER_IDENTITY,
-				proofId: "immutable-proof:019179f26c5076068606060606060606",
+				proofId: expect.stringMatching(IMMUTABLE_PROOF_URN_PATTERN),
 				patches: [
 					{
 						op: "replace",
@@ -1440,80 +1427,61 @@ describe("AuditableItemGraphService", () => {
 						value: "This is a simple note 2"
 					}
 				]
-			}
-		]);
+			})
+		);
 
 		const immutableStore = verifiableStorage.getStore();
-		expect(immutableStore).toEqual([
-			{
+		expect(immutableStore).toHaveLength(2);
+		expect(immutableStore[0]).toEqual(
+			expect.objectContaining({
 				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				allowList: [TEST_ORGANIZATION_IDENTITY],
 				creator: TEST_ORGANIZATION_IDENTITY,
-				data: Converter.bytesToBase64(
-					ObjectHelper.toBytes({
-						type: "DataIntegrityProof",
-						cryptosuite: "eddsa-jcs-2022",
-						created: "2024-08-22T11:56:56.272Z",
-						verificationMethod:
-							"did:entity-storage:0x0202020202020202020202020202020202020202020202020202020202020202#immutable-proof-assertion",
-						proofPurpose: "assertionMethod",
-						proofValue:
-							"z2jazYhLxbsXyzZS2jMBjyHKVXrGr93Y4JRLsTFohMkxuy4Z7SyBYepy94N2UPxv32at5tiKvhJrmHcBTwXZg4ken",
-						"@context": "https://w3id.org/security/data-integrity/v2"
-					})
-				),
-				id: "0909090909090909090909090909090909090909090909090909090909090909",
+				data: expect.any(String),
+				id: expect.stringMatching(HEX_ID_PATTERN),
 				maxAllowListSize: 100
-			},
-			{
+			})
+		);
+		expect(immutableStore[1]).toEqual(
+			expect.objectContaining({
 				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				allowList: [TEST_ORGANIZATION_IDENTITY],
 				creator: TEST_ORGANIZATION_IDENTITY,
-				data: Converter.bytesToBase64(
-					ObjectHelper.toBytes({
-						type: "DataIntegrityProof",
-						cryptosuite: "eddsa-jcs-2022",
-						created: "2024-08-22T11:56:56.272Z",
-						verificationMethod:
-							"did:entity-storage:0x0202020202020202020202020202020202020202020202020202020202020202#immutable-proof-assertion",
-						proofPurpose: "assertionMethod",
-						proofValue:
-							"z39apawQDL9Jb6Ca74Jc6sDzevobN2KAXZz2VA1HgkRiurdcanAjPfoUZbvaUvPWLGabt9LqwT1yJuNq9RVyDxMq4",
-						"@context": "https://w3id.org/security/data-integrity/v2"
-					})
-				),
-				id: "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b",
+				data: expect.any(String),
+				id: expect.stringMatching(HEX_ID_PATTERN),
 				maxAllowListSize: 100
-			}
-		]);
+			})
+		);
 
 		let immutableProof = ObjectHelper.fromBytes<IImmutableProof>(
 			Converter.base64ToBytes(immutableStore[0].data)
 		);
-		expect(immutableProof).toEqual({
-			"@context": "https://w3id.org/security/data-integrity/v2",
-			type: "DataIntegrityProof",
-			created: "2024-08-22T11:56:56.272Z",
-			cryptosuite: "eddsa-jcs-2022",
-			proofPurpose: "assertionMethod",
-			proofValue:
-				"z2jazYhLxbsXyzZS2jMBjyHKVXrGr93Y4JRLsTFohMkxuy4Z7SyBYepy94N2UPxv32at5tiKvhJrmHcBTwXZg4ken",
-			verificationMethod: `${TEST_ORGANIZATION_IDENTITY}#immutable-proof-assertion`
-		});
+		expect(immutableProof).toEqual(
+			expect.objectContaining({
+				"@context": "https://w3id.org/security/data-integrity/v2",
+				type: "DataIntegrityProof",
+				created: "2024-08-22T11:56:56.272Z",
+				cryptosuite: "eddsa-jcs-2022",
+				proofPurpose: "assertionMethod",
+				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN),
+				verificationMethod: `${TEST_ORGANIZATION_IDENTITY}#immutable-proof-assertion`
+			})
+		);
 
 		immutableProof = ObjectHelper.fromBytes<IImmutableProof>(
 			Converter.base64ToBytes(immutableStore[1].data)
 		);
-		expect(immutableProof).toEqual({
-			"@context": "https://w3id.org/security/data-integrity/v2",
-			type: "DataIntegrityProof",
-			created: "2024-08-22T11:56:56.272Z",
-			cryptosuite: "eddsa-jcs-2022",
-			proofPurpose: "assertionMethod",
-			proofValue:
-				"z39apawQDL9Jb6Ca74Jc6sDzevobN2KAXZz2VA1HgkRiurdcanAjPfoUZbvaUvPWLGabt9LqwT1yJuNq9RVyDxMq4",
-			verificationMethod: `${TEST_ORGANIZATION_IDENTITY}#immutable-proof-assertion`
-		});
+		expect(immutableProof).toEqual(
+			expect.objectContaining({
+				"@context": "https://w3id.org/security/data-integrity/v2",
+				type: "DataIntegrityProof",
+				created: "2024-08-22T11:56:56.272Z",
+				cryptosuite: "eddsa-jcs-2022",
+				proofPurpose: "assertionMethod",
+				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN),
+				verificationMethod: `${TEST_ORGANIZATION_IDENTITY}#immutable-proof-assertion`
+			})
+		);
 	});
 
 	test("Can create and update and verify resources, aliases and object", async () => {
@@ -1640,7 +1608,7 @@ describe("AuditableItemGraphService", () => {
 				"https://schema.org",
 				"https://schema.twindev.org/immutable-proof/"
 			],
-			id: "aig:0101010101010101010101010101010101010101010101010101010101010101",
+			id,
 			type: "AuditableItemGraphVertex",
 			dateCreated: expect.any(String),
 			dateModified: expect.any(String),
@@ -1688,11 +1656,13 @@ describe("AuditableItemGraphService", () => {
 		});
 
 		const changesetStore = changesetStorage.getStore();
-		expect(changesetStore).toEqual([
-			{
+		const storedVertexId = vertexStorage.getStore()[0].id;
+		expect(changesetStore).toHaveLength(2);
+		expect(changesetStore[0]).toEqual(
+			expect.objectContaining({
 				partitionId: TEST_TENANT_IDENTITY_SHORT,
-				id: "0202020202020202020202020202020202020202020202020202020202020202",
-				vertexId: "0101010101010101010101010101010101010101010101010101010101010101",
+				id: expect.stringMatching(HEX_ID_PATTERN),
+				vertexId: storedVertexId,
 				dateCreated: expect.any(String),
 				userIdentity: TEST_USER_IDENTITY,
 				patches: [
@@ -1744,12 +1714,14 @@ describe("AuditableItemGraphService", () => {
 						]
 					}
 				],
-				proofId: "immutable-proof:019179f26c5073038303030303030303"
-			},
-			{
+				proofId: expect.stringMatching(IMMUTABLE_PROOF_URN_PATTERN)
+			})
+		);
+		expect(changesetStore[1]).toEqual(
+			expect.objectContaining({
 				partitionId: TEST_TENANT_IDENTITY_SHORT,
-				id: "0505050505050505050505050505050505050505050505050505050505050505",
-				vertexId: "0101010101010101010101010101010101010101010101010101010101010101",
+				id: expect.stringMatching(HEX_ID_PATTERN),
+				vertexId: storedVertexId,
 				dateCreated: expect.any(String),
 				userIdentity: TEST_USER_IDENTITY,
 				patches: [
@@ -1771,81 +1743,62 @@ describe("AuditableItemGraphService", () => {
 						value: "This is a simple note resource 11"
 					}
 				],
-				proofId: "immutable-proof:019179f26c5076068606060606060606"
-			}
-		]);
+				proofId: expect.stringMatching(IMMUTABLE_PROOF_URN_PATTERN)
+			})
+		);
 
 		const immutableStore = verifiableStorage.getStore();
-		expect(immutableStore).toEqual([
-			{
+		expect(immutableStore).toHaveLength(2);
+		expect(immutableStore[0]).toEqual(
+			expect.objectContaining({
 				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				allowList: [TEST_ORGANIZATION_IDENTITY],
 				creator: TEST_ORGANIZATION_IDENTITY,
-				data: Converter.bytesToBase64(
-					ObjectHelper.toBytes({
-						type: "DataIntegrityProof",
-						cryptosuite: "eddsa-jcs-2022",
-						created: "2024-08-22T11:56:56.272Z",
-						verificationMethod:
-							"did:entity-storage:0x0202020202020202020202020202020202020202020202020202020202020202#immutable-proof-assertion",
-						proofPurpose: "assertionMethod",
-						proofValue:
-							"z4ESEMrWiwgcgNcLAgYwFYEszJyJQTJU9Ajhg46iGkP8W1a4AM3eqRARk7mTfQ4ECBhvd8CgajTfTaaWgh5xi11K8",
-						"@context": "https://w3id.org/security/data-integrity/v2"
-					})
-				),
-				id: "0909090909090909090909090909090909090909090909090909090909090909",
+				data: expect.any(String),
+				id: expect.stringMatching(HEX_ID_PATTERN),
 				maxAllowListSize: 100
-			},
-			{
+			})
+		);
+		expect(immutableStore[1]).toEqual(
+			expect.objectContaining({
 				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				allowList: [TEST_ORGANIZATION_IDENTITY],
 				creator: TEST_ORGANIZATION_IDENTITY,
-				data: Converter.bytesToBase64(
-					ObjectHelper.toBytes({
-						type: "DataIntegrityProof",
-						cryptosuite: "eddsa-jcs-2022",
-						created: "2024-08-22T11:56:56.272Z",
-						verificationMethod:
-							"did:entity-storage:0x0202020202020202020202020202020202020202020202020202020202020202#immutable-proof-assertion",
-						proofPurpose: "assertionMethod",
-						proofValue:
-							"z4iTFC8qMpBGQ3GXghA9ubqEafJpLtkqmZMBGqJf6AF3YtCNa1syxWXKYqpeXGiVT6MGCj1UzphtRdNuq95Ehbwea",
-						"@context": "https://w3id.org/security/data-integrity/v2"
-					})
-				),
-				id: "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b",
+				data: expect.any(String),
+				id: expect.stringMatching(HEX_ID_PATTERN),
 				maxAllowListSize: 100
-			}
-		]);
+			})
+		);
 
 		let immutableProof = ObjectHelper.fromBytes<IImmutableProof>(
 			Converter.base64ToBytes(immutableStore[0].data)
 		);
-		expect(immutableProof).toEqual({
-			"@context": "https://w3id.org/security/data-integrity/v2",
-			type: "DataIntegrityProof",
-			created: "2024-08-22T11:56:56.272Z",
-			cryptosuite: "eddsa-jcs-2022",
-			proofPurpose: "assertionMethod",
-			proofValue:
-				"z4ESEMrWiwgcgNcLAgYwFYEszJyJQTJU9Ajhg46iGkP8W1a4AM3eqRARk7mTfQ4ECBhvd8CgajTfTaaWgh5xi11K8",
-			verificationMethod: `${TEST_ORGANIZATION_IDENTITY}#immutable-proof-assertion`
-		});
+		expect(immutableProof).toEqual(
+			expect.objectContaining({
+				"@context": "https://w3id.org/security/data-integrity/v2",
+				type: "DataIntegrityProof",
+				created: "2024-08-22T11:56:56.272Z",
+				cryptosuite: "eddsa-jcs-2022",
+				proofPurpose: "assertionMethod",
+				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN),
+				verificationMethod: `${TEST_ORGANIZATION_IDENTITY}#immutable-proof-assertion`
+			})
+		);
 
 		immutableProof = ObjectHelper.fromBytes<IImmutableProof>(
 			Converter.base64ToBytes(immutableStore[1].data)
 		);
-		expect(immutableProof).toEqual({
-			"@context": "https://w3id.org/security/data-integrity/v2",
-			type: "DataIntegrityProof",
-			created: "2024-08-22T11:56:56.272Z",
-			cryptosuite: "eddsa-jcs-2022",
-			proofPurpose: "assertionMethod",
-			proofValue:
-				"z4iTFC8qMpBGQ3GXghA9ubqEafJpLtkqmZMBGqJf6AF3YtCNa1syxWXKYqpeXGiVT6MGCj1UzphtRdNuq95Ehbwea",
-			verificationMethod: `${TEST_ORGANIZATION_IDENTITY}#immutable-proof-assertion`
-		});
+		expect(immutableProof).toEqual(
+			expect.objectContaining({
+				"@context": "https://w3id.org/security/data-integrity/v2",
+				type: "DataIntegrityProof",
+				created: "2024-08-22T11:56:56.272Z",
+				cryptosuite: "eddsa-jcs-2022",
+				proofPurpose: "assertionMethod",
+				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN),
+				verificationMethod: `${TEST_ORGANIZATION_IDENTITY}#immutable-proof-assertion`
+			})
+		);
 	});
 
 	test("Can create and update and verify edges", async () => {
@@ -1873,11 +1826,15 @@ describe("AuditableItemGraphService", () => {
 			]
 		});
 
+		const created = await service.get(id, undefined);
+		const createdEdgeId = created.edges?.[0]?.id;
+		expect(createdEdgeId).toBeDefined();
+
 		await service.update({
 			id,
 			edges: [
 				{
-					id: "aig:0101010101010101010101010101010101010101010101010101010101010101:edge:0202020202020202020202020202020202020202020202020202020202020202",
+					id: createdEdgeId,
 					targetId: "aig:1010101010101010101010101010101010101010101010101010101010101010",
 					edgeRelationships: ["frenemy"],
 					annotationObject: {
@@ -1904,45 +1861,39 @@ describe("AuditableItemGraphService", () => {
 			verifySignatureDepth: VerifyDepth.All
 		});
 
-		expect(result).toEqual({
-			"@context": [
-				"https://schema.twindev.org/aig/",
-				"https://schema.twindev.org/common/",
-				"https://schema.org",
-				"https://schema.twindev.org/immutable-proof/"
-			],
-			id: "aig:0101010101010101010101010101010101010101010101010101010101010101",
-			type: "AuditableItemGraphVertex",
-			dateCreated: expect.any(String),
-			dateModified: expect.any(String),
-			edges: [
-				{
-					id: "aig:0101010101010101010101010101010101010101010101010101010101010101:edge:0202020202020202020202020202020202020202020202020202020202020202",
-					targetId: "aig:1010101010101010101010101010101010101010101010101010101010101010",
-					type: "AuditableItemGraphEdge",
-					dateCreated: expect.any(String),
-					dateModified: expect.any(String),
-					annotationObject: {
-						"@context": "https://www.w3.org/ns/activitystreams",
-						type: "Create",
-						actor: { id: "acct:person@example.org", type: "Person", name: "Person" },
-						object: { type: "Note", content: "This is a simple note 2" },
-						published: "2015-01-25T12:34:56Z"
-					},
-					edgeRelationships: ["frenemy"]
-				}
-			],
-			organizationIdentity: TEST_ORGANIZATION_IDENTITY,
-			verified: true
-		});
+		expect(result.id).toEqual(id);
+		expect(result.type).toEqual("AuditableItemGraphVertex");
+		expect(result.dateCreated).toEqual(expect.any(String));
+		expect(result.dateModified).toEqual(expect.any(String));
+		expect(result.organizationIdentity).toEqual(TEST_ORGANIZATION_IDENTITY);
+		expect(result.verified).toEqual(true);
+		expect(result.edges).toHaveLength(1);
+		expect(result.edges?.[0]).toEqual(
+			expect.objectContaining({
+				id: expect.stringMatching(/^aig:[\da-f]+:edge:[\da-f]+$/),
+				targetId: "aig:1010101010101010101010101010101010101010101010101010101010101010",
+				type: "AuditableItemGraphEdge",
+				dateCreated: expect.any(String),
+				annotationObject: {
+					"@context": "https://www.w3.org/ns/activitystreams",
+					type: "Create",
+					actor: { id: "acct:person@example.org", type: "Person", name: "Person" },
+					object: { type: "Note", content: "This is a simple note 2" },
+					published: "2015-01-25T12:34:56Z"
+				},
+				edgeRelationships: ["frenemy"]
+			})
+		);
 
 		const changesetStore = changesetStorage.getStore();
 
-		expect(changesetStore).toEqual([
-			{
+		const storedVertexId = vertexStorage.getStore()[0].id;
+		expect(changesetStore).toHaveLength(2);
+		expect(changesetStore[0]).toEqual(
+			expect.objectContaining({
 				partitionId: TEST_TENANT_IDENTITY_SHORT,
-				id: "0303030303030303030303030303030303030303030303030303030303030303",
-				vertexId: "0101010101010101010101010101010101010101010101010101010101010101",
+				id: expect.stringMatching(HEX_ID_PATTERN),
+				vertexId: storedVertexId,
 				dateCreated: expect.any(String),
 				userIdentity: TEST_USER_IDENTITY,
 				patches: [
@@ -1951,7 +1902,7 @@ describe("AuditableItemGraphService", () => {
 						path: "/edges",
 						value: [
 							{
-								id: "0202020202020202020202020202020202020202020202020202020202020202",
+								id: expect.stringMatching(HEX_ID_PATTERN),
 								targetId: "aig:1010101010101010101010101010101010101010101010101010101010101010",
 								dateCreated: expect.any(String),
 								annotationObject: {
@@ -1966,12 +1917,14 @@ describe("AuditableItemGraphService", () => {
 						]
 					}
 				],
-				proofId: "immutable-proof:019179f26c5074048404040404040404"
-			},
-			{
+				proofId: expect.stringMatching(IMMUTABLE_PROOF_URN_PATTERN)
+			})
+		);
+		expect(changesetStore[1]).toEqual(
+			expect.objectContaining({
 				partitionId: TEST_TENANT_IDENTITY_SHORT,
-				vertexId: "0101010101010101010101010101010101010101010101010101010101010101",
-				id: "0606060606060606060606060606060606060606060606060606060606060606",
+				vertexId: storedVertexId,
+				id: expect.stringMatching(HEX_ID_PATTERN),
 				dateCreated: expect.any(String),
 				userIdentity: TEST_USER_IDENTITY,
 				patches: [
@@ -1983,9 +1936,9 @@ describe("AuditableItemGraphService", () => {
 					},
 					{ op: "replace", path: "/edges/0/edgeRelationships/0", value: "frenemy" }
 				],
-				proofId: "immutable-proof:019179f26c5077078707070707070707"
-			}
-		]);
+				proofId: expect.stringMatching(IMMUTABLE_PROOF_URN_PATTERN)
+			})
+		);
 	});
 
 	test("Can create and update and verify aliases, object, resources and edges", async () => {
@@ -2117,6 +2070,11 @@ describe("AuditableItemGraphService", () => {
 			]
 		});
 
+		const created = await service.get(id, undefined);
+		const createdEdgeIds = created.edges?.map(e => e.id) ?? [];
+		expect(createdEdgeIds).toHaveLength(2);
+		const [createdEdgeId1, createdEdgeId2] = createdEdgeIds;
+
 		await service.update({
 			id,
 			annotationObject: {
@@ -2207,7 +2165,7 @@ describe("AuditableItemGraphService", () => {
 			],
 			edges: [
 				{
-					id: "aig:0101010101010101010101010101010101010101010101010101010101010101:edge:0202020202020202020202020202020202020202020202020202020202020202",
+					id: createdEdgeId1,
 					targetId: "aig:0101010101010101010101010101010101010101010101010101010101010101",
 					edgeRelationships: ["friend"],
 					annotationObject: {
@@ -2226,7 +2184,7 @@ describe("AuditableItemGraphService", () => {
 					}
 				},
 				{
-					id: "aig:0101010101010101010101010101010101010101010101010101010101010101:edge:0303030303030303030303030303030303030303030303030303030303030303",
+					id: createdEdgeId2,
 					targetId: "aig:0202020202020202020202020202020202020202020202020202020202020202",
 					edgeRelationships: ["enemy"],
 					annotationObject: {
@@ -2253,52 +2211,85 @@ describe("AuditableItemGraphService", () => {
 			verifySignatureDepth: VerifyDepth.All
 		});
 
-		expect(result).toEqual({
-			"@context": [
-				"https://schema.twindev.org/aig/",
-				"https://schema.twindev.org/common/",
-				"https://schema.org",
-				"https://schema.twindev.org/immutable-proof/"
-			],
-			id: "aig:0101010101010101010101010101010101010101010101010101010101010101",
-			type: "AuditableItemGraphVertex",
-			dateCreated: expect.any(String),
-			dateModified: expect.any(String),
-			aliases: [
-				{
-					id: "foo123",
-					type: "AuditableItemGraphAlias",
-					dateCreated: expect.any(String),
-					dateModified: expect.any(String),
-					annotationObject: {
-						"@context": "https://www.w3.org/ns/activitystreams",
-						type: "Create",
-						actor: { id: "acct:person@example.org", type: "Person", name: "Person" },
-						object: { type: "Note", content: "This is a simple note alias 10" },
-						published: "2015-01-25T12:34:56Z"
-					}
-				},
-				{
-					id: "bar456",
-					type: "AuditableItemGraphAlias",
-					dateCreated: expect.any(String),
-					dateModified: expect.any(String),
-					annotationObject: {
-						"@context": "https://www.w3.org/ns/activitystreams",
-						type: "Create",
-						actor: { id: "acct:person@example.org", type: "Person", name: "Person" },
-						object: { type: "Note", content: "This is a simple note alias 20" },
-						published: "2015-01-25T12:34:56Z"
-					}
+		expect(result.id).toEqual(id);
+		expect(result.type).toEqual("AuditableItemGraphVertex");
+		expect(result.dateCreated).toEqual(expect.any(String));
+		expect(result.dateModified).toEqual(expect.any(String));
+		expect(result.organizationIdentity).toEqual(TEST_ORGANIZATION_IDENTITY);
+		expect(result.verified).toEqual(true);
+		expect(result.aliases).toHaveLength(2);
+		expect(result.aliases).toEqual([
+			expect.objectContaining({
+				id: "foo123",
+				type: "AuditableItemGraphAlias",
+				dateCreated: expect.any(String),
+				dateModified: expect.any(String),
+				annotationObject: {
+					"@context": "https://www.w3.org/ns/activitystreams",
+					type: "Create",
+					actor: { id: "acct:person@example.org", type: "Person", name: "Person" },
+					object: { type: "Note", content: "This is a simple note alias 10" },
+					published: "2015-01-25T12:34:56Z"
 				}
-			],
-			edges: [
-				{
-					id: "aig:0101010101010101010101010101010101010101010101010101010101010101:edge:0202020202020202020202020202020202020202020202020202020202020202",
+			}),
+			expect.objectContaining({
+				id: "bar456",
+				type: "AuditableItemGraphAlias",
+				dateCreated: expect.any(String),
+				dateModified: expect.any(String),
+				annotationObject: {
+					"@context": "https://www.w3.org/ns/activitystreams",
+					type: "Create",
+					actor: { id: "acct:person@example.org", type: "Person", name: "Person" },
+					object: { type: "Note", content: "This is a simple note alias 20" },
+					published: "2015-01-25T12:34:56Z"
+				}
+			})
+		]);
+		expect(result.resources).toHaveLength(2);
+		expect(result.resources).toEqual([
+			expect.objectContaining({
+				id: "resource1",
+				type: "AuditableItemGraphResource",
+				dateCreated: expect.any(String),
+				dateModified: expect.any(String),
+				resourceObject: {
+					"@context": "https://www.w3.org/ns/activitystreams",
+					type: "Create",
+					actor: { id: "acct:person@example.org", type: "Person", name: "Person" },
+					object: { type: "Note", content: "This is a simple note resource 10" },
+					published: "2015-01-25T12:34:56Z"
+				}
+			}),
+			expect.objectContaining({
+				id: "resource2",
+				type: "AuditableItemGraphResource",
+				dateCreated: expect.any(String),
+				dateModified: expect.any(String),
+				resourceObject: {
+					"@context": "https://www.w3.org/ns/activitystreams",
+					type: "Create",
+					actor: { id: "acct:person@example.org", type: "Person", name: "Person" },
+					object: { type: "Note", content: "This is a simple note resource 20" },
+					published: "2015-01-25T12:34:56Z"
+				}
+			})
+		]);
+		expect(result.annotationObject).toEqual({
+			"@context": "https://www.w3.org/ns/activitystreams",
+			type: "Create",
+			actor: { id: "acct:person@example.org", type: "Person", name: "Person" },
+			object: { type: "Note", content: "This is a simple note 2" },
+			published: "2015-01-25T12:34:56Z"
+		});
+		expect(result.edges).toHaveLength(2);
+		expect(result.edges).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					id: createdEdgeId1,
 					targetId: "aig:0101010101010101010101010101010101010101010101010101010101010101",
 					type: "AuditableItemGraphEdge",
 					dateCreated: expect.any(String),
-					dateModified: expect.any(String),
 					annotationObject: {
 						"@context": "https://www.w3.org/ns/activitystreams",
 						type: "Create",
@@ -2307,13 +2298,12 @@ describe("AuditableItemGraphService", () => {
 						published: "2015-01-25T12:34:56Z"
 					},
 					edgeRelationships: ["friend"]
-				},
-				{
-					id: "aig:0101010101010101010101010101010101010101010101010101010101010101:edge:0303030303030303030303030303030303030303030303030303030303030303",
+				}),
+				expect.objectContaining({
+					id: createdEdgeId2,
 					targetId: "aig:0202020202020202020202020202020202020202020202020202020202020202",
 					type: "AuditableItemGraphEdge",
 					dateCreated: expect.any(String),
-					dateModified: expect.any(String),
 					annotationObject: {
 						"@context": "https://www.w3.org/ns/activitystreams",
 						type: "Create",
@@ -2322,53 +2312,18 @@ describe("AuditableItemGraphService", () => {
 						published: "2015-01-25T12:34:56Z"
 					},
 					edgeRelationships: ["enemy"]
-				}
-			],
-			resources: [
-				{
-					id: "resource1",
-					type: "AuditableItemGraphResource",
-					dateCreated: expect.any(String),
-					dateModified: expect.any(String),
-					resourceObject: {
-						"@context": "https://www.w3.org/ns/activitystreams",
-						type: "Create",
-						actor: { id: "acct:person@example.org", type: "Person", name: "Person" },
-						object: { type: "Note", content: "This is a simple note resource 10" },
-						published: "2015-01-25T12:34:56Z"
-					}
-				},
-				{
-					id: "resource2",
-					type: "AuditableItemGraphResource",
-					dateCreated: expect.any(String),
-					dateModified: expect.any(String),
-					resourceObject: {
-						"@context": "https://www.w3.org/ns/activitystreams",
-						type: "Create",
-						actor: { id: "acct:person@example.org", type: "Person", name: "Person" },
-						object: { type: "Note", content: "This is a simple note resource 20" },
-						published: "2015-01-25T12:34:56Z"
-					}
-				}
-			],
-			annotationObject: {
-				"@context": "https://www.w3.org/ns/activitystreams",
-				type: "Create",
-				actor: { id: "acct:person@example.org", type: "Person", name: "Person" },
-				object: { type: "Note", content: "This is a simple note 2" },
-				published: "2015-01-25T12:34:56Z"
-			},
-			organizationIdentity: TEST_ORGANIZATION_IDENTITY,
-			verified: true
-		});
+				})
+			])
+		);
 
 		const changesetStore = changesetStorage.getStore();
-		expect(changesetStore).toEqual([
-			{
+		const storedVertexId = vertexStorage.getStore()[0].id;
+		expect(changesetStore).toHaveLength(2);
+		expect(changesetStore[0]).toEqual(
+			expect.objectContaining({
 				partitionId: TEST_TENANT_IDENTITY_SHORT,
-				id: "0404040404040404040404040404040404040404040404040404040404040404",
-				vertexId: "0101010101010101010101010101010101010101010101010101010101010101",
+				id: expect.stringMatching(HEX_ID_PATTERN),
+				vertexId: storedVertexId,
 				dateCreated: expect.any(String),
 				userIdentity: TEST_USER_IDENTITY,
 				patches: [
@@ -2444,7 +2399,7 @@ describe("AuditableItemGraphService", () => {
 						path: "/edges",
 						value: [
 							{
-								id: "0202020202020202020202020202020202020202020202020202020202020202",
+								id: expect.stringMatching(HEX_ID_PATTERN),
 								targetId: "aig:0101010101010101010101010101010101010101010101010101010101010101",
 								dateCreated: expect.any(String),
 								annotationObject: {
@@ -2457,7 +2412,7 @@ describe("AuditableItemGraphService", () => {
 								edgeRelationships: ["friend"]
 							},
 							{
-								id: "0303030303030303030303030303030303030303030303030303030303030303",
+								id: expect.stringMatching(HEX_ID_PATTERN),
 								targetId: "aig:0202020202020202020202020202020202020202020202020202020202020202",
 								dateCreated: expect.any(String),
 								annotationObject: {
@@ -2472,12 +2427,14 @@ describe("AuditableItemGraphService", () => {
 						]
 					}
 				],
-				proofId: "immutable-proof:019179f26c5075058505050505050505"
-			},
-			{
+				proofId: expect.stringMatching(IMMUTABLE_PROOF_URN_PATTERN)
+			})
+		);
+		expect(changesetStore[1]).toEqual(
+			expect.objectContaining({
 				partitionId: TEST_TENANT_IDENTITY_SHORT,
-				vertexId: "0101010101010101010101010101010101010101010101010101010101010101",
-				id: "0707070707070707070707070707070707070707070707070707070707070707",
+				vertexId: storedVertexId,
+				id: expect.stringMatching(HEX_ID_PATTERN),
 				dateCreated: expect.any(String),
 				userIdentity: TEST_USER_IDENTITY,
 				patches: [
@@ -2523,81 +2480,62 @@ describe("AuditableItemGraphService", () => {
 						value: "This is a simple note edge 20"
 					}
 				],
-				proofId: "immutable-proof:019179f26c5078088808080808080808"
-			}
-		]);
+				proofId: expect.stringMatching(IMMUTABLE_PROOF_URN_PATTERN)
+			})
+		);
 
 		const immutableStore = verifiableStorage.getStore();
-		expect(immutableStore).toEqual([
-			{
+		expect(immutableStore).toHaveLength(2);
+		expect(immutableStore[0]).toEqual(
+			expect.objectContaining({
 				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				allowList: [TEST_ORGANIZATION_IDENTITY],
 				creator: TEST_ORGANIZATION_IDENTITY,
-				data: Converter.bytesToBase64(
-					ObjectHelper.toBytes({
-						type: "DataIntegrityProof",
-						cryptosuite: "eddsa-jcs-2022",
-						created: "2024-08-22T11:56:56.272Z",
-						verificationMethod:
-							"did:entity-storage:0x0202020202020202020202020202020202020202020202020202020202020202#immutable-proof-assertion",
-						proofPurpose: "assertionMethod",
-						proofValue:
-							"z4MxDt388pL55ac4FJsXKM9MeQAx3h7smVhxCwPaoMqamsizQTeyhR8bVoHkmi9TkTdEki4dzYnVmANHcVfjXahMW",
-						"@context": "https://w3id.org/security/data-integrity/v2"
-					})
-				),
-				id: "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b",
+				data: expect.any(String),
+				id: expect.stringMatching(HEX_ID_PATTERN),
 				maxAllowListSize: 100
-			},
-			{
+			})
+		);
+		expect(immutableStore[1]).toEqual(
+			expect.objectContaining({
 				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				allowList: [TEST_ORGANIZATION_IDENTITY],
 				creator: TEST_ORGANIZATION_IDENTITY,
-				data: Converter.bytesToBase64(
-					ObjectHelper.toBytes({
-						type: "DataIntegrityProof",
-						cryptosuite: "eddsa-jcs-2022",
-						created: "2024-08-22T11:56:56.272Z",
-						verificationMethod:
-							"did:entity-storage:0x0202020202020202020202020202020202020202020202020202020202020202#immutable-proof-assertion",
-						proofPurpose: "assertionMethod",
-						proofValue:
-							"z64wtVpy42U1QUCzaqgAD9uher88gDkd5n9Kbv27WZ6TUgFX2BUsd8KZDxiyHzScVtXvJK5xg1JR2zcATkhTe3i9Q",
-						"@context": "https://w3id.org/security/data-integrity/v2"
-					})
-				),
-				id: "0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d",
+				data: expect.any(String),
+				id: expect.stringMatching(HEX_ID_PATTERN),
 				maxAllowListSize: 100
-			}
-		]);
+			})
+		);
 
 		let immutableProof = ObjectHelper.fromBytes<IImmutableProof>(
 			Converter.base64ToBytes(immutableStore[0].data)
 		);
-		expect(immutableProof).toEqual({
-			"@context": "https://w3id.org/security/data-integrity/v2",
-			type: "DataIntegrityProof",
-			created: "2024-08-22T11:56:56.272Z",
-			cryptosuite: "eddsa-jcs-2022",
-			proofPurpose: "assertionMethod",
-			proofValue:
-				"z4MxDt388pL55ac4FJsXKM9MeQAx3h7smVhxCwPaoMqamsizQTeyhR8bVoHkmi9TkTdEki4dzYnVmANHcVfjXahMW",
-			verificationMethod: `${TEST_ORGANIZATION_IDENTITY}#immutable-proof-assertion`
-		});
+		expect(immutableProof).toEqual(
+			expect.objectContaining({
+				"@context": "https://w3id.org/security/data-integrity/v2",
+				type: "DataIntegrityProof",
+				created: "2024-08-22T11:56:56.272Z",
+				cryptosuite: "eddsa-jcs-2022",
+				proofPurpose: "assertionMethod",
+				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN),
+				verificationMethod: `${TEST_ORGANIZATION_IDENTITY}#immutable-proof-assertion`
+			})
+		);
 
 		immutableProof = ObjectHelper.fromBytes<IImmutableProof>(
 			Converter.base64ToBytes(immutableStore[1].data)
 		);
-		expect(immutableProof).toEqual({
-			"@context": "https://w3id.org/security/data-integrity/v2",
-			type: "DataIntegrityProof",
-			created: "2024-08-22T11:56:56.272Z",
-			cryptosuite: "eddsa-jcs-2022",
-			proofPurpose: "assertionMethod",
-			proofValue:
-				"z64wtVpy42U1QUCzaqgAD9uher88gDkd5n9Kbv27WZ6TUgFX2BUsd8KZDxiyHzScVtXvJK5xg1JR2zcATkhTe3i9Q",
-			verificationMethod: `${TEST_ORGANIZATION_IDENTITY}#immutable-proof-assertion`
-		});
+		expect(immutableProof).toEqual(
+			expect.objectContaining({
+				"@context": "https://w3id.org/security/data-integrity/v2",
+				type: "DataIntegrityProof",
+				created: "2024-08-22T11:56:56.272Z",
+				cryptosuite: "eddsa-jcs-2022",
+				proofPurpose: "assertionMethod",
+				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN),
+				verificationMethod: `${TEST_ORGANIZATION_IDENTITY}#immutable-proof-assertion`
+			})
+		);
 	});
 
 	test("Can remove the verifiable storage for a vertex", async () => {
@@ -2624,7 +2562,7 @@ describe("AuditableItemGraphService", () => {
 				"https://schema.org",
 				"https://schema.twindev.org/immutable-proof/"
 			],
-			id: "aig:0101010101010101010101010101010101010101010101010101010101010101",
+			id,
 			type: "AuditableItemGraphVertex",
 			dateCreated: expect.any(String),
 			aliases: [
@@ -2640,115 +2578,131 @@ describe("AuditableItemGraphService", () => {
 
 	test("Can query for a vertex by id", async () => {
 		const service = new AuditableItemGraphService();
-		await service.create({});
-		await service.create({});
+		const createdId1 = await service.create({});
+		const createdId2 = await service.create({});
 
 		const resultsAndCursor = await service.query({ id: "0" });
 
-		expect(resultsAndCursor.entries).toEqual({
-			"@context": [
-				"https://schema.org",
-				"https://schema.twindev.org/aig/",
-				"https://schema.twindev.org/common/"
-			],
-			type: ["ItemList", "AuditableItemGraphVertexList"],
-			itemListElement: [
-				{
+		expect(resultsAndCursor.entries).toEqual(
+			expect.objectContaining({
+				"@context": [
+					"https://schema.org",
+					"https://schema.twindev.org/aig/",
+					"https://schema.twindev.org/common/"
+				],
+				type: ["ItemList", "AuditableItemGraphVertexList"]
+			})
+		);
+		expect(resultsAndCursor.entries.itemListElement).toHaveLength(2);
+		expect(resultsAndCursor.entries.itemListElement).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
 					type: "AuditableItemGraphVertex",
-					id: "aig:0505050505050505050505050505050505050505050505050505050505050505",
+					id: createdId1,
 					dateCreated: expect.any(String)
-				},
-				{
+				}),
+				expect.objectContaining({
 					type: "AuditableItemGraphVertex",
-					id: "aig:0101010101010101010101010101010101010101010101010101010101010101",
+					id: createdId2,
 					dateCreated: expect.any(String)
-				}
-			]
-		});
+				})
+			])
+		);
 	});
 
 	test("Can query for a vertex by alias with partial match", async () => {
 		const service = new AuditableItemGraphService();
-		await service.create({
+		const createdId1 = await service.create({
 			aliases: [{ id: "foo123" }, { id: "bar123" }]
 		});
-		await service.create({
+		const createdId2 = await service.create({
 			aliases: [{ id: "foo456" }, { id: "bar456" }]
 		});
 
 		const resultsAndCursor = await service.query({ id: "foo" });
-		expect(resultsAndCursor.entries).toEqual({
-			"@context": [
-				"https://schema.org",
-				"https://schema.twindev.org/aig/",
-				"https://schema.twindev.org/common/"
-			],
-			type: ["ItemList", "AuditableItemGraphVertexList"],
-			itemListElement: [
-				{
+		expect(resultsAndCursor.entries).toEqual(
+			expect.objectContaining({
+				"@context": [
+					"https://schema.org",
+					"https://schema.twindev.org/aig/",
+					"https://schema.twindev.org/common/"
+				],
+				type: ["ItemList", "AuditableItemGraphVertexList"]
+			})
+		);
+		expect(resultsAndCursor.entries.itemListElement).toHaveLength(2);
+		expect(resultsAndCursor.entries.itemListElement).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
 					type: "AuditableItemGraphVertex",
-					id: "aig:0505050505050505050505050505050505050505050505050505050505050505",
+					id: createdId2,
 					dateCreated: expect.any(String),
-					aliases: [
-						{
+					aliases: expect.arrayContaining([
+						expect.objectContaining({
 							id: "foo456",
 							type: "AuditableItemGraphAlias",
 							dateCreated: expect.any(String)
-						},
-						{
+						}),
+						expect.objectContaining({
 							id: "bar456",
 							type: "AuditableItemGraphAlias",
 							dateCreated: expect.any(String)
-						}
-					]
-				},
-				{
-					id: "aig:0101010101010101010101010101010101010101010101010101010101010101",
+						})
+					])
+				}),
+				expect.objectContaining({
 					type: "AuditableItemGraphVertex",
+					id: createdId1,
 					dateCreated: expect.any(String),
-					aliases: [
-						{
+					aliases: expect.arrayContaining([
+						expect.objectContaining({
 							id: "foo123",
 							type: "AuditableItemGraphAlias",
 							dateCreated: expect.any(String)
-						},
-						{
+						}),
+						expect.objectContaining({
 							id: "bar123",
 							type: "AuditableItemGraphAlias",
 							dateCreated: expect.any(String)
-						}
-					]
-				}
-			]
-		});
+						})
+					])
+				})
+			])
+		);
 	});
 
 	test("Can query for a vertex by id or alias", async () => {
 		const service = new AuditableItemGraphService();
-		await service.create({
+		const createdId1 = await service.create({
 			aliases: [{ id: "foo1" }]
 		});
 		await service.create({});
 
-		const resultsAndCursor = await service.query({ id: "1" });
-		expect(resultsAndCursor.entries).toEqual({
-			"@context": [
-				"https://schema.org",
-				"https://schema.twindev.org/aig/",
-				"https://schema.twindev.org/common/"
-			],
-			type: ["ItemList", "AuditableItemGraphVertexList"],
-			itemListElement: [
-				{
-					id: "aig:0101010101010101010101010101010101010101010101010101010101010101",
-					type: "AuditableItemGraphVertex",
-					dateCreated: expect.any(String),
-					aliases: [
-						{ id: "foo1", type: "AuditableItemGraphAlias", dateCreated: expect.any(String) }
-					]
-				}
-			]
-		});
+		const resultsAndCursor = await service.query({ id: "foo1" });
+		expect(resultsAndCursor.entries).toEqual(
+			expect.objectContaining({
+				"@context": [
+					"https://schema.org",
+					"https://schema.twindev.org/aig/",
+					"https://schema.twindev.org/common/"
+				],
+				type: ["ItemList", "AuditableItemGraphVertexList"],
+				itemListElement: [
+					expect.objectContaining({
+						id: createdId1,
+						type: "AuditableItemGraphVertex",
+						dateCreated: expect.any(String),
+						aliases: [
+							expect.objectContaining({
+								id: "foo1",
+								type: "AuditableItemGraphAlias",
+								dateCreated: expect.any(String)
+							})
+						]
+					})
+				]
+			})
+		);
 	});
 
 	test("Can query for a vertex by mode id", async () => {
@@ -2756,29 +2710,31 @@ describe("AuditableItemGraphService", () => {
 		await service.create({
 			aliases: [{ id: "foo5" }]
 		});
-		await service.create({});
+		const createdId2 = await service.create({});
 
-		const resultsAndCursor = await service.query({ id: "5", idMode: "id" });
-		expect(resultsAndCursor.entries).toEqual({
-			"@context": [
-				"https://schema.org",
-				"https://schema.twindev.org/aig/",
-				"https://schema.twindev.org/common/"
-			],
-			type: ["ItemList", "AuditableItemGraphVertexList"],
-			itemListElement: [
-				{
-					id: "aig:0505050505050505050505050505050505050505050505050505050505050505",
-					type: "AuditableItemGraphVertex",
-					dateCreated: expect.any(String)
-				}
-			]
-		});
+		const resultsAndCursor = await service.query({ id: extractAigId(createdId2), idMode: "id" });
+		expect(resultsAndCursor.entries).toEqual(
+			expect.objectContaining({
+				"@context": [
+					"https://schema.org",
+					"https://schema.twindev.org/aig/",
+					"https://schema.twindev.org/common/"
+				],
+				type: ["ItemList", "AuditableItemGraphVertexList"],
+				itemListElement: [
+					expect.objectContaining({
+						id: createdId2,
+						type: "AuditableItemGraphVertex",
+						dateCreated: expect.any(String)
+					})
+				]
+			})
+		);
 	});
 
 	test("Can query for a vertex by using mode alias", async () => {
 		const service = new AuditableItemGraphService();
-		await service.create({
+		const createdId1 = await service.create({
 			aliases: [{ id: "foo4" }]
 		});
 		await service.create({});
@@ -2786,29 +2742,35 @@ describe("AuditableItemGraphService", () => {
 		await waitForProofGeneration();
 
 		const resultsAndCursor = await service.query({ id: "4", idMode: "alias" });
-		expect(resultsAndCursor.entries).toEqual({
-			"@context": [
-				"https://schema.org",
-				"https://schema.twindev.org/aig/",
-				"https://schema.twindev.org/common/"
-			],
-			type: ["ItemList", "AuditableItemGraphVertexList"],
-			itemListElement: [
-				{
-					id: "aig:0101010101010101010101010101010101010101010101010101010101010101",
-					type: "AuditableItemGraphVertex",
-					dateCreated: expect.any(String),
-					aliases: [
-						{ id: "foo4", type: "AuditableItemGraphAlias", dateCreated: expect.any(String) }
-					]
-				}
-			]
-		});
+		expect(resultsAndCursor.entries).toEqual(
+			expect.objectContaining({
+				"@context": [
+					"https://schema.org",
+					"https://schema.twindev.org/aig/",
+					"https://schema.twindev.org/common/"
+				],
+				type: ["ItemList", "AuditableItemGraphVertexList"],
+				itemListElement: [
+					expect.objectContaining({
+						id: createdId1,
+						type: "AuditableItemGraphVertex",
+						dateCreated: expect.any(String),
+						aliases: [
+							expect.objectContaining({
+								id: "foo4",
+								type: "AuditableItemGraphAlias",
+								dateCreated: expect.any(String)
+							})
+						]
+					})
+				]
+			})
+		);
 	});
 
 	test("Can query for a vertex using resource types", async () => {
 		const service = new AuditableItemGraphService();
-		await service.create({
+		const createdId1 = await service.create({
 			resources: [
 				{
 					id: "resource1",
@@ -2829,7 +2791,7 @@ describe("AuditableItemGraphService", () => {
 				}
 			]
 		});
-		await service.create({
+		const createdId2 = await service.create({
 			resources: [
 				{
 					id: "resource1",
@@ -2854,31 +2816,36 @@ describe("AuditableItemGraphService", () => {
 		await waitForProofGeneration();
 
 		const resultsAndCursor = await service.query({ includesResourceTypes: ["Create", "Delete"] });
-		expect(resultsAndCursor.entries).toEqual({
-			"@context": [
-				"https://schema.org",
-				"https://schema.twindev.org/aig/",
-				"https://schema.twindev.org/common/"
-			],
-			type: ["ItemList", "AuditableItemGraphVertexList"],
-			itemListElement: [
-				{
-					dateCreated: expect.any(String),
-					id: "aig:0505050505050505050505050505050505050505050505050505050505050505",
-					type: "AuditableItemGraphVertex"
-				},
-				{
-					id: "aig:0101010101010101010101010101010101010101010101010101010101010101",
+		expect(resultsAndCursor.entries).toEqual(
+			expect.objectContaining({
+				"@context": [
+					"https://schema.org",
+					"https://schema.twindev.org/aig/",
+					"https://schema.twindev.org/common/"
+				],
+				type: ["ItemList", "AuditableItemGraphVertexList"]
+			})
+		);
+		expect(resultsAndCursor.entries.itemListElement).toHaveLength(2);
+		expect(resultsAndCursor.entries.itemListElement).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					id: createdId1,
 					type: "AuditableItemGraphVertex",
 					dateCreated: expect.any(String)
-				}
-			]
-		});
+				}),
+				expect.objectContaining({
+					id: createdId2,
+					type: "AuditableItemGraphVertex",
+					dateCreated: expect.any(String)
+				})
+			])
+		);
 	});
 
 	test("Can query for a vertex using it's annotation object id", async () => {
 		const service = new AuditableItemGraphService();
-		await service.create({
+		const createdId1 = await service.create({
 			annotationObject: {
 				"@context": "https://www.w3.org/ns/activitystreams",
 				id: "http://example.org/notes/1",
@@ -2903,36 +2870,38 @@ describe("AuditableItemGraphService", () => {
 				comparison: ComparisonOperator.Equals
 			}
 		]);
-		expect(resultsAndCursor.entries).toEqual({
-			"@context": [
-				"https://schema.org",
-				"https://schema.twindev.org/aig/",
-				"https://schema.twindev.org/common/"
-			],
-			type: ["ItemList", "AuditableItemGraphVertexList"],
-			itemListElement: [
-				{
-					dateCreated: "2024-08-22T11:56:56.272Z",
-					id: "aig:0101010101010101010101010101010101010101010101010101010101010101",
-					type: "AuditableItemGraphVertex",
-					annotationObject: {
-						"@context": "https://www.w3.org/ns/activitystreams",
-						id: "http://example.org/notes/1",
-						type: "Create",
-						actor: {
-							type: "Person",
-							id: "acct:person@example.org",
-							name: "John Smith"
-						},
-						object: {
-							type: "Note",
-							content: "This is a simple note"
-						},
-						published: "2015-01-25T12:34:56Z"
-					}
-				}
-			]
-		});
+		expect(resultsAndCursor.entries).toEqual(
+			expect.objectContaining({
+				"@context": [
+					"https://schema.org",
+					"https://schema.twindev.org/aig/",
+					"https://schema.twindev.org/common/"
+				],
+				type: ["ItemList", "AuditableItemGraphVertexList"],
+				itemListElement: [
+					expect.objectContaining({
+						dateCreated: expect.any(String),
+						id: createdId1,
+						type: "AuditableItemGraphVertex",
+						annotationObject: {
+							"@context": "https://www.w3.org/ns/activitystreams",
+							id: "http://example.org/notes/1",
+							type: "Create",
+							actor: {
+								type: "Person",
+								id: "acct:person@example.org",
+								name: "John Smith"
+							},
+							object: {
+								type: "Note",
+								content: "This is a simple note"
+							},
+							published: "2015-01-25T12:34:56Z"
+						}
+					})
+				]
+			})
+		);
 	});
 
 	test("Can fail to create a vertex with an alias that already exists and the unique flag set", async () => {

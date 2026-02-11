@@ -4,10 +4,10 @@ import {
 	AuditableItemGraphContexts,
 	AuditableItemGraphTopics,
 	AuditableItemGraphTypes,
-	type IAuditableItemGraphChangesetList,
 	VerifyDepth,
 	type IAuditableItemGraphAlias,
 	type IAuditableItemGraphChangeset,
+	type IAuditableItemGraphChangesetList,
 	type IAuditableItemGraphComponent,
 	type IAuditableItemGraphEdge,
 	type IAuditableItemGraphEventBusVertexCreated,
@@ -20,7 +20,6 @@ import { ContextIdKeys, ContextIdStore } from "@twin.org/context";
 import {
 	ArrayHelper,
 	ComponentFactory,
-	Converter,
 	GeneralError,
 	Guards,
 	Is,
@@ -47,11 +46,11 @@ import {
 } from "@twin.org/entity-storage-models";
 import type { IEventBusComponent } from "@twin.org/event-bus-models";
 import {
-	type IImmutableProofVerification,
 	ImmutableProofContexts,
 	ImmutableProofFailure,
 	ImmutableProofTypes,
-	type IImmutableProofComponent
+	type IImmutableProofComponent,
+	type IImmutableProofVerification
 } from "@twin.org/immutable-proof-models";
 import { nameof, nameofKebabCase } from "@twin.org/nameof";
 import {
@@ -202,7 +201,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				);
 			}
 
-			const id = Converter.bytesToHex(RandomHelper.generate(32), false);
+			const id = RandomHelper.generateUuidV7("compact");
 
 			const context: IAuditableItemGraphServiceContext = {
 				now: new Date(Date.now()).toISOString(),
@@ -1148,7 +1147,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 		let findId = Is.stringValue(edge.id) ? this.reduceEdgeId(edge.id) : undefined;
 		if (Is.empty(findId)) {
-			findId = Converter.bytesToHex(RandomHelper.generate(32), false);
+			findId = RandomHelper.generateUuidV7("compact");
 		}
 
 		// Try to find an existing edge with the same id.
@@ -1200,7 +1199,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 		// If there is a diff set or this is the first time the item is created.
 		if (patches.length > 0 || isNew) {
 			const changesetEntity: AuditableItemGraphChangeset = {
-				id: Converter.bytesToHex(RandomHelper.generate(32), false),
+				id: RandomHelper.generateUuidV7("compact"),
 				vertexId: updated.id,
 				dateCreated: context.now,
 				userIdentity: context.contextIds?.[ContextIdKeys.User],
