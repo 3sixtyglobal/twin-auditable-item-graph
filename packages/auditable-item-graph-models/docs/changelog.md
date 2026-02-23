@@ -1,5 +1,12 @@
 # @twin.org/auditable-item-graph-models - Changelog
 
+## [0.0.3-next.9](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-models-v0.0.3-next.8...auditable-item-graph-models-v0.0.3-next.9) (2026-02-23)
+
+
+### Miscellaneous Chores
+
+* **auditable-item-graph-models:** Synchronize repo versions
+
 ## [0.0.3-next.8](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-models-v0.0.3-next.7...auditable-item-graph-models-v0.0.3-next.8) (2026-02-11)
 
 

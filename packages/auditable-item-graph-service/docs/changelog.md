@@ -1,5 +1,19 @@
 # @twin.org/auditable-item-graph-service - Changelog
 
+## [0.0.3-next.9](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.8...auditable-item-graph-service-v0.0.3-next.9) (2026-02-23)
+
+
+### Bug Fixes
+
+* query resource type property name ([b684b31](https://github.com/twinfoundation/auditable-item-graph/commit/b684b3108e1e16852ee319e47edd0e40d5a2fe99))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/auditable-item-graph-models bumped from 0.0.3-next.8 to 0.0.3-next.9
+
 ## [0.0.3-next.8](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.7...auditable-item-graph-service-v0.0.3-next.8) (2026-02-11)
 
 
