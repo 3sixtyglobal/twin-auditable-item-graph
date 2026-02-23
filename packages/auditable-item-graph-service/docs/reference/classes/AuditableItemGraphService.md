@@ -370,7 +370,7 @@ Look in id, alias or both, defaults to both.
 
 Find only exact matches, default to false meaning partial matching.
 
-###### includesResourceTypes?
+###### resourceTypes?
 
 `string`[]
 

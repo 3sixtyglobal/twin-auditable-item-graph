@@ -2815,7 +2815,7 @@ describe("AuditableItemGraphService", () => {
 
 		await waitForProofGeneration();
 
-		const resultsAndCursor = await service.query({ includesResourceTypes: ["Create", "Delete"] });
+		const resultsAndCursor = await service.query({ resourceTypes: ["Create", "Delete"] });
 		expect(resultsAndCursor.entries).toEqual(
 			expect.objectContaining({
 				"@context": [

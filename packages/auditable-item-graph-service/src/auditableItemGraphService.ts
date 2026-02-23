@@ -624,7 +624,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	 * @param options.id The optional id to look for.
 	 * @param options.idMode Look in id, alias or both, defaults to both.
 	 * @param options.idExact Find only exact matches, default to false meaning partial matching.
-	 * @param options.includesResourceTypes Include vertices with specific resource types.
+	 * @param options.resourceTypes Include vertices with specific resource types.
 	 * @param conditions Conditions to use in the query.
 	 * @param orderBy The order for the results, defaults to created.
 	 * @param orderByDirection The direction for the order, defaults to desc.
@@ -638,7 +638,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			id?: string;
 			idMode?: "id" | "alias" | "both";
 			idExact?: boolean;
-			includesResourceTypes?: string[];
+			resourceTypes?: string[];
 		},
 		conditions?: IComparator[],
 		orderBy?: keyof Pick<IAuditableItemGraphVertex, "dateCreated" | "dateModified">,
@@ -682,8 +682,8 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				}
 			}
 
-			if (Is.arrayValue(options?.includesResourceTypes)) {
-				for (const resourceType of options.includesResourceTypes) {
+			if (Is.arrayValue(options?.resourceTypes)) {
+				for (const resourceType of options.resourceTypes) {
 					combinedConditions.push({
 						property: "resourceTypeIndex",
 						comparison: ComparisonOperator.Includes,
