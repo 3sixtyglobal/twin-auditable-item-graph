@@ -12,19 +12,19 @@ export interface IAuditableItemGraphAuditedElement {
 
 	/**
 	 * The date/time of when the element was created.
-	 * json-ld namespace:schema
+	 * json-ld namespace:sch
 	 */
 	dateCreated?: string;
 
 	/**
 	 * The date/time of when the element was modified.
-	 * json-ld namespace:schema
+	 * json-ld namespace:sch
 	 */
 	dateModified?: string;
 
 	/**
 	 * The date/time of when the element was deleted, as we never actually remove items.
-	 * json-ld namespace:schema
+	 * json-ld namespace:sch
 	 */
 	dateDeleted?: string;
 }

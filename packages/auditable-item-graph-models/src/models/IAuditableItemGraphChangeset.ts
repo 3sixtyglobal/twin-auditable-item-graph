@@ -31,7 +31,7 @@ export interface IAuditableItemGraphChangeset {
 
 	/**
 	 * The date/time of when the changeset was created.
-	 * json-ld namespace:schema
+	 * json-ld namespace:sch
 	 */
 	dateCreated: string;
 
@@ -49,7 +49,7 @@ export interface IAuditableItemGraphChangeset {
 
 	/**
 	 * The immutable proof id which contains the signature for this changeset.
-	 * json-ld type:schema:identifier
+	 * json-ld type:sch:identifier
 	 */
 	proofId?: string;
 

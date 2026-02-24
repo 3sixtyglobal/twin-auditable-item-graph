@@ -25,4 +25,4 @@ JSON-LD Type.
 > **itemListElement**: [`IAuditableItemGraphChangeset`](IAuditableItemGraphChangeset.md)[]
 
 The list of changesets.
-json-ld namespace:schema
+json-ld namespace:sch

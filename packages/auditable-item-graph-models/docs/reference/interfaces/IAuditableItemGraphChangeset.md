@@ -33,7 +33,7 @@ The id of the changeset.
 > **dateCreated**: `string`
 
 The date/time of when the changeset was created.
-json-ld namespace:schema
+json-ld namespace:sch
 
 ***
 
@@ -60,7 +60,7 @@ json-ld container:set
 > `optional` **proofId**: `string`
 
 The immutable proof id which contains the signature for this changeset.
-json-ld type:schema:identifier
+json-ld type:sch:identifier
 
 ***
 

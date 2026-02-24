@@ -50,7 +50,7 @@ json-ld namespace:twin-common
 > `optional` **aliasFormat**: `string`
 
 The format of the id in the alias.
-json-ld type:schema:Text
+json-ld type:sch:Text
 
 ***
 
@@ -59,7 +59,7 @@ json-ld type:schema:Text
 > `optional` **dateCreated**: `string`
 
 The date/time of when the element was created.
-json-ld namespace:schema
+json-ld namespace:sch
 
 #### Inherited from
 
@@ -72,7 +72,7 @@ json-ld namespace:schema
 > `optional` **dateModified**: `string`
 
 The date/time of when the element was modified.
-json-ld namespace:schema
+json-ld namespace:sch
 
 #### Inherited from
 
@@ -85,7 +85,7 @@ json-ld namespace:schema
 > `optional` **dateDeleted**: `string`
 
 The date/time of when the element was deleted, as we never actually remove items.
-json-ld namespace:schema
+json-ld namespace:sch
 
 #### Inherited from
 

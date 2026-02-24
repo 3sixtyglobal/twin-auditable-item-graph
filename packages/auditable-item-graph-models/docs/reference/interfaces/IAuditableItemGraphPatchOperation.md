@@ -25,7 +25,7 @@ JSON-LD Type.
 > **patchOperation**: `"add"` \| `"remove"` \| `"replace"` \| `"move"` \| `"copy"` \| `"test"`
 
 The operation that was performed on the item.
-json-ld type:schema:Text
+json-ld type:sch:Text
 
 ***
 
@@ -34,7 +34,7 @@ json-ld type:schema:Text
 > **patchPath**: `string`
 
 The path to the object that was changed.
-json-ld type:schema:Text
+json-ld type:sch:Text
 
 ***
 
@@ -43,7 +43,7 @@ json-ld type:schema:Text
 > `optional` **patchFrom**: `string`
 
 The path the value was copied or moved from.
-json-ld type:schema:Text
+json-ld type:sch:Text
 
 ***
 

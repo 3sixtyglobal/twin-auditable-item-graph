@@ -34,7 +34,7 @@ export interface IAuditableItemGraphAlias extends IAuditableItemGraphAuditedElem
 
 	/**
 	 * The format of the id in the alias.
-	 * json-ld type:schema:Text
+	 * json-ld type:sch:Text
 	 */
 	aliasFormat?: string;
 }

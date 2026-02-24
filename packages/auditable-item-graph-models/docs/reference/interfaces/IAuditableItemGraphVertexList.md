@@ -25,4 +25,4 @@ JSON-LD Type.
 > **itemListElement**: [`IAuditableItemGraphVertex`](IAuditableItemGraphVertex.md)[]
 
 The list of vertices.
-json-ld namespace:schema
+json-ld namespace:sch

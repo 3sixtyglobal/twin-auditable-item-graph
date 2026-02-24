@@ -26,7 +26,7 @@ export interface IAuditableItemGraphVertexList {
 
 	/**
 	 * The list of vertices.
-	 * json-ld namespace:schema
+	 * json-ld namespace:sch
 	 */
 	[SchemaOrgTypes.ItemListElement]: IAuditableItemGraphVertex[];
 }

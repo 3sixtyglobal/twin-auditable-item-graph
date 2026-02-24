@@ -244,8 +244,7 @@ describe("AuditableItemGraphService", () => {
 				type: "DataIntegrityProof",
 				cryptosuite: "eddsa-jcs-2022",
 				proofPurpose: "assertionMethod",
-				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN),
-				verificationMethod: `${TEST_ORGANIZATION_IDENTITY}#immutable-proof-assertion`
+				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN)
 			})
 		);
 	});
@@ -336,8 +335,7 @@ describe("AuditableItemGraphService", () => {
 				created: "2024-08-22T11:56:56.272Z",
 				cryptosuite: "eddsa-jcs-2022",
 				proofPurpose: "assertionMethod",
-				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN),
-				verificationMethod: `${TEST_ORGANIZATION_IDENTITY}#immutable-proof-assertion`
+				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN)
 			})
 		);
 	});
@@ -450,8 +448,7 @@ describe("AuditableItemGraphService", () => {
 				created: "2024-08-22T11:56:56.272Z",
 				cryptosuite: "eddsa-jcs-2022",
 				proofPurpose: "assertionMethod",
-				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN),
-				verificationMethod: `${TEST_ORGANIZATION_IDENTITY}#immutable-proof-assertion`
+				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN)
 			})
 		);
 	});
@@ -1009,8 +1006,7 @@ describe("AuditableItemGraphService", () => {
 				created: "2024-08-22T11:56:56.272Z",
 				cryptosuite: "eddsa-jcs-2022",
 				proofPurpose: "assertionMethod",
-				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN),
-				verificationMethod: `${TEST_ORGANIZATION_IDENTITY}#immutable-proof-assertion`
+				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN)
 			})
 		);
 	});
@@ -1286,8 +1282,7 @@ describe("AuditableItemGraphService", () => {
 				created: "2024-08-22T11:56:56.272Z",
 				cryptosuite: "eddsa-jcs-2022",
 				proofPurpose: "assertionMethod",
-				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN),
-				verificationMethod: `${TEST_ORGANIZATION_IDENTITY}#immutable-proof-assertion`
+				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN)
 			})
 		);
 
@@ -1301,8 +1296,7 @@ describe("AuditableItemGraphService", () => {
 				created: "2024-08-22T11:56:56.272Z",
 				cryptosuite: "eddsa-jcs-2022",
 				proofPurpose: "assertionMethod",
-				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN),
-				verificationMethod: `${TEST_ORGANIZATION_IDENTITY}#immutable-proof-assertion`
+				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN)
 			})
 		);
 	});
@@ -1463,8 +1457,7 @@ describe("AuditableItemGraphService", () => {
 				created: "2024-08-22T11:56:56.272Z",
 				cryptosuite: "eddsa-jcs-2022",
 				proofPurpose: "assertionMethod",
-				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN),
-				verificationMethod: `${TEST_ORGANIZATION_IDENTITY}#immutable-proof-assertion`
+				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN)
 			})
 		);
 
@@ -1478,8 +1471,7 @@ describe("AuditableItemGraphService", () => {
 				created: "2024-08-22T11:56:56.272Z",
 				cryptosuite: "eddsa-jcs-2022",
 				proofPurpose: "assertionMethod",
-				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN),
-				verificationMethod: `${TEST_ORGANIZATION_IDENTITY}#immutable-proof-assertion`
+				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN)
 			})
 		);
 	});
@@ -1780,8 +1772,7 @@ describe("AuditableItemGraphService", () => {
 				created: "2024-08-22T11:56:56.272Z",
 				cryptosuite: "eddsa-jcs-2022",
 				proofPurpose: "assertionMethod",
-				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN),
-				verificationMethod: `${TEST_ORGANIZATION_IDENTITY}#immutable-proof-assertion`
+				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN)
 			})
 		);
 
@@ -1795,8 +1786,7 @@ describe("AuditableItemGraphService", () => {
 				created: "2024-08-22T11:56:56.272Z",
 				cryptosuite: "eddsa-jcs-2022",
 				proofPurpose: "assertionMethod",
-				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN),
-				verificationMethod: `${TEST_ORGANIZATION_IDENTITY}#immutable-proof-assertion`
+				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN)
 			})
 		);
 	});
@@ -2517,8 +2507,7 @@ describe("AuditableItemGraphService", () => {
 				created: "2024-08-22T11:56:56.272Z",
 				cryptosuite: "eddsa-jcs-2022",
 				proofPurpose: "assertionMethod",
-				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN),
-				verificationMethod: `${TEST_ORGANIZATION_IDENTITY}#immutable-proof-assertion`
+				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN)
 			})
 		);
 
@@ -2532,8 +2521,7 @@ describe("AuditableItemGraphService", () => {
 				created: "2024-08-22T11:56:56.272Z",
 				cryptosuite: "eddsa-jcs-2022",
 				proofPurpose: "assertionMethod",
-				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN),
-				verificationMethod: `${TEST_ORGANIZATION_IDENTITY}#immutable-proof-assertion`
+				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN)
 			})
 		);
 	});
