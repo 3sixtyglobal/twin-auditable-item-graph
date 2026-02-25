@@ -68,6 +68,5 @@
 		"targetId",
 		"type",
 		"edgeRelationships"
-	],
-	"additionalProperties": false
+	]
 }

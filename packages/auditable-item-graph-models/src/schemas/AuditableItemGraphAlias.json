@@ -60,6 +60,5 @@
 		"@context",
 		"id",
 		"type"
-	],
-	"additionalProperties": false
+	]
 }

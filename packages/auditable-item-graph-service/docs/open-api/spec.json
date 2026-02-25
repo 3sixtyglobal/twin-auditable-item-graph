@@ -1439,7 +1439,6 @@
 						"description": "The edges connected to the vertex."
 					}
 				},
-				"additionalProperties": false,
 				"description": "The data to be used in the vertex."
 			},
 			"AuditableItemGraphUpdateRequest": {
@@ -1519,7 +1518,6 @@
 						"description": "The edges connected to the vertex."
 					}
 				},
-				"additionalProperties": false,
 				"description": "The data to be used in the vertex."
 			},
 			"Error": {
@@ -1554,7 +1552,6 @@
 					"name",
 					"message"
 				],
-				"additionalProperties": false,
 				"description": "Model to describe serialized error."
 			},
 			"SortDirection": {
