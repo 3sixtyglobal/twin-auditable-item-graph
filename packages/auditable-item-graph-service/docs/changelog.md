@@ -1,5 +1,19 @@
 # @twin.org/auditable-item-graph-service - Changelog
 
+## [0.0.3-next.11](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.10...auditable-item-graph-service-v0.0.3-next.11) (2026-02-25)
+
+
+### Features
+
+* update schemas ([b00bcac](https://github.com/twinfoundation/auditable-item-graph/commit/b00bcac6551fa524e8871e1b573a712ed0f30943))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/auditable-item-graph-models bumped from 0.0.3-next.10 to 0.0.3-next.11
+
 ## [0.0.3-next.10](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.9...auditable-item-graph-service-v0.0.3-next.10) (2026-02-24)
 
 
