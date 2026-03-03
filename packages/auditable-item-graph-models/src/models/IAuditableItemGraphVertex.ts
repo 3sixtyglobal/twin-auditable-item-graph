@@ -11,8 +11,10 @@ import type { IAuditableItemGraphResource } from "./IAuditableItemGraphResource.
 /**
  * Interface describing an auditable item graph vertex.
  */
-export interface IAuditableItemGraphVertex
-	extends Omit<IAuditableItemGraphAuditedElement, "deleted"> {
+export interface IAuditableItemGraphVertex extends Omit<
+	IAuditableItemGraphAuditedElement,
+	"deleted"
+> {
 	/**
 	 * JSON-LD Context.
 	 */
