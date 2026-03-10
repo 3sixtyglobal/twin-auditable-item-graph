@@ -36,37 +36,37 @@ export interface IAuditableItemGraphVertex extends Omit<
 
 	/**
 	 * The identity of the organization which controls the vertex.
-	 * json-ld namespace:twin-common
+	 * @json-ld namespace:twin-common
 	 */
 	organizationIdentity?: string;
 
 	/**
 	 * The JSON-LD annotation object for the vertex.
-	 * json-ld namespace:twin-common
+	 * @json-ld namespace:twin-common
 	 */
 	annotationObject?: IJsonLdNodeObject;
 
 	/**
 	 * Alternative aliases that can be used to identify the vertex.
-	 * json-ld container:set
+	 * @json-ld container:set
 	 */
 	aliases?: IAuditableItemGraphAlias[];
 
 	/**
 	 * The resources attached to the vertex.
-	 * json-ld container:set
+	 * @json-ld container:set
 	 */
 	resources?: IAuditableItemGraphResource[];
 
 	/**
 	 * Edges connected to the vertex.
-	 * json-ld container:set
+	 * @json-ld container:set
 	 */
 	edges?: IAuditableItemGraphEdge[];
 
 	/**
 	 * Is the vertex verified, will only be populated when verification is requested.
-	 * json-ld namespace:twin-common
+	 * @json-ld namespace:twin-common
 	 */
 	verified?: boolean;
 }

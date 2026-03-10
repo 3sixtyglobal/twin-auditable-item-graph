@@ -31,31 +31,31 @@ export interface IAuditableItemGraphChangeset {
 
 	/**
 	 * The date/time of when the changeset was created.
-	 * json-ld namespace:sch
+	 * @json-ld namespace:sch
 	 */
 	dateCreated: string;
 
 	/**
 	 * The user identity that created the changes.
-	 * json-ld namespace:twin-common
+	 * @json-ld namespace:twin-common
 	 */
 	userIdentity?: string;
 
 	/**
 	 * The patches in the changeset.
-	 * json-ld container:set
+	 * @json-ld container:set
 	 */
 	patches: IAuditableItemGraphPatchOperation[];
 
 	/**
 	 * The immutable proof id which contains the signature for this changeset.
-	 * json-ld type:sch:identifier
+	 * @json-ld type:sch:identifier
 	 */
 	proofId?: string;
 
 	/**
 	 * The verification for the changeset.
-	 * json-ld id
+	 * @json-ld id
 	 */
 	verification?: IImmutableProofVerification;
 }

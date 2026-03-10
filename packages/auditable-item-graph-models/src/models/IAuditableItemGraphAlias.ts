@@ -28,13 +28,13 @@ export interface IAuditableItemGraphAlias extends IAuditableItemGraphAuditedElem
 
 	/**
 	 * The JSON-LD annotation object for the alias.
-	 * json-ld namespace:twin-common
+	 * @json-ld namespace:twin-common
 	 */
 	annotationObject?: IJsonLdNodeObject;
 
 	/**
 	 * The format of the id in the alias.
-	 * json-ld type:sch:Text
+	 * @json-ld type:sch:Text
 	 */
 	aliasFormat?: string;
 }

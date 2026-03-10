@@ -23,7 +23,7 @@ export interface IAuditableItemGraphEdge extends IAuditableItemGraphAuditedEleme
 
 	/**
 	 * The target vertex id the edge connects to.
-	 * json-ld type:@id
+	 * @json-ld type:@id
 	 */
 	targetId: string;
 
@@ -34,13 +34,13 @@ export interface IAuditableItemGraphEdge extends IAuditableItemGraphAuditedEleme
 
 	/**
 	 * The JSON-LD annotation object for the edge.
-	 * json-ld namespace:twin-common
+	 * @json-ld namespace:twin-common
 	 */
 	annotationObject?: IJsonLdNodeObject;
 
 	/**
 	 * The relationships between the two vertices.
-	 * json-ld container:set
+	 * @json-ld container:set
 	 */
 	edgeRelationships: string[];
 }

@@ -26,7 +26,7 @@ export interface IAuditableItemGraphChangesetList {
 
 	/**
 	 * The list of changesets.
-	 * json-ld namespace:sch
+	 * @json-ld namespace:sch
 	 */
 	[SchemaOrgTypes.ItemListElement]: IAuditableItemGraphChangeset[];
 }
