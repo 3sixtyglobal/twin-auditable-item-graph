@@ -1,6 +1,8 @@
 # TWIN Auditable Item Graph REST Client
 
-Auditable Item Graph contract implementation which can connect to REST endpoints.
+This package offers a straightforward client for sending auditable graph requests to compatible HTTP endpoints.
+
+It helps applications consume graph, changeset, and query operations without reimplementing request and response handling.
 
 ## Installation
 

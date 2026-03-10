@@ -1,6 +1,8 @@
 # TWIN Auditable Item Graph Service
 
-Auditable Item Graph contract implementation and REST endpoint definitions.
+This package delivers the core graph operations, including create, update, query, and historical change retrieval with verifiable audit data.
+
+It also exposes route definitions so applications can host the service over HTTP while keeping behaviour aligned with shared contracts.
 
 ## Installation
 

@@ -1,7 +1,7 @@
 {
 	"name": "@twin.org/auditable-item-graph-models",
 	"version": "0.0.3-next.11",
-	"description": "Models which define the structure of the auditable item graph connectors and services",
+	"description": "Defines shared graph data contracts, JSON schemas, and JSON-LD contexts for consistent interoperability.",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/twinfoundation/auditable-item-graph.git",
