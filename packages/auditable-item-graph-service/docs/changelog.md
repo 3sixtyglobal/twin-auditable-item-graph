@@ -1,4 +1,4 @@
-# @twin.org/auditable-item-graph-service - Changelog
+# Changelog
 
 ## [0.0.3-next.11](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.10...auditable-item-graph-service-v0.0.3-next.11) (2026-02-25)
 
