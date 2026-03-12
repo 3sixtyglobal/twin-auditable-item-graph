@@ -4,7 +4,7 @@ Interface describing a set of changes to the vertex.
 
 ## Properties
 
-### @context?
+### @context? {#context}
 
 > `optional` **@context**: \[`"https://schema.twindev.org/aig/"`, `"https://schema.twindev.org/common/"`, `...IJsonLdContextDefinitionElement[]`\]
 
@@ -12,7 +12,7 @@ JSON-LD Context.
 
 ***
 
-### type
+### type {#type}
 
 > **type**: `"AuditableItemGraphChangeset"`
 
@@ -20,7 +20,7 @@ JSON-LD Type.
 
 ***
 
-### id
+### id {#id}
 
 > **id**: `string`
 
@@ -28,45 +28,40 @@ The id of the changeset.
 
 ***
 
-### dateCreated
+### dateCreated {#datecreated}
 
 > **dateCreated**: `string`
 
 The date/time of when the changeset was created.
-json-ld namespace:sch
 
 ***
 
-### userIdentity?
+### userIdentity? {#useridentity}
 
 > `optional` **userIdentity**: `string`
 
 The user identity that created the changes.
-json-ld namespace:twin-common
 
 ***
 
-### patches
+### patches {#patches}
 
 > **patches**: [`IAuditableItemGraphPatchOperation`](IAuditableItemGraphPatchOperation.md)[]
 
 The patches in the changeset.
-json-ld container:set
 
 ***
 
-### proofId?
+### proofId? {#proofid}
 
 > `optional` **proofId**: `string`
 
 The immutable proof id which contains the signature for this changeset.
-json-ld type:sch:identifier
 
 ***
 
-### verification?
+### verification? {#verification}
 
 > `optional` **verification**: `IImmutableProofVerification`
 
 The verification for the changeset.
-json-ld id

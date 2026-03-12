@@ -28,7 +28,7 @@ The dependencies for the auditable item graph connector.
 
 ## Properties
 
-### CLASS\_NAME
+### CLASS\_NAME {#class_name}
 
 > `readonly` `static` **CLASS\_NAME**: `string`
 
@@ -36,7 +36,7 @@ Runtime name for the class.
 
 ***
 
-### NAMESPACE\_CHANGESET
+### NAMESPACE\_CHANGESET {#namespace_changeset}
 
 > `readonly` `static` **NAMESPACE\_CHANGESET**: `string` = `"changeset"`
 
@@ -44,7 +44,7 @@ The namespace for the service changeset.
 
 ***
 
-### NAMESPACE\_EDGE
+### NAMESPACE\_EDGE {#namespace_edge}
 
 > `readonly` `static` **NAMESPACE\_EDGE**: `string` = `"edge"`
 
@@ -52,7 +52,7 @@ The namespace for the service edge.
 
 ## Methods
 
-### className()
+### className() {#classname}
 
 > **className**(): `string`
 
@@ -70,7 +70,7 @@ The class name of the component.
 
 ***
 
-### create()
+### create() {#create}
 
 > **create**(`vertex`): `Promise`\<`string`\>
 
@@ -118,7 +118,7 @@ The id of the new graph item.
 
 ***
 
-### get()
+### get() {#get}
 
 > **get**(`id`, `options?`): `Promise`\<`IAuditableItemGraphVertex`\>
 
@@ -164,7 +164,7 @@ NotFoundError if the vertex is not found.
 
 ***
 
-### getChangesets()
+### getChangesets() {#getchangesets}
 
 > **getChangesets**(`id`, `cursor?`, `limit?`, `options?`): `Promise`\<\{ `changesets`: `IAuditableItemGraphChangesetList`; `cursor?`: `string`; \}\>
 
@@ -216,7 +216,7 @@ NotFoundError if the vertex is not found.
 
 ***
 
-### getChangeset()
+### getChangeset() {#getchangeset}
 
 > **getChangeset**(`id`, `options?`): `Promise`\<`IAuditableItemGraphChangeset`\>
 
@@ -256,7 +256,7 @@ NotFoundError if the vertex is not found.
 
 ***
 
-### update()
+### update() {#update}
 
 > **update**(`vertex`): `Promise`\<`void`\>
 
@@ -310,7 +310,7 @@ Nothing.
 
 ***
 
-### removeVerifiable()
+### removeVerifiable() {#removeverifiable}
 
 > **removeVerifiable**(`id`): `Promise`\<`void`\>
 
@@ -340,7 +340,7 @@ NotFoundError if the vertex is not found.
 
 ***
 
-### query()
+### query() {#query}
 
 > **query**(`options?`, `conditions?`, `orderBy?`, `orderByDirection?`, `properties?`, `cursor?`, `limit?`): `Promise`\<\{ `entries`: `IAuditableItemGraphVertexList`; `cursor?`: `string`; \}\>
 

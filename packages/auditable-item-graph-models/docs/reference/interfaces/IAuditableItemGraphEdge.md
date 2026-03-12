@@ -8,12 +8,11 @@ Interface describing an edge between two vertices in an auditable item graph.
 
 ## Properties
 
-### dateCreated?
+### dateCreated? {#datecreated}
 
 > `optional` **dateCreated**: `string`
 
 The date/time of when the element was created.
-json-ld namespace:sch
 
 #### Inherited from
 
@@ -21,12 +20,11 @@ json-ld namespace:sch
 
 ***
 
-### dateModified?
+### dateModified? {#datemodified}
 
 > `optional` **dateModified**: `string`
 
 The date/time of when the element was modified.
-json-ld namespace:sch
 
 #### Inherited from
 
@@ -34,12 +32,11 @@ json-ld namespace:sch
 
 ***
 
-### dateDeleted?
+### dateDeleted? {#datedeleted}
 
 > `optional` **dateDeleted**: `string`
 
 The date/time of when the element was deleted, as we never actually remove items.
-json-ld namespace:sch
 
 #### Inherited from
 
@@ -47,7 +44,7 @@ json-ld namespace:sch
 
 ***
 
-### @context
+### @context {#context}
 
 > **@context**: `"https://schema.twindev.org/aig/"` \| \[`"https://schema.twindev.org/aig/"`, `...IJsonLdContextDefinitionElement[]`\]
 
@@ -55,7 +52,7 @@ JSON-LD Context.
 
 ***
 
-### id?
+### id? {#id}
 
 > `optional` **id**: `string`
 
@@ -67,16 +64,15 @@ The id of the element.
 
 ***
 
-### targetId
+### targetId {#targetid}
 
 > **targetId**: `string`
 
 The target vertex id the edge connects to.
-json-ld type:@id
 
 ***
 
-### type
+### type {#type}
 
 > **type**: `"AuditableItemGraphEdge"`
 
@@ -84,18 +80,16 @@ JSON-LD Type.
 
 ***
 
-### annotationObject?
+### annotationObject? {#annotationobject}
 
 > `optional` **annotationObject**: `IJsonLdNodeObject`
 
 The JSON-LD annotation object for the edge.
-json-ld namespace:twin-common
 
 ***
 
-### edgeRelationships
+### edgeRelationships {#edgerelationships}
 
 > **edgeRelationships**: `string`[]
 
 The relationships between the two vertices.
-json-ld container:set

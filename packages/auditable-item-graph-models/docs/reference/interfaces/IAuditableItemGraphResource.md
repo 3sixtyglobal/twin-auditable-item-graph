@@ -8,7 +8,7 @@ Interface describing an auditable item graph vertex resource.
 
 ## Properties
 
-### id?
+### id? {#id}
 
 > `optional` **id**: `string`
 
@@ -20,12 +20,11 @@ The id of the element.
 
 ***
 
-### dateCreated?
+### dateCreated? {#datecreated}
 
 > `optional` **dateCreated**: `string`
 
 The date/time of when the element was created.
-json-ld namespace:sch
 
 #### Inherited from
 
@@ -33,12 +32,11 @@ json-ld namespace:sch
 
 ***
 
-### dateModified?
+### dateModified? {#datemodified}
 
 > `optional` **dateModified**: `string`
 
 The date/time of when the element was modified.
-json-ld namespace:sch
 
 #### Inherited from
 
@@ -46,12 +44,11 @@ json-ld namespace:sch
 
 ***
 
-### dateDeleted?
+### dateDeleted? {#datedeleted}
 
 > `optional` **dateDeleted**: `string`
 
 The date/time of when the element was deleted, as we never actually remove items.
-json-ld namespace:sch
 
 #### Inherited from
 
@@ -59,7 +56,7 @@ json-ld namespace:sch
 
 ***
 
-### @context
+### @context {#context}
 
 > **@context**: `"https://schema.twindev.org/aig/"` \| \[`"https://schema.twindev.org/aig/"`, `...IJsonLdContextDefinitionElement[]`\]
 
@@ -67,7 +64,7 @@ JSON-LD Context.
 
 ***
 
-### type
+### type {#type}
 
 > **type**: `"AuditableItemGraphResource"`
 
@@ -75,9 +72,8 @@ JSON-LD Type.
 
 ***
 
-### resourceObject?
+### resourceObject? {#resourceobject}
 
 > `optional` **resourceObject**: `IJsonLdNodeObject`
 
 The JSON-LD object for the resource.
-json-ld type:json

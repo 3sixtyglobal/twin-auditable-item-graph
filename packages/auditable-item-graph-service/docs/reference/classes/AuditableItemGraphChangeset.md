@@ -14,7 +14,7 @@ Class describing a set of updates to the vertex.
 
 ## Properties
 
-### id
+### id {#id}
 
 > **id**: `string`
 
@@ -22,7 +22,7 @@ The id of the changeset.
 
 ***
 
-### vertexId
+### vertexId {#vertexid}
 
 > **vertexId**: `string`
 
@@ -30,7 +30,7 @@ The vertex the changeset belongs to.
 
 ***
 
-### dateCreated
+### dateCreated {#datecreated}
 
 > **dateCreated**: `string`
 
@@ -38,7 +38,7 @@ The date/time of when the changeset was created.
 
 ***
 
-### userIdentity?
+### userIdentity? {#useridentity}
 
 > `optional` **userIdentity**: `string`
 
@@ -46,7 +46,7 @@ The identity of the user who made the changeset.
 
 ***
 
-### patches
+### patches {#patches}
 
 > **patches**: [`AuditableItemGraphPatch`](AuditableItemGraphPatch.md)[]
 
@@ -54,7 +54,7 @@ The patches in the changeset.
 
 ***
 
-### proofId?
+### proofId? {#proofid}
 
 > `optional` **proofId**: `string`
 

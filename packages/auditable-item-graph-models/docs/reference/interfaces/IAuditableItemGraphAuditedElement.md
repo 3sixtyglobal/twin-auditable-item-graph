@@ -10,7 +10,7 @@ Interface describing the base properties for auditable elements.
 
 ## Properties
 
-### id?
+### id? {#id}
 
 > `optional` **id**: `string`
 
@@ -18,27 +18,24 @@ The id of the element.
 
 ***
 
-### dateCreated?
+### dateCreated? {#datecreated}
 
 > `optional` **dateCreated**: `string`
 
 The date/time of when the element was created.
-json-ld namespace:sch
 
 ***
 
-### dateModified?
+### dateModified? {#datemodified}
 
 > `optional` **dateModified**: `string`
 
 The date/time of when the element was modified.
-json-ld namespace:sch
 
 ***
 
-### dateDeleted?
+### dateDeleted? {#datedeleted}
 
 > `optional` **dateDeleted**: `string`
 
 The date/time of when the element was deleted, as we never actually remove items.
-json-ld namespace:sch

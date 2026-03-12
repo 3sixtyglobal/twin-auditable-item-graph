@@ -14,7 +14,7 @@ Class describing the auditable item graph patches.
 
 ## Properties
 
-### op
+### op {#op}
 
 > **op**: `"add"` \| `"remove"` \| `"replace"` \| `"move"` \| `"copy"` \| `"test"`
 
@@ -22,7 +22,7 @@ The operation for the patch.
 
 ***
 
-### path
+### path {#path}
 
 > **path**: `string`
 
@@ -30,7 +30,7 @@ The path for the patch.
 
 ***
 
-### from?
+### from? {#from}
 
 > `optional` **from**: `string`
 
@@ -38,7 +38,7 @@ The from for the patch.
 
 ***
 
-### value?
+### value? {#value}
 
 > `optional` **value**: `unknown`
 

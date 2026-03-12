@@ -4,7 +4,7 @@ The response to getting the a list of the vertices with matching ids or aliases.
 
 ## Properties
 
-### headers?
+### headers? {#headers}
 
 > `optional` **headers**: `object`
 
@@ -20,7 +20,7 @@ The headers which can be used to determine the response data type.
 
 ***
 
-### body
+### body {#body}
 
 > **body**: [`IAuditableItemGraphVertexList`](IAuditableItemGraphVertexList.md)
 

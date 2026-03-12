@@ -8,7 +8,7 @@ Interface describing an alias for a vertex.
 
 ## Properties
 
-### @context
+### @context {#context}
 
 > **@context**: `"https://schema.twindev.org/aig/"` \| \[`"https://schema.twindev.org/aig/"`, `...IJsonLdContextDefinitionElement[]`\]
 
@@ -16,7 +16,7 @@ JSON-LD Context.
 
 ***
 
-### id
+### id {#id}
 
 > **id**: `string`
 
@@ -28,7 +28,7 @@ The id of the element.
 
 ***
 
-### type
+### type {#type}
 
 > **type**: `"AuditableItemGraphAlias"`
 
@@ -36,30 +36,27 @@ JSON-LD Type.
 
 ***
 
-### annotationObject?
+### annotationObject? {#annotationobject}
 
 > `optional` **annotationObject**: `IJsonLdNodeObject`
 
 The JSON-LD annotation object for the alias.
-json-ld namespace:twin-common
 
 ***
 
-### aliasFormat?
+### aliasFormat? {#aliasformat}
 
 > `optional` **aliasFormat**: `string`
 
 The format of the id in the alias.
-json-ld type:sch:Text
 
 ***
 
-### dateCreated?
+### dateCreated? {#datecreated}
 
 > `optional` **dateCreated**: `string`
 
 The date/time of when the element was created.
-json-ld namespace:sch
 
 #### Inherited from
 
@@ -67,12 +64,11 @@ json-ld namespace:sch
 
 ***
 
-### dateModified?
+### dateModified? {#datemodified}
 
 > `optional` **dateModified**: `string`
 
 The date/time of when the element was modified.
-json-ld namespace:sch
 
 #### Inherited from
 
@@ -80,12 +76,11 @@ json-ld namespace:sch
 
 ***
 
-### dateDeleted?
+### dateDeleted? {#datedeleted}
 
 > `optional` **dateDeleted**: `string`
 
 The date/time of when the element was deleted, as we never actually remove items.
-json-ld namespace:sch
 
 #### Inherited from
 

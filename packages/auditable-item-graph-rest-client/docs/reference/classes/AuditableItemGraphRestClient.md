@@ -36,7 +36,7 @@ The configuration for the client.
 
 ## Properties
 
-### CLASS\_NAME
+### CLASS\_NAME {#class_name}
 
 > `readonly` `static` **CLASS\_NAME**: `string`
 
@@ -44,7 +44,7 @@ Runtime name for the class.
 
 ## Methods
 
-### className()
+### className() {#classname}
 
 > **className**(): `string`
 
@@ -62,7 +62,7 @@ The class name of the component.
 
 ***
 
-### create()
+### create() {#create}
 
 > **create**(`vertex`): `Promise`\<`string`\>
 
@@ -110,7 +110,7 @@ The id of the new graph item.
 
 ***
 
-### get()
+### get() {#get}
 
 > **get**(`id`, `options?`): `Promise`\<`IAuditableItemGraphVertex`\>
 
@@ -156,7 +156,7 @@ NotFoundError if the vertex is not found.
 
 ***
 
-### getChangesets()
+### getChangesets() {#getchangesets}
 
 > **getChangesets**(`id`, `cursor?`, `limit?`, `options?`): `Promise`\<\{ `changesets`: `IAuditableItemGraphChangesetList`; `cursor?`: `string`; \}\>
 
@@ -204,7 +204,7 @@ The changesets if found.
 
 ***
 
-### getChangeset()
+### getChangeset() {#getchangeset}
 
 > **getChangeset**(`id`, `options?`): `Promise`\<`IAuditableItemGraphChangeset`\>
 
@@ -244,7 +244,7 @@ NotFoundError if the vertex or changeset is not found.
 
 ***
 
-### update()
+### update() {#update}
 
 > **update**(`vertex`): `Promise`\<`void`\>
 
@@ -298,7 +298,7 @@ Nothing.
 
 ***
 
-### removeVerifiable()
+### removeVerifiable() {#removeverifiable}
 
 > **removeVerifiable**(`id`): `Promise`\<`void`\>
 
@@ -328,7 +328,7 @@ NotFoundError if the vertex is not found.
 
 ***
 
-### query()
+### query() {#query}
 
 > **query**(`options?`, `conditions?`, `orderBy?`, `orderByDirection?`, `properties?`, `cursor?`, `limit?`): `Promise`\<\{ `entries`: `IAuditableItemGraphVertexList`; `cursor?`: `string`; \}\>
 

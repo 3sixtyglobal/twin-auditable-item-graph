@@ -8,7 +8,7 @@ Interface describing an auditable item graph contract.
 
 ## Methods
 
-### create()
+### create() {#create}
 
 > **create**(`vertex`): `Promise`\<`string`\>
 
@@ -52,7 +52,7 @@ The id of the new graph item.
 
 ***
 
-### update()
+### update() {#update}
 
 > **update**(`vertex`): `Promise`\<`void`\>
 
@@ -102,7 +102,7 @@ Nothing.
 
 ***
 
-### get()
+### get() {#get}
 
 > **get**(`id`, `options?`): `Promise`\<[`IAuditableItemGraphVertex`](IAuditableItemGraphVertex.md)\>
 
@@ -144,7 +144,7 @@ NotFoundError if the vertex is not found.
 
 ***
 
-### getChangesets()
+### getChangesets() {#getchangesets}
 
 > **getChangesets**(`id`, `cursor?`, `limit?`, `options?`): `Promise`\<\{ `changesets`: [`IAuditableItemGraphChangesetList`](IAuditableItemGraphChangesetList.md); `cursor?`: `string`; \}\>
 
@@ -192,7 +192,7 @@ NotFoundError if the vertex is not found.
 
 ***
 
-### getChangeset()
+### getChangeset() {#getchangeset}
 
 > **getChangeset**(`id`, `options?`): `Promise`\<[`IAuditableItemGraphChangeset`](IAuditableItemGraphChangeset.md)\>
 
@@ -228,7 +228,7 @@ NotFoundError if the vertex or changeset is not found.
 
 ***
 
-### removeVerifiable()
+### removeVerifiable() {#removeverifiable}
 
 > **removeVerifiable**(`id`): `Promise`\<`void`\>
 
@@ -254,7 +254,7 @@ NotFoundError if the vertex is not found.
 
 ***
 
-### query()
+### query() {#query}
 
 > **query**(`options?`, `conditions?`, `orderBy?`, `orderByDirection?`, `properties?`, `cursor?`, `limit?`): `Promise`\<\{ `entries`: [`IAuditableItemGraphVertexList`](IAuditableItemGraphVertexList.md); `cursor?`: `string`; \}\>
 

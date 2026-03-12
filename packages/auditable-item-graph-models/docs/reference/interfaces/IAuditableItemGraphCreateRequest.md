@@ -4,7 +4,7 @@ Create an auditable item graph vertex.
 
 ## Properties
 
-### body
+### body {#body}
 
 > **body**: `object`
 

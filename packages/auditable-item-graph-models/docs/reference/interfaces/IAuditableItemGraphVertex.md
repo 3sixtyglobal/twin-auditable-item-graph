@@ -8,12 +8,11 @@ Interface describing an auditable item graph vertex.
 
 ## Properties
 
-### dateCreated?
+### dateCreated? {#datecreated}
 
 > `optional` **dateCreated**: `string`
 
 The date/time of when the element was created.
-json-ld namespace:sch
 
 #### Inherited from
 
@@ -21,12 +20,11 @@ json-ld namespace:sch
 
 ***
 
-### dateModified?
+### dateModified? {#datemodified}
 
 > `optional` **dateModified**: `string`
 
 The date/time of when the element was modified.
-json-ld namespace:sch
 
 #### Inherited from
 
@@ -34,12 +32,11 @@ json-ld namespace:sch
 
 ***
 
-### dateDeleted?
+### dateDeleted? {#datedeleted}
 
 > `optional` **dateDeleted**: `string`
 
 The date/time of when the element was deleted, as we never actually remove items.
-json-ld namespace:sch
 
 #### Inherited from
 
@@ -47,7 +44,7 @@ json-ld namespace:sch
 
 ***
 
-### @context
+### @context {#context}
 
 > **@context**: \[`"https://schema.twindev.org/aig/"`, `"https://schema.twindev.org/common/"`, `...IJsonLdContextDefinitionElement[]`\]
 
@@ -55,7 +52,7 @@ JSON-LD Context.
 
 ***
 
-### id
+### id {#id}
 
 > **id**: `string`
 
@@ -67,7 +64,7 @@ The id of the element.
 
 ***
 
-### type
+### type {#type}
 
 > **type**: `"AuditableItemGraphVertex"`
 
@@ -75,54 +72,48 @@ JSON-LD Type.
 
 ***
 
-### organizationIdentity?
+### organizationIdentity? {#organizationidentity}
 
 > `optional` **organizationIdentity**: `string`
 
 The identity of the organization which controls the vertex.
-json-ld namespace:twin-common
 
 ***
 
-### annotationObject?
+### annotationObject? {#annotationobject}
 
 > `optional` **annotationObject**: `IJsonLdNodeObject`
 
 The JSON-LD annotation object for the vertex.
-json-ld namespace:twin-common
 
 ***
 
-### aliases?
+### aliases? {#aliases}
 
 > `optional` **aliases**: [`IAuditableItemGraphAlias`](IAuditableItemGraphAlias.md)[]
 
 Alternative aliases that can be used to identify the vertex.
-json-ld container:set
 
 ***
 
-### resources?
+### resources? {#resources}
 
 > `optional` **resources**: [`IAuditableItemGraphResource`](IAuditableItemGraphResource.md)[]
 
 The resources attached to the vertex.
-json-ld container:set
 
 ***
 
-### edges?
+### edges? {#edges}
 
 > `optional` **edges**: [`IAuditableItemGraphEdge`](IAuditableItemGraphEdge.md)[]
 
 Edges connected to the vertex.
-json-ld container:set
 
 ***
 
-### verified?
+### verified? {#verified}
 
 > `optional` **verified**: `boolean`
 
 Is the vertex verified, will only be populated when verification is requested.
-json-ld namespace:twin-common

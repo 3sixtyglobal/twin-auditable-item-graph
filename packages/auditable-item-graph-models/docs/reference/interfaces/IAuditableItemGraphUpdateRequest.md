@@ -4,7 +4,7 @@ Update an auditable item graph vertex.
 
 ## Properties
 
-### pathParams
+### pathParams {#pathparams}
 
 > **pathParams**: `object`
 
@@ -18,7 +18,7 @@ The id of the vertex to update.
 
 ***
 
-### body
+### body {#body}
 
 > **body**: `object`
 

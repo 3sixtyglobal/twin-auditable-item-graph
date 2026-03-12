@@ -4,7 +4,7 @@ Response to getting an auditable item graph changeset list.
 
 ## Properties
 
-### headers?
+### headers? {#headers}
 
 > `optional` **headers**: `object`
 
@@ -20,7 +20,7 @@ The headers which can be used to determine the response data type.
 
 ***
 
-### body
+### body {#body}
 
 > **body**: [`IAuditableItemGraphChangesetList`](IAuditableItemGraphChangesetList.md)
 
