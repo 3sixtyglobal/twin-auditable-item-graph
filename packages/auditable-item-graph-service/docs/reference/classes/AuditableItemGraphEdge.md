@@ -32,7 +32,7 @@ The date/time of when the edge was created.
 
 ### dateModified? {#datemodified}
 
-> `optional` **dateModified**: `string`
+> `optional` **dateModified?**: `string`
 
 The date/time of when the edge was last modified.
 
@@ -40,7 +40,7 @@ The date/time of when the edge was last modified.
 
 ### dateDeleted? {#datedeleted}
 
-> `optional` **dateDeleted**: `string`
+> `optional` **dateDeleted?**: `string`
 
 The timestamp of when the edge was deleted, as we never actually remove items.
 
@@ -64,6 +64,6 @@ The relationships between the two vertices.
 
 ### annotationObject? {#annotationobject}
 
-> `optional` **annotationObject**: `IJsonLdNodeObject`
+> `optional` **annotationObject?**: `IJsonLdNodeObject`
 
 Object to associate with the edge as JSON-LD.

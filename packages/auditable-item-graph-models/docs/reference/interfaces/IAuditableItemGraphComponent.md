@@ -298,9 +298,9 @@ Conditions to use in the query.
 
 ##### orderBy?
 
-The order for the results, defaults to dateCreated.
+`"dateCreated"` \| `"dateModified"`
 
-`"dateCreated"` | `"dateModified"`
+The order for the results, defaults to dateCreated.
 
 ##### orderByDirection?
 

@@ -6,7 +6,7 @@ Get an auditable item graph vertex changeset.
 
 ### headers? {#headers}
 
-> `optional` **headers**: `object`
+> `optional` **headers?**: `object`
 
 The headers which can be used to determine the response data type.
 
@@ -38,12 +38,12 @@ The id of the changeset to get.
 
 ### query? {#query}
 
-> `optional` **query**: `object`
+> `optional` **query?**: `object`
 
 The query parameters.
 
 #### verifySignatureDepth?
 
-> `optional` **verifySignatureDepth**: [`VerifyDepth`](../type-aliases/VerifyDepth.md)
+> `optional` **verifySignatureDepth?**: [`VerifyDepth`](../type-aliases/VerifyDepth.md)
 
 How many signatures to verify, none, current or all, defaults to "none".

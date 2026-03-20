@@ -6,7 +6,7 @@ Response to getting an auditable item graph vertex changeset.
 
 ### headers? {#headers}
 
-> `optional` **headers**: `object`
+> `optional` **headers?**: `object`
 
 The headers which can be used to determine the response data type.
 

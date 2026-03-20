@@ -1,9 +1,10 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import { DataTypeHandlerFactory, type IJsonSchema } from "@twin.org/data-core";
+import { DataTypeHelper } from "@twin.org/data-core";
 import { AuditableItemGraphContexts } from "../models/auditableItemGraphContexts.js";
 import { AuditableItemGraphTypes } from "../models/auditableItemGraphTypes.js";
 import AuditableItemGraphAliasSchema from "../schemas/AuditableItemGraphAlias.json" with { type: "json" };
+import AuditableItemGraphAuditedElementSchema from "../schemas/AuditableItemGraphAuditedElement.json" with { type: "json" };
 import AuditableItemGraphChangesetSchema from "../schemas/AuditableItemGraphChangeset.json" with { type: "json" };
 import AuditableItemGraphEdgeSchema from "../schemas/AuditableItemGraphEdge.json" with { type: "json" };
 import AuditableItemGraphPatchOperationSchema from "../schemas/AuditableItemGraphPatchOperation.json" with { type: "json" };
@@ -19,68 +20,45 @@ export class AuditableItemGraphDataTypes {
 	 * Register all the data types.
 	 */
 	public static registerTypes(): void {
-		DataTypeHandlerFactory.register(
-			`${AuditableItemGraphContexts.Namespace}${AuditableItemGraphTypes.Vertex}`,
-			() => ({
-				namespace: AuditableItemGraphContexts.Namespace,
+		const types = [
+			{
 				type: AuditableItemGraphTypes.Vertex,
-				defaultValue: {},
-				jsonSchema: async () => AuditableItemGraphVertexSchema as IJsonSchema
-			})
-		);
-		DataTypeHandlerFactory.register(
-			`${AuditableItemGraphContexts.Namespace}${AuditableItemGraphTypes.VertexList}`,
-			() => ({
-				namespace: AuditableItemGraphContexts.Namespace,
+				schema: AuditableItemGraphVertexSchema
+			},
+			{
 				type: AuditableItemGraphTypes.VertexList,
-				defaultValue: {},
-				jsonSchema: async () => AuditableItemGraphVertexListSchema as IJsonSchema
-			})
-		);
-		DataTypeHandlerFactory.register(
-			`${AuditableItemGraphContexts.Namespace}${AuditableItemGraphTypes.Alias}`,
-			() => ({
-				namespace: AuditableItemGraphContexts.Namespace,
+				schema: AuditableItemGraphVertexListSchema
+			},
+			{
 				type: AuditableItemGraphTypes.Alias,
-				defaultValue: {},
-				jsonSchema: async () => AuditableItemGraphAliasSchema as IJsonSchema
-			})
-		);
-		DataTypeHandlerFactory.register(
-			`${AuditableItemGraphContexts.Namespace}${AuditableItemGraphTypes.Resource}`,
-			() => ({
-				namespace: AuditableItemGraphContexts.Namespace,
+				schema: AuditableItemGraphAliasSchema
+			},
+			{
 				type: AuditableItemGraphTypes.Resource,
-				defaultValue: {},
-				jsonSchema: async () => AuditableItemGraphResourceSchema as IJsonSchema
-			})
-		);
-		DataTypeHandlerFactory.register(
-			`${AuditableItemGraphContexts.Namespace}${AuditableItemGraphTypes.Edge}`,
-			() => ({
-				namespace: AuditableItemGraphContexts.Namespace,
+				schema: AuditableItemGraphResourceSchema
+			},
+			{
 				type: AuditableItemGraphTypes.Edge,
-				defaultValue: {},
-				jsonSchema: async () => AuditableItemGraphEdgeSchema as IJsonSchema
-			})
-		);
-		DataTypeHandlerFactory.register(
-			`${AuditableItemGraphContexts.Namespace}${AuditableItemGraphTypes.Changeset}`,
-			() => ({
-				namespace: AuditableItemGraphContexts.Namespace,
+				schema: AuditableItemGraphEdgeSchema
+			},
+			{
 				type: AuditableItemGraphTypes.Changeset,
-				defaultValue: {},
-				jsonSchema: async () => AuditableItemGraphChangesetSchema as IJsonSchema
-			})
-		);
-		DataTypeHandlerFactory.register(
-			`${AuditableItemGraphContexts.Namespace}${AuditableItemGraphTypes.PatchOperation}`,
-			() => ({
-				namespace: AuditableItemGraphContexts.Namespace,
+				schema: AuditableItemGraphChangesetSchema
+			},
+			{
 				type: AuditableItemGraphTypes.PatchOperation,
-				defaultValue: {},
-				jsonSchema: async () => AuditableItemGraphPatchOperationSchema as IJsonSchema
-			})
+				schema: AuditableItemGraphPatchOperationSchema
+			},
+			{
+				type: "AuditedElement",
+				schema: AuditableItemGraphAuditedElementSchema
+			}
+		];
+
+		DataTypeHelper.registerTypes(
+			AuditableItemGraphContexts.Namespace,
+			AuditableItemGraphContexts.JsonLdContext,
+			types.map(t => ({ type: `AuditableItemGraph${t.type}`, schema: t.schema }))
 		);
 	}
 }

@@ -38,7 +38,7 @@ JSON-LD Type.
 
 ### annotationObject? {#annotationobject}
 
-> `optional` **annotationObject**: `IJsonLdNodeObject`
+> `optional` **annotationObject?**: `IJsonLdNodeObject`
 
 The JSON-LD annotation object for the alias.
 
@@ -46,7 +46,7 @@ The JSON-LD annotation object for the alias.
 
 ### aliasFormat? {#aliasformat}
 
-> `optional` **aliasFormat**: `string`
+> `optional` **aliasFormat?**: `string`
 
 The format of the id in the alias.
 
@@ -54,7 +54,7 @@ The format of the id in the alias.
 
 ### dateCreated? {#datecreated}
 
-> `optional` **dateCreated**: `string`
+> `optional` **dateCreated?**: `string`
 
 The date/time of when the element was created.
 
@@ -66,7 +66,7 @@ The date/time of when the element was created.
 
 ### dateModified? {#datemodified}
 
-> `optional` **dateModified**: `string`
+> `optional` **dateModified?**: `string`
 
 The date/time of when the element was modified.
 
@@ -78,7 +78,7 @@ The date/time of when the element was modified.
 
 ### dateDeleted? {#datedeleted}
 
-> `optional` **dateDeleted**: `string`
+> `optional` **dateDeleted?**: `string`
 
 The date/time of when the element was deleted, as we never actually remove items.
 

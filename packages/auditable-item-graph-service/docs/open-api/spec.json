@@ -208,11 +208,16 @@
 						"in": "query",
 						"required": false,
 						"schema": {
-							"type": "string",
-							"enum": [
-								"id",
-								"alias",
-								"both"
+							"anyOf": [
+								{
+									"const": "id"
+								},
+								{
+									"const": "alias"
+								},
+								{
+									"const": "both"
+								}
 							]
 						}
 					},
@@ -249,7 +254,6 @@
 						"in": "query",
 						"required": false,
 						"schema": {
-							"type": "string",
 							"enum": [
 								"dateCreated",
 								"dateModified"
@@ -1391,8 +1395,7 @@
 							},
 							"required": [
 								"id"
-							],
-							"additionalProperties": false
+							]
 						},
 						"description": "Alternative aliases that can be used to identify the vertex."
 					},
@@ -1407,8 +1410,7 @@
 								"resourceObject": {
 									"$ref": "https://schema.twindev.org/json-ld/JsonLdNodeObject"
 								}
-							},
-							"additionalProperties": false
+							}
 						},
 						"description": "The resources attached to the vertex."
 					},
@@ -1433,8 +1435,7 @@
 							"required": [
 								"targetId",
 								"edgeRelationships"
-							],
-							"additionalProperties": false
+							]
 						},
 						"description": "The edges connected to the vertex."
 					}
@@ -1467,8 +1468,7 @@
 							},
 							"required": [
 								"id"
-							],
-							"additionalProperties": false
+							]
 						},
 						"description": "Alternative aliases that can be used to identify the vertex."
 					},
@@ -1483,8 +1483,7 @@
 								"resourceObject": {
 									"$ref": "https://schema.twindev.org/json-ld/JsonLdNodeObject"
 								}
-							},
-							"additionalProperties": false
+							}
 						},
 						"description": "The resources attached to the vertex."
 					},
@@ -1512,8 +1511,7 @@
 							"required": [
 								"targetId",
 								"edgeRelationships"
-							],
-							"additionalProperties": false
+							]
 						},
 						"description": "The edges connected to the vertex."
 					}
@@ -1521,6 +1519,7 @@
 				"description": "The data to be used in the vertex."
 			},
 			"Error": {
+				"description": "Model to describe serialized error.",
 				"type": "object",
 				"properties": {
 					"name": {
@@ -1551,43 +1550,37 @@
 				"required": [
 					"name",
 					"message"
-				],
-				"description": "Model to describe serialized error."
+				]
 			},
 			"SortDirection": {
+				"description": "The sort directions.",
 				"anyOf": [
 					{
-						"type": "string",
 						"const": "asc",
 						"description": "Ascending."
 					},
 					{
-						"type": "string",
 						"const": "desc",
 						"description": "Descending."
 					}
-				],
-				"description": "The sort directions."
+				]
 			},
 			"VerifyDepth": {
+				"description": "How deep to verify the signatures.",
 				"anyOf": [
 					{
-						"type": "string",
 						"const": "none",
 						"description": "Do not verify any signatures."
 					},
 					{
-						"type": "string",
 						"const": "current",
 						"description": "Verify only the most recent signature."
 					},
 					{
-						"type": "string",
 						"const": "all",
 						"description": "Verify all the signatures."
 					}
-				],
-				"description": "How deep to verify the signatures."
+				]
 			}
 		},
 		"securitySchemes": {

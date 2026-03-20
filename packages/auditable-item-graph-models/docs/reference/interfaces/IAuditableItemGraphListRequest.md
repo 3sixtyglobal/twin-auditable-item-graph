@@ -6,7 +6,7 @@ Get the a list of the vertices with matching ids or aliases.
 
 ### headers? {#headers}
 
-> `optional` **headers**: `object`
+> `optional` **headers?**: `object`
 
 The headers which can be used to determine the response data type.
 
@@ -18,66 +18,66 @@ The headers which can be used to determine the response data type.
 
 ### query? {#query}
 
-> `optional` **query**: `object`
+> `optional` **query?**: `object`
 
 The query parameters.
 
 #### id?
 
-> `optional` **id**: `string`
+> `optional` **id?**: `string`
 
 The id or alias to try and find.
 
 #### idMode?
 
-> `optional` **idMode**: `"id"` \| `"alias"` \| `"both"`
+> `optional` **idMode?**: `"id"` \| `"alias"` \| `"both"`
 
 Which field to look in with the id, defaults to both.
 
 #### idExact?
 
-> `optional` **idExact**: `string`
+> `optional` **idExact?**: `string`
 
 Find only exact matches, default to false meaning partial matching.
 
 #### resourceTypes?
 
-> `optional` **resourceTypes**: `string`
+> `optional` **resourceTypes?**: `string`
 
 Include vertices with specific resource types, comma separated.
 
 #### conditions?
 
-> `optional` **conditions**: `string`
+> `optional` **conditions?**: `string`
 
 The conditions to filter the streams, JSON stringified IComparator[].
 
 #### orderBy?
 
-> `optional` **orderBy**: `"dateCreated"` \| `"dateModified"`
+> `optional` **orderBy?**: `"dateCreated"` \| `"dateModified"`
 
 The order for the results, default to dateCreated.
 
 #### orderByDirection?
 
-> `optional` **orderByDirection**: `SortDirection`
+> `optional` **orderByDirection?**: `SortDirection`
 
 The direction for the order, defaults to desc.
 
 #### properties?
 
-> `optional` **properties**: `string`
+> `optional` **properties?**: `string`
 
 The properties to return as a comma separated list, defaults to "id,dateCreated,aliases,annotationObject".
 
 #### cursor?
 
-> `optional` **cursor**: `string`
+> `optional` **cursor?**: `string`
 
 The optional cursor to get next chunk.
 
 #### limit?
 
-> `optional` **limit**: `string`
+> `optional` **limit?**: `string`
 
 Limit the number of entities to return.

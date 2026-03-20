@@ -6,7 +6,7 @@ Interface describing a set of changes to the vertex.
 
 ### @context? {#context}
 
-> `optional` **@context**: \[`"https://schema.twindev.org/aig/"`, `"https://schema.twindev.org/common/"`, `...IJsonLdContextDefinitionElement[]`\]
+> `optional` **@context?**: \[`"https://schema.twindev.org/aig/"`, `"https://schema.twindev.org/common/"`, `...IJsonLdContextDefinitionElement[]`\]
 
 JSON-LD Context.
 
@@ -38,7 +38,7 @@ The date/time of when the changeset was created.
 
 ### userIdentity? {#useridentity}
 
-> `optional` **userIdentity**: `string`
+> `optional` **userIdentity?**: `string`
 
 The user identity that created the changes.
 
@@ -54,7 +54,7 @@ The patches in the changeset.
 
 ### proofId? {#proofid}
 
-> `optional` **proofId**: `string`
+> `optional` **proofId?**: `string`
 
 The immutable proof id which contains the signature for this changeset.
 
@@ -62,6 +62,6 @@ The immutable proof id which contains the signature for this changeset.
 
 ### verification? {#verification}
 
-> `optional` **verification**: `IImmutableProofVerification`
+> `optional` **verification?**: `IImmutableProofVerification`
 
 The verification for the changeset.

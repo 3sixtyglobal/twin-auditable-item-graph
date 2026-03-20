@@ -10,7 +10,7 @@ Interface describing an edge between two vertices in an auditable item graph.
 
 ### dateCreated? {#datecreated}
 
-> `optional` **dateCreated**: `string`
+> `optional` **dateCreated?**: `string`
 
 The date/time of when the element was created.
 
@@ -22,7 +22,7 @@ The date/time of when the element was created.
 
 ### dateModified? {#datemodified}
 
-> `optional` **dateModified**: `string`
+> `optional` **dateModified?**: `string`
 
 The date/time of when the element was modified.
 
@@ -34,7 +34,7 @@ The date/time of when the element was modified.
 
 ### dateDeleted? {#datedeleted}
 
-> `optional` **dateDeleted**: `string`
+> `optional` **dateDeleted?**: `string`
 
 The date/time of when the element was deleted, as we never actually remove items.
 
@@ -54,7 +54,7 @@ JSON-LD Context.
 
 ### id? {#id}
 
-> `optional` **id**: `string`
+> `optional` **id?**: `string`
 
 The id of the element.
 
@@ -82,7 +82,7 @@ JSON-LD Type.
 
 ### annotationObject? {#annotationobject}
 
-> `optional` **annotationObject**: `IJsonLdNodeObject`
+> `optional` **annotationObject?**: `IJsonLdNodeObject`
 
 The JSON-LD annotation object for the edge.
 

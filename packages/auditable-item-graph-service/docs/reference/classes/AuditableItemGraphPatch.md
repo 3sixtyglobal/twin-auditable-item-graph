@@ -32,7 +32,7 @@ The path for the patch.
 
 ### from? {#from}
 
-> `optional` **from**: `string`
+> `optional` **from?**: `string`
 
 The from for the patch.
 
@@ -40,6 +40,6 @@ The from for the patch.
 
 ### value? {#value}
 
-> `optional` **value**: `unknown`
+> `optional` **value?**: `unknown`
 
 The value for the patch.

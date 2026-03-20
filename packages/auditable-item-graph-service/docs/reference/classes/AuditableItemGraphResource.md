@@ -16,7 +16,7 @@ Class describing the auditable item graph vertex resource.
 
 ### id? {#id}
 
-> `optional` **id**: `string`
+> `optional` **id?**: `string`
 
 The id of the resource.
 
@@ -32,7 +32,7 @@ The date/time of when the resource was created.
 
 ### dateModified? {#datemodified}
 
-> `optional` **dateModified**: `string`
+> `optional` **dateModified?**: `string`
 
 The date/time of when the resource was last modified.
 
@@ -40,7 +40,7 @@ The date/time of when the resource was last modified.
 
 ### dateDeleted? {#datedeleted}
 
-> `optional` **dateDeleted**: `string`
+> `optional` **dateDeleted?**: `string`
 
 The timestamp of when the resource was deleted, as we never actually remove items.
 
@@ -48,6 +48,6 @@ The timestamp of when the resource was deleted, as we never actually remove item
 
 ### resourceObject? {#resourceobject}
 
-> `optional` **resourceObject**: `IJsonLdNodeObject`
+> `optional` **resourceObject?**: `IJsonLdNodeObject`
 
 Object to associate with the resource as JSON-LD.

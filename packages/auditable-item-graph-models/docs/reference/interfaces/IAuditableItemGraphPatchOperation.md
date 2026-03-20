@@ -6,7 +6,7 @@ The patch operation for JSON diffs.
 
 ### @context? {#context}
 
-> `optional` **@context**: `"https://schema.twindev.org/aig/"` \| \[`"https://schema.twindev.org/aig/"`, `...IJsonLdContextDefinitionElement[]`\]
+> `optional` **@context?**: `"https://schema.twindev.org/aig/"` \| \[`"https://schema.twindev.org/aig/"`, `...IJsonLdContextDefinitionElement[]`\]
 
 JSON-LD Context.
 
@@ -38,7 +38,7 @@ The path to the object that was changed.
 
 ### patchFrom? {#patchfrom}
 
-> `optional` **patchFrom**: `string`
+> `optional` **patchFrom?**: `string`
 
 The path the value was copied or moved from.
 
@@ -46,6 +46,6 @@ The path the value was copied or moved from.
 
 ### patchValue? {#patchvalue}
 
-> `optional` **patchValue**: `unknown`
+> `optional` **patchValue?**: `unknown`
 
 The value to add.

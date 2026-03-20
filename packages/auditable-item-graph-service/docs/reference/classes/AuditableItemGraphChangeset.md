@@ -40,7 +40,7 @@ The date/time of when the changeset was created.
 
 ### userIdentity? {#useridentity}
 
-> `optional` **userIdentity**: `string`
+> `optional` **userIdentity?**: `string`
 
 The identity of the user who made the changeset.
 
@@ -56,6 +56,6 @@ The patches in the changeset.
 
 ### proofId? {#proofid}
 
-> `optional` **proofId**: `string`
+> `optional` **proofId?**: `string`
 
 The immutable proof id which contains the signature for this changeset.

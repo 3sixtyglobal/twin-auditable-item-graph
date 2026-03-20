@@ -10,7 +10,7 @@ Interface describing an auditable item graph vertex.
 
 ### dateCreated? {#datecreated}
 
-> `optional` **dateCreated**: `string`
+> `optional` **dateCreated?**: `string`
 
 The date/time of when the element was created.
 
@@ -22,7 +22,7 @@ The date/time of when the element was created.
 
 ### dateModified? {#datemodified}
 
-> `optional` **dateModified**: `string`
+> `optional` **dateModified?**: `string`
 
 The date/time of when the element was modified.
 
@@ -34,7 +34,7 @@ The date/time of when the element was modified.
 
 ### dateDeleted? {#datedeleted}
 
-> `optional` **dateDeleted**: `string`
+> `optional` **dateDeleted?**: `string`
 
 The date/time of when the element was deleted, as we never actually remove items.
 
@@ -74,7 +74,7 @@ JSON-LD Type.
 
 ### organizationIdentity? {#organizationidentity}
 
-> `optional` **organizationIdentity**: `string`
+> `optional` **organizationIdentity?**: `string`
 
 The identity of the organization which controls the vertex.
 
@@ -82,7 +82,7 @@ The identity of the organization which controls the vertex.
 
 ### annotationObject? {#annotationobject}
 
-> `optional` **annotationObject**: `IJsonLdNodeObject`
+> `optional` **annotationObject?**: `IJsonLdNodeObject`
 
 The JSON-LD annotation object for the vertex.
 
@@ -90,7 +90,7 @@ The JSON-LD annotation object for the vertex.
 
 ### aliases? {#aliases}
 
-> `optional` **aliases**: [`IAuditableItemGraphAlias`](IAuditableItemGraphAlias.md)[]
+> `optional` **aliases?**: [`IAuditableItemGraphAlias`](IAuditableItemGraphAlias.md)[]
 
 Alternative aliases that can be used to identify the vertex.
 
@@ -98,7 +98,7 @@ Alternative aliases that can be used to identify the vertex.
 
 ### resources? {#resources}
 
-> `optional` **resources**: [`IAuditableItemGraphResource`](IAuditableItemGraphResource.md)[]
+> `optional` **resources?**: [`IAuditableItemGraphResource`](IAuditableItemGraphResource.md)[]
 
 The resources attached to the vertex.
 
@@ -106,7 +106,7 @@ The resources attached to the vertex.
 
 ### edges? {#edges}
 
-> `optional` **edges**: [`IAuditableItemGraphEdge`](IAuditableItemGraphEdge.md)[]
+> `optional` **edges?**: [`IAuditableItemGraphEdge`](IAuditableItemGraphEdge.md)[]
 
 Edges connected to the vertex.
 
@@ -114,6 +114,6 @@ Edges connected to the vertex.
 
 ### verified? {#verified}
 
-> `optional` **verified**: `boolean`
+> `optional` **verified?**: `boolean`
 
 Is the vertex verified, will only be populated when verification is requested.
