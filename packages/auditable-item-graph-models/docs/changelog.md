@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.3-next.12](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-models-v0.0.3-next.11...auditable-item-graph-models-v0.0.3-next.12) (2026-03-24)
+
+
+### Features
+
+* add vertex validation ([#54](https://github.com/twinfoundation/auditable-item-graph/issues/54)) ([d3ef124](https://github.com/twinfoundation/auditable-item-graph/commit/d3ef1241f60956dc296e22d063f188921255d68c))
+
 ## [0.0.3-next.11](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-models-v0.0.3-next.10...auditable-item-graph-models-v0.0.3-next.11) (2026-02-25)
 
 
