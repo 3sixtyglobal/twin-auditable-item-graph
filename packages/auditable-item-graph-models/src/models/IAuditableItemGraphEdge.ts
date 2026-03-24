@@ -12,7 +12,7 @@ export interface IAuditableItemGraphEdge extends IAuditableItemGraphAuditedEleme
 	/**
 	 * JSON-LD Context.
 	 */
-	"@context":
+	"@context"?:
 		| typeof AuditableItemGraphContexts.Context
 		| [typeof AuditableItemGraphContexts.Context, ...IJsonLdContextDefinitionElement[]];
 

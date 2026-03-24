@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0.
 import {
 	AuditableItemGraphContexts,
+	AuditableItemGraphDataTypes,
 	AuditableItemGraphTopics,
 	AuditableItemGraphTypes,
 	VerifyDepth,
@@ -33,7 +34,13 @@ import {
 	type IPatchOperation,
 	type IValidationFailure
 } from "@twin.org/core";
-import { JsonLdHelper, JsonLdProcessor, type IJsonLdNodeObject } from "@twin.org/data-json-ld";
+import { DataTypeHelper } from "@twin.org/data-core";
+import {
+	JsonLdDataTypes,
+	JsonLdHelper,
+	JsonLdProcessor,
+	type IJsonLdNodeObject
+} from "@twin.org/data-json-ld";
 import {
 	ComparisonOperator,
 	LogicalOperator,
@@ -149,6 +156,8 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 		}
 
 		SchemaOrgDataTypes.registerRedirects();
+		AuditableItemGraphDataTypes.registerTypes();
+		JsonLdDataTypes.registerTypes();
 	}
 
 	/**
@@ -168,29 +177,30 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	 * @param vertex.edges The edges connected to the vertex.
 	 * @returns The id of the new graph item.
 	 */
-	public async create(vertex: {
-		annotationObject?: IJsonLdNodeObject;
-		aliases?: {
-			id: string;
-			aliasFormat?: string;
-			unique?: boolean;
-			annotationObject?: IJsonLdNodeObject;
-		}[];
-		resources?: {
-			id?: string;
-			resourceObject?: IJsonLdNodeObject;
-		}[];
-		edges?: {
-			targetId: string;
-			edgeRelationships: string[];
-			annotationObject?: IJsonLdNodeObject;
-		}[];
-	}): Promise<string> {
+	public async create(vertex: Omit<IAuditableItemGraphVertex, "id">): Promise<string> {
 		Guards.object(AuditableItemGraphService.CLASS_NAME, nameof(vertex), vertex);
 
 		const contextIds = await ContextIdStore.getContextIds();
 
 		try {
+			const id = RandomHelper.generateUuidV7("compact");
+
+			const schemaValidationFailures: IValidationFailure[] = [];
+			await DataTypeHelper.validate(
+				nameof(vertex),
+				`${AuditableItemGraphContexts.Namespace}${AuditableItemGraphTypes.Vertex}`,
+				{
+					...vertex,
+					id
+				},
+				schemaValidationFailures
+			);
+			Validation.asValidationError(
+				AuditableItemGraphService.CLASS_NAME,
+				nameof(vertex),
+				schemaValidationFailures
+			);
+
 			if (Is.object(vertex.annotationObject)) {
 				const validationFailures: IValidationFailure[] = [];
 				await JsonLdHelper.validate(vertex.annotationObject, validationFailures);
@@ -200,8 +210,6 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 					validationFailures
 				);
 			}
-
-			const id = RandomHelper.generateUuidV7("compact");
 
 			const context: IAuditableItemGraphServiceContext = {
 				now: new Date(Date.now()).toISOString(),
@@ -242,6 +250,103 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			throw new GeneralError(
 				AuditableItemGraphService.CLASS_NAME,
 				"createFailed",
+				undefined,
+				error
+			);
+		}
+	}
+
+	/**
+	 * Update a graph vertex.
+	 * @param vertex The vertex to update.
+	 * @param vertex.id The id of the vertex to update.
+	 * @param vertex.annotationObject The annotation object for the vertex as JSON-LD.
+	 * @param vertex.aliases Alternative aliases that can be used to identify the vertex.
+	 * @param vertex.resources The resources attached to the vertex.
+	 * @param vertex.edges The edges connected to the vertex.
+	 * @returns Nothing.
+	 */
+	public async update(vertex: IAuditableItemGraphVertex): Promise<void> {
+		Guards.object(AuditableItemGraphService.CLASS_NAME, nameof(vertex), vertex);
+		Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(vertex.id), vertex.id);
+
+		const contextIds = await ContextIdStore.getContextIds();
+
+		const urnParsed = Urn.fromValidString(vertex.id);
+
+		if (urnParsed.namespaceIdentifier() !== AuditableItemGraphService.NAMESPACE) {
+			throw new GeneralError(AuditableItemGraphService.CLASS_NAME, "namespaceMismatch", {
+				namespace: AuditableItemGraphService.NAMESPACE,
+				id: vertex.id
+			});
+		}
+
+		try {
+			const schemaValidationFailures: IValidationFailure[] = [];
+			await DataTypeHelper.validate(
+				nameof(vertex),
+				`${AuditableItemGraphContexts.Namespace}${AuditableItemGraphTypes.Vertex}`,
+				vertex,
+				schemaValidationFailures
+			);
+			Validation.asValidationError(
+				AuditableItemGraphService.CLASS_NAME,
+				nameof(vertex),
+				schemaValidationFailures
+			);
+
+			const vertexId = urnParsed.namespaceSpecific(0);
+			const vertexEntity = await this._vertexStorage.get(vertexId);
+
+			if (Is.empty(vertexEntity)) {
+				throw new NotFoundError(AuditableItemGraphService.CLASS_NAME, "vertexNotFound", vertex.id);
+			}
+
+			if (Is.object(vertex.annotationObject)) {
+				const validationFailures: IValidationFailure[] = [];
+				await JsonLdHelper.validate(vertex.annotationObject, validationFailures);
+				Validation.asValidationError(
+					AuditableItemGraphService.CLASS_NAME,
+					nameof(vertex.annotationObject),
+					validationFailures
+				);
+			}
+
+			const context: IAuditableItemGraphServiceContext = {
+				now: new Date(Date.now()).toISOString(),
+				contextIds
+			};
+
+			delete vertexEntity.aliasIndex;
+			const originalEntity = ObjectHelper.clone(vertexEntity);
+			const newEntity = ObjectHelper.clone(vertexEntity);
+
+			newEntity.annotationObject = vertex.annotationObject;
+
+			await this.updateAliasList(context, newEntity, vertex.aliases);
+			await this.updateResourceList(context, newEntity, vertex.resources);
+			await this.updateEdgeList(context, newEntity, vertex.edges);
+
+			const patches = await this.addChangeset(context, originalEntity, newEntity, false);
+			if (patches.length > 0) {
+				newEntity.dateModified = context.now;
+
+				const indexes = this.buildIndexes(newEntity);
+
+				await this._vertexStorage.set({
+					...newEntity,
+					...indexes
+				});
+
+				await this._eventBusComponent?.publish<IAuditableItemGraphEventBusVertexUpdated>(
+					AuditableItemGraphTopics.VertexUpdated,
+					{ id: vertex.id, patches }
+				);
+			}
+		} catch (error) {
+			throw new GeneralError(
+				AuditableItemGraphService.CLASS_NAME,
+				"updatingFailed",
 				undefined,
 				error
 			);
@@ -451,108 +556,6 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			return result;
 		} catch (error) {
 			throw new GeneralError(AuditableItemGraphService.CLASS_NAME, "getFailed", undefined, error);
-		}
-	}
-
-	/**
-	 * Update a graph vertex.
-	 * @param vertex The vertex to update.
-	 * @param vertex.id The id of the vertex to update.
-	 * @param vertex.annotationObject The annotation object for the vertex as JSON-LD.
-	 * @param vertex.aliases Alternative aliases that can be used to identify the vertex.
-	 * @param vertex.resources The resources attached to the vertex.
-	 * @param vertex.edges The edges connected to the vertex.
-	 * @returns Nothing.
-	 */
-	public async update(vertex: {
-		id: string;
-		annotationObject?: IJsonLdNodeObject;
-		aliases?: {
-			id: string;
-			aliasFormat?: string;
-			annotationObject?: IJsonLdNodeObject;
-		}[];
-		resources?: {
-			id?: string;
-			resourceObject?: IJsonLdNodeObject;
-		}[];
-		edges?: {
-			id?: string;
-			targetId: string;
-			edgeRelationships: string[];
-			annotationObject?: IJsonLdNodeObject;
-		}[];
-	}): Promise<void> {
-		Guards.object(AuditableItemGraphService.CLASS_NAME, nameof(vertex), vertex);
-		Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(vertex.id), vertex.id);
-
-		const contextIds = await ContextIdStore.getContextIds();
-
-		const urnParsed = Urn.fromValidString(vertex.id);
-
-		if (urnParsed.namespaceIdentifier() !== AuditableItemGraphService.NAMESPACE) {
-			throw new GeneralError(AuditableItemGraphService.CLASS_NAME, "namespaceMismatch", {
-				namespace: AuditableItemGraphService.NAMESPACE,
-				id: vertex.id
-			});
-		}
-
-		try {
-			const vertexId = urnParsed.namespaceSpecific(0);
-			const vertexEntity = await this._vertexStorage.get(vertexId);
-
-			if (Is.empty(vertexEntity)) {
-				throw new NotFoundError(AuditableItemGraphService.CLASS_NAME, "vertexNotFound", vertex.id);
-			}
-
-			if (Is.object(vertex.annotationObject)) {
-				const validationFailures: IValidationFailure[] = [];
-				await JsonLdHelper.validate(vertex.annotationObject, validationFailures);
-				Validation.asValidationError(
-					AuditableItemGraphService.CLASS_NAME,
-					nameof(vertex.annotationObject),
-					validationFailures
-				);
-			}
-
-			const context: IAuditableItemGraphServiceContext = {
-				now: new Date(Date.now()).toISOString(),
-				contextIds
-			};
-
-			delete vertexEntity.aliasIndex;
-			const originalEntity = ObjectHelper.clone(vertexEntity);
-			const newEntity = ObjectHelper.clone(vertexEntity);
-
-			newEntity.annotationObject = vertex.annotationObject;
-
-			await this.updateAliasList(context, newEntity, vertex.aliases);
-			await this.updateResourceList(context, newEntity, vertex.resources);
-			await this.updateEdgeList(context, newEntity, vertex.edges);
-
-			const patches = await this.addChangeset(context, originalEntity, newEntity, false);
-			if (patches.length > 0) {
-				newEntity.dateModified = context.now;
-
-				const indexes = this.buildIndexes(newEntity);
-
-				await this._vertexStorage.set({
-					...newEntity,
-					...indexes
-				});
-
-				await this._eventBusComponent?.publish<IAuditableItemGraphEventBusVertexUpdated>(
-					AuditableItemGraphTopics.VertexUpdated,
-					{ id: vertex.id, patches }
-				);
-			}
-		} catch (error) {
-			throw new GeneralError(
-				AuditableItemGraphService.CLASS_NAME,
-				"updatingFailed",
-				undefined,
-				error
-			);
 		}
 	}
 
@@ -883,11 +886,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	private async updateAliasList(
 		context: IAuditableItemGraphServiceContext,
 		vertex: AuditableItemGraphVertex,
-		aliases?: {
-			id: string;
-			aliasFormat?: string;
-			annotationObject?: IJsonLdNodeObject;
-		}[]
+		aliases?: IAuditableItemGraphAlias[]
 	): Promise<void> {
 		const active = vertex.aliases?.filter(a => Is.empty(a.dateDeleted)) ?? [];
 
@@ -917,18 +916,13 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	private async updateAlias(
 		context: IAuditableItemGraphServiceContext,
 		vertex: AuditableItemGraphVertex,
-		alias: {
-			id: string;
-			aliasFormat?: string;
-			unique?: boolean;
-			annotationObject?: IJsonLdNodeObject;
-		}
+		alias: IAuditableItemGraphAlias
 	): Promise<void> {
 		Guards.object(AuditableItemGraphService.CLASS_NAME, nameof(alias), alias);
 		Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(alias.id), alias.id);
 
 		if (alias.unique ?? false) {
-			const existingVertices = await this.findMatchingVertices(context, vertex.id, alias.id);
+			const existingVertices = await this.findMatchingVertices(vertex.id, alias.id);
 			if (existingVertices) {
 				throw new GeneralError(AuditableItemGraphService.CLASS_NAME, "aliasNotUnique", {
 					aliasId: alias.id
@@ -957,18 +951,21 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				id: alias.id,
 				aliasFormat: alias.aliasFormat,
 				dateCreated: context.now,
-				annotationObject: alias.annotationObject
+				annotationObject: alias.annotationObject,
+				unique: alias.unique
 			};
 
 			vertex.aliases.push(model);
 		} else if (
 			existing.aliasFormat !== alias.aliasFormat ||
-			!ObjectHelper.equal(existing.annotationObject, alias.annotationObject, false)
+			!ObjectHelper.equal(existing.annotationObject, alias.annotationObject, false) ||
+			existing.unique !== alias.unique
 		) {
 			// Existing alias found, update the annotationObject.
 			existing.dateModified = context.now;
 			existing.aliasFormat = alias.aliasFormat;
 			existing.annotationObject = alias.annotationObject;
+			existing.unique = alias.unique;
 		}
 	}
 
@@ -982,10 +979,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	private async updateResourceList(
 		context: IAuditableItemGraphServiceContext,
 		vertex: AuditableItemGraphVertex,
-		resources?: {
-			id?: string;
-			resourceObject?: IJsonLdNodeObject;
-		}[]
+		resources?: IAuditableItemGraphResource[]
 	): Promise<void> {
 		if (Is.arrayValue(resources)) {
 			for (let i = 0; i < resources.length; i++) {
@@ -1026,10 +1020,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	private async updateResource(
 		context: IAuditableItemGraphServiceContext,
 		vertex: AuditableItemGraphVertex,
-		resource: {
-			id?: string;
-			resourceObject?: IJsonLdNodeObject;
-		}
+		resource: IAuditableItemGraphResource
 	): Promise<void> {
 		Guards.object(AuditableItemGraphService.CLASS_NAME, nameof(resource), resource);
 
@@ -1076,12 +1067,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	private async updateEdgeList(
 		context: IAuditableItemGraphServiceContext,
 		vertex: AuditableItemGraphVertex,
-		edges?: {
-			id?: string;
-			targetId: string;
-			edgeRelationships: string[];
-			annotationObject?: IJsonLdNodeObject;
-		}[]
+		edges?: IAuditableItemGraphEdge[]
 	): Promise<void> {
 		const active = vertex.edges?.filter(e => Is.empty(e.dateDeleted)) ?? [];
 
@@ -1111,12 +1097,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	private async updateEdge(
 		context: IAuditableItemGraphServiceContext,
 		vertex: AuditableItemGraphVertex,
-		edge: {
-			id?: string;
-			targetId: string;
-			edgeRelationships: string[];
-			annotationObject?: IJsonLdNodeObject;
-		}
+		edge: IAuditableItemGraphEdge
 	): Promise<void> {
 		Guards.object(AuditableItemGraphService.CLASS_NAME, nameof(edge), edge);
 		Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(edge.targetId), edge.targetId);
@@ -1420,11 +1401,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	 * @returns True if any other vertices have matching aliases.
 	 * @internal
 	 */
-	private async findMatchingVertices(
-		context: IAuditableItemGraphServiceContext,
-		vertexId: string,
-		aliasId: string
-	): Promise<boolean> {
+	private async findMatchingVertices(vertexId: string, aliasId: string): Promise<boolean> {
 		const results = await this._vertexStorage.query({
 			conditions: [
 				{

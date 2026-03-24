@@ -17,11 +17,10 @@ describe("AuditableItemGraphDataTypes", () => {
 		const validationFailures: IValidationFailure[] = [];
 		const isValid = await DataTypeHelper.validate(
 			"",
-			`${AuditableItemGraphContexts.Namespace}AuditableItemGraph${AuditableItemGraphTypes.Vertex}`,
+			`${AuditableItemGraphContexts.Namespace}${AuditableItemGraphTypes.Vertex}`,
 			{},
 			validationFailures
 		);
-		console.log(validationFailures);
 		expect(validationFailures.length).toEqual(3);
 		expect(isValid).toEqual(false);
 	});
@@ -30,7 +29,7 @@ describe("AuditableItemGraphDataTypes", () => {
 		const validationFailures: IValidationFailure[] = [];
 		const isValid = await DataTypeHelper.validate(
 			"",
-			`${AuditableItemGraphContexts.Namespace}AuditableItemGraph${AuditableItemGraphTypes.Vertex}`,
+			`${AuditableItemGraphContexts.Namespace}${AuditableItemGraphTypes.Vertex}`,
 			{
 				"@context": [
 					AuditableItemGraphContexts.Namespace,

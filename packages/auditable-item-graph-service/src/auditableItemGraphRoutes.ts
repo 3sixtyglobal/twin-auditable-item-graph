@@ -69,6 +69,11 @@ export function generateRestRoutesAuditableItemGraph(
 					id: "auditableItemGraphCreateRequestExample",
 					request: {
 						body: {
+							"@context": [
+								AuditableItemGraphContexts.Context,
+								AuditableItemGraphContexts.ContextCommon
+							],
+							type: AuditableItemGraphTypes.Vertex,
 							annotationObject: {
 								"@context": "https://schema.org",
 								"@type": "Note",
@@ -76,6 +81,7 @@ export function generateRestRoutesAuditableItemGraph(
 							},
 							aliases: [
 								{
+									type: AuditableItemGraphTypes.Alias,
 									id: "bar456",
 									annotationObject: {
 										"@context": "https://schema.org",
@@ -84,6 +90,7 @@ export function generateRestRoutesAuditableItemGraph(
 									}
 								},
 								{
+									type: AuditableItemGraphTypes.Alias,
 									id: "foo321",
 									annotationObject: {
 										"@context": "https://schema.org",
@@ -94,6 +101,7 @@ export function generateRestRoutesAuditableItemGraph(
 							],
 							resources: [
 								{
+									type: AuditableItemGraphTypes.Resource,
 									id: "resource1",
 									resourceObject: {
 										"@context": "https://schema.org",
@@ -102,6 +110,7 @@ export function generateRestRoutesAuditableItemGraph(
 									}
 								},
 								{
+									type: AuditableItemGraphTypes.Resource,
 									id: "resource2",
 									resourceObject: {
 										"@context": "https://schema.org",
@@ -112,6 +121,7 @@ export function generateRestRoutesAuditableItemGraph(
 							],
 							edges: [
 								{
+									type: AuditableItemGraphTypes.Edge,
 									targetId: "aig:1234567890",
 									edgeRelationships: ["frenemy"],
 									annotationObject: {
@@ -121,6 +131,7 @@ export function generateRestRoutesAuditableItemGraph(
 									}
 								},
 								{
+									type: AuditableItemGraphTypes.Edge,
 									targetId: "aig:45678901234",
 									edgeRelationships: ["end"],
 									annotationObject: {
@@ -553,6 +564,11 @@ export function generateRestRoutesAuditableItemGraph(
 							id: "aig:1234567890"
 						},
 						body: {
+							"@context": [
+								AuditableItemGraphContexts.Context,
+								AuditableItemGraphContexts.ContextCommon
+							],
+							type: AuditableItemGraphTypes.Vertex,
 							annotationObject: {
 								"@context": "https://schema.org",
 								"@type": "Note",
@@ -560,6 +576,7 @@ export function generateRestRoutesAuditableItemGraph(
 							},
 							aliases: [
 								{
+									type: AuditableItemGraphTypes.Alias,
 									id: "bar456",
 									annotationObject: {
 										"@context": "https://schema.org",
@@ -568,6 +585,7 @@ export function generateRestRoutesAuditableItemGraph(
 									}
 								},
 								{
+									type: AuditableItemGraphTypes.Alias,
 									id: "foo321",
 									annotationObject: {
 										"@context": "https://schema.org",
@@ -578,6 +596,7 @@ export function generateRestRoutesAuditableItemGraph(
 							],
 							resources: [
 								{
+									type: AuditableItemGraphTypes.Resource,
 									id: "resource1",
 									resourceObject: {
 										"@context": "https://schema.org",
@@ -586,6 +605,7 @@ export function generateRestRoutesAuditableItemGraph(
 									}
 								},
 								{
+									type: AuditableItemGraphTypes.Resource,
 									id: "resource2",
 									resourceObject: {
 										"@context": "https://schema.org",
@@ -596,6 +616,7 @@ export function generateRestRoutesAuditableItemGraph(
 							],
 							edges: [
 								{
+									type: AuditableItemGraphTypes.Edge,
 									id: "edge1",
 									targetId: "aig:1234567890",
 									edgeRelationships: ["frenemy"],
@@ -606,6 +627,7 @@ export function generateRestRoutesAuditableItemGraph(
 									}
 								},
 								{
+									type: AuditableItemGraphTypes.Edge,
 									id: "edge2",
 									targetId: "aig:45678901234",
 									edgeRelationships: ["end"],

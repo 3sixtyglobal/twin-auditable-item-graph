@@ -50,7 +50,7 @@ export class AuditableItemGraphDataTypes {
 				schema: AuditableItemGraphPatchOperationSchema
 			},
 			{
-				type: "AuditedElement",
+				type: "AuditableItemGraphAuditedElement",
 				schema: AuditableItemGraphAuditedElementSchema
 			}
 		];
@@ -58,7 +58,7 @@ export class AuditableItemGraphDataTypes {
 		DataTypeHelper.registerTypes(
 			AuditableItemGraphContexts.Namespace,
 			AuditableItemGraphContexts.JsonLdContext,
-			types.map(t => ({ type: `AuditableItemGraph${t.type}`, schema: t.schema }))
+			types.map(t => ({ type: t.type, schema: t.schema }))
 		);
 	}
 }

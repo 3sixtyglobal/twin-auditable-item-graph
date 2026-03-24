@@ -1,7 +1,15 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
 import { TenantIdContextIdHandler } from "@twin.org/api-tenant-processor";
-import { VerifyDepth } from "@twin.org/auditable-item-graph-models";
+import {
+	AuditableItemGraphContexts,
+	AuditableItemGraphTypes,
+	type IAuditableItemGraphAlias,
+	type IAuditableItemGraphEdge,
+	type IAuditableItemGraphResource,
+	type IAuditableItemGraphVertex,
+	VerifyDepth
+} from "@twin.org/auditable-item-graph-models";
 import {
 	type BackgroundTask,
 	BackgroundTaskService,
@@ -185,7 +193,10 @@ describe("AuditableItemGraphService", () => {
 
 	test("Can create a vertex with no properties", async () => {
 		const service = new AuditableItemGraphService();
-		const id = await service.create({});
+		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex
+		});
 		expect(id).toMatch(AIG_URN_PATTERN);
 
 		await waitForProofGeneration();
@@ -252,7 +263,12 @@ describe("AuditableItemGraphService", () => {
 	test("Can create a vertex with an alias", async () => {
 		const service = new AuditableItemGraphService();
 		const id = await service.create({
-			aliases: [{ id: "foo123" }, { id: "bar456" }]
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			aliases: [
+				{ type: AuditableItemGraphTypes.Alias, id: "foo123" },
+				{ type: AuditableItemGraphTypes.Alias, id: "bar456" }
+			]
 		});
 		expect(id).toMatch(AIG_URN_PATTERN);
 		const storedVertexId = extractAigId(id);
@@ -343,6 +359,8 @@ describe("AuditableItemGraphService", () => {
 	test("Can create a vertex with object", async () => {
 		const service = new AuditableItemGraphService();
 		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
 			annotationObject: {
 				"@context": "https://www.w3.org/ns/activitystreams",
 				type: "Create",
@@ -456,6 +474,8 @@ describe("AuditableItemGraphService", () => {
 	test("Can get a vertex", async () => {
 		const service = new AuditableItemGraphService();
 		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
 			annotationObject: {
 				"@context": "https://www.w3.org/ns/activitystreams",
 				type: "Create",
@@ -470,7 +490,10 @@ describe("AuditableItemGraphService", () => {
 				},
 				published: "2015-01-25T12:34:56Z"
 			},
-			aliases: [{ id: "foo123" }, { id: "bar456" }]
+			aliases: [
+				{ type: AuditableItemGraphTypes.Alias, id: "foo123" },
+				{ type: AuditableItemGraphTypes.Alias, id: "bar456" }
+			]
 		});
 		expect(id).toMatch(AIG_URN_PATTERN);
 
@@ -482,7 +505,7 @@ describe("AuditableItemGraphService", () => {
 				"https://schema.twindev.org/common/",
 				"https://schema.org"
 			],
-			type: "AuditableItemGraphVertex",
+			type: AuditableItemGraphTypes.Vertex,
 			id,
 			dateCreated: expect.any(String),
 			organizationIdentity: TEST_ORGANIZATION_IDENTITY,
@@ -502,12 +525,12 @@ describe("AuditableItemGraphService", () => {
 			},
 			aliases: [
 				{
-					type: "AuditableItemGraphAlias",
+					type: AuditableItemGraphTypes.Alias,
 					id: "foo123",
 					dateCreated: expect.any(String)
 				},
 				{
-					type: "AuditableItemGraphAlias",
+					type: AuditableItemGraphTypes.Alias,
 					id: "bar456",
 					dateCreated: expect.any(String)
 				}
@@ -518,6 +541,8 @@ describe("AuditableItemGraphService", () => {
 	test("Can get a vertex changesets", async () => {
 		const service = new AuditableItemGraphService();
 		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
 			annotationObject: {
 				"@context": "https://www.w3.org/ns/activitystreams",
 				type: "Create",
@@ -533,8 +558,8 @@ describe("AuditableItemGraphService", () => {
 				published: "2015-01-25T12:34:56Z"
 			},
 			aliases: [
-				{ id: "foo123", aliasFormat: "type1" },
-				{ id: "bar456", aliasFormat: "type2" }
+				{ type: AuditableItemGraphTypes.Alias, id: "foo123", aliasFormat: "type1" },
+				{ type: AuditableItemGraphTypes.Alias, id: "bar456", aliasFormat: "type2" }
 			]
 		});
 		expect(id).toMatch(AIG_URN_PATTERN);
@@ -550,15 +575,15 @@ describe("AuditableItemGraphService", () => {
 				"https://schema.twindev.org/aig/",
 				"https://schema.twindev.org/common/"
 			],
-			type: ["ItemList", "AuditableItemGraphChangesetList"],
+			type: ["ItemList", AuditableItemGraphTypes.ChangesetList],
 			itemListElement: [
 				{
 					id: changesetUrn,
-					type: "AuditableItemGraphChangeset",
+					type: AuditableItemGraphTypes.Changeset,
 					dateCreated: "2024-08-22T11:56:56.272Z",
 					patches: [
 						{
-							type: "AuditableItemGraphPatchOperation",
+							type: AuditableItemGraphTypes.PatchOperation,
 							patchOperation: "add",
 							patchPath: "/annotationObject",
 							patchValue: {
@@ -577,7 +602,7 @@ describe("AuditableItemGraphService", () => {
 							}
 						},
 						{
-							type: "AuditableItemGraphPatchOperation",
+							type: AuditableItemGraphTypes.PatchOperation,
 							patchOperation: "add",
 							patchPath: "/aliases",
 							patchValue: [
@@ -639,6 +664,8 @@ describe("AuditableItemGraphService", () => {
 	test("Can get a vertex changeset", async () => {
 		const service = new AuditableItemGraphService();
 		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
 			annotationObject: {
 				"@context": "https://www.w3.org/ns/activitystreams",
 				type: "Create",
@@ -654,8 +681,8 @@ describe("AuditableItemGraphService", () => {
 				published: "2015-01-25T12:34:56Z"
 			},
 			aliases: [
-				{ id: "foo123", aliasFormat: "type1" },
-				{ id: "bar456", aliasFormat: "type2" }
+				{ type: AuditableItemGraphTypes.Alias, id: "foo123", aliasFormat: "type1" },
+				{ type: AuditableItemGraphTypes.Alias, id: "bar456", aliasFormat: "type2" }
 			]
 		});
 		expect(id.startsWith("aig:")).toEqual(true);
@@ -678,14 +705,14 @@ describe("AuditableItemGraphService", () => {
 					"https://schema.org",
 					"https://schema.twindev.org/immutable-proof/"
 				],
-				type: "AuditableItemGraphChangeset",
+				type: AuditableItemGraphTypes.Changeset,
 				id: changesetUrn,
 				dateCreated: expect.any(String),
 				userIdentity: TEST_USER_IDENTITY,
 				proofId: expect.stringMatching(/^immutable-proof:/),
 				patches: [
 					{
-						type: "AuditableItemGraphPatchOperation",
+						type: AuditableItemGraphTypes.PatchOperation,
 						patchOperation: "add",
 						patchPath: "/annotationObject",
 						patchValue: {
@@ -704,7 +731,7 @@ describe("AuditableItemGraphService", () => {
 						}
 					},
 					{
-						type: "AuditableItemGraphPatchOperation",
+						type: AuditableItemGraphTypes.PatchOperation,
 						patchOperation: "add",
 						patchPath: "/aliases",
 						patchValue: [
@@ -730,6 +757,8 @@ describe("AuditableItemGraphService", () => {
 	test("Can get vertex changesets and verify current signature", async () => {
 		const service = new AuditableItemGraphService();
 		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
 			annotationObject: {
 				"@context": "https://www.w3.org/ns/activitystreams",
 				type: "Create",
@@ -744,11 +773,16 @@ describe("AuditableItemGraphService", () => {
 				},
 				published: "2015-01-25T12:34:56Z"
 			},
-			aliases: [{ id: "foo123" }, { id: "bar456" }]
+			aliases: [
+				{ type: AuditableItemGraphTypes.Alias, id: "foo123" },
+				{ type: AuditableItemGraphTypes.Alias, id: "bar456" }
+			]
 		});
 
 		await service.update({
 			id,
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
 			annotationObject: {
 				"@context": "https://www.w3.org/ns/activitystreams",
 				type: "Create",
@@ -763,7 +797,10 @@ describe("AuditableItemGraphService", () => {
 				},
 				published: "2015-01-25T12:34:56Z"
 			},
-			aliases: [{ id: "foo321" }, { id: "bar456" }]
+			aliases: [
+				{ type: AuditableItemGraphTypes.Alias, id: "foo321" },
+				{ type: AuditableItemGraphTypes.Alias, id: "bar456" }
+			]
 		});
 
 		await waitForProofGeneration(2);
@@ -782,6 +819,8 @@ describe("AuditableItemGraphService", () => {
 	test("Can get vertex changesets and verify all signatures", async () => {
 		const service = new AuditableItemGraphService();
 		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
 			annotationObject: {
 				"@context": "https://www.w3.org/ns/activitystreams",
 				type: "Create",
@@ -796,11 +835,16 @@ describe("AuditableItemGraphService", () => {
 				},
 				published: "2015-01-25T12:34:56Z"
 			},
-			aliases: [{ id: "foo123" }, { id: "bar456" }]
+			aliases: [
+				{ type: AuditableItemGraphTypes.Alias, id: "foo123" },
+				{ type: AuditableItemGraphTypes.Alias, id: "bar456" }
+			]
 		});
 
 		await service.update({
 			id,
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
 			annotationObject: {
 				"@context": "https://www.w3.org/ns/activitystreams",
 				type: "Create",
@@ -815,7 +859,10 @@ describe("AuditableItemGraphService", () => {
 				},
 				published: "2015-01-25T12:34:56Z"
 			},
-			aliases: [{ id: "foo321" }, { id: "bar456" }]
+			aliases: [
+				{ type: AuditableItemGraphTypes.Alias, id: "foo321" },
+				{ type: AuditableItemGraphTypes.Alias, id: "bar456" }
+			]
 		});
 
 		await waitForProofGeneration(2);
@@ -835,6 +882,8 @@ describe("AuditableItemGraphService", () => {
 	test("Can page vertex changesets using cursor and limit", async () => {
 		const service = new AuditableItemGraphService();
 		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
 			annotationObject: {
 				"@context": "https://www.w3.org/ns/activitystreams",
 				type: "Create",
@@ -849,11 +898,16 @@ describe("AuditableItemGraphService", () => {
 				},
 				published: "2015-01-25T12:34:56Z"
 			},
-			aliases: [{ id: "foo123" }, { id: "bar456" }]
+			aliases: [
+				{ type: AuditableItemGraphTypes.Alias, id: "foo123" },
+				{ type: AuditableItemGraphTypes.Alias, id: "bar456" }
+			]
 		});
 
 		await service.update({
 			id,
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
 			annotationObject: {
 				"@context": "https://www.w3.org/ns/activitystreams",
 				type: "Create",
@@ -868,7 +922,10 @@ describe("AuditableItemGraphService", () => {
 				},
 				published: "2015-01-25T12:34:56Z"
 			},
-			aliases: [{ id: "foo321" }, { id: "bar456" }]
+			aliases: [
+				{ type: AuditableItemGraphTypes.Alias, id: "foo321" },
+				{ type: AuditableItemGraphTypes.Alias, id: "bar456" }
+			]
 		});
 
 		const firstPage = await service.getChangesets(id, undefined, 1);
@@ -882,6 +939,8 @@ describe("AuditableItemGraphService", () => {
 	test("Can get a vertex and verify current signature", async () => {
 		const service = new AuditableItemGraphService();
 		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
 			annotationObject: {
 				"@context": "https://www.w3.org/ns/activitystreams",
 				type: "Create",
@@ -896,7 +955,10 @@ describe("AuditableItemGraphService", () => {
 				},
 				published: "2015-01-25T12:34:56Z"
 			},
-			aliases: [{ id: "foo123" }, { id: "bar456" }]
+			aliases: [
+				{ type: AuditableItemGraphTypes.Alias, id: "foo123" },
+				{ type: AuditableItemGraphTypes.Alias, id: "bar456" }
+			]
 		});
 
 		expect(id).toMatch(AIG_URN_PATTERN);
@@ -915,7 +977,7 @@ describe("AuditableItemGraphService", () => {
 				"https://schema.org",
 				"https://schema.twindev.org/immutable-proof/"
 			],
-			type: "AuditableItemGraphVertex",
+			type: AuditableItemGraphTypes.Vertex,
 			id,
 			dateCreated: expect.any(String),
 			organizationIdentity: TEST_ORGANIZATION_IDENTITY,
@@ -927,8 +989,8 @@ describe("AuditableItemGraphService", () => {
 				published: "2015-01-25T12:34:56Z"
 			},
 			aliases: [
-				{ type: "AuditableItemGraphAlias", id: "foo123", dateCreated: expect.any(String) },
-				{ type: "AuditableItemGraphAlias", id: "bar456", dateCreated: expect.any(String) }
+				{ type: AuditableItemGraphTypes.Alias, id: "foo123", dateCreated: expect.any(String) },
+				{ type: AuditableItemGraphTypes.Alias, id: "bar456", dateCreated: expect.any(String) }
 			],
 			verified: true
 		});
@@ -1014,6 +1076,8 @@ describe("AuditableItemGraphService", () => {
 	test("Can create and update with no changes and verify", async () => {
 		const service = new AuditableItemGraphService();
 		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
 			annotationObject: {
 				"@context": "https://www.w3.org/ns/activitystreams",
 				type: "Create",
@@ -1028,11 +1092,16 @@ describe("AuditableItemGraphService", () => {
 				},
 				published: "2015-01-25T12:34:56Z"
 			},
-			aliases: [{ id: "foo123" }, { id: "bar456" }]
+			aliases: [
+				{ type: AuditableItemGraphTypes.Alias, id: "foo123" },
+				{ type: AuditableItemGraphTypes.Alias, id: "bar456" }
+			]
 		});
 
 		await service.update({
 			id,
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
 			annotationObject: {
 				"@context": "https://www.w3.org/ns/activitystreams",
 				type: "Create",
@@ -1047,7 +1116,10 @@ describe("AuditableItemGraphService", () => {
 				},
 				published: "2015-01-25T12:34:56Z"
 			},
-			aliases: [{ id: "foo123" }, { id: "bar456" }]
+			aliases: [
+				{ type: AuditableItemGraphTypes.Alias, id: "foo123" },
+				{ type: AuditableItemGraphTypes.Alias, id: "bar456" }
+			]
 		});
 
 		await waitForProofGeneration();
@@ -1064,11 +1136,11 @@ describe("AuditableItemGraphService", () => {
 				"https://schema.twindev.org/immutable-proof/"
 			],
 			id,
-			type: "AuditableItemGraphVertex",
+			type: AuditableItemGraphTypes.Vertex,
 			dateCreated: expect.any(String),
 			aliases: [
-				{ id: "foo123", type: "AuditableItemGraphAlias", dateCreated: expect.any(String) },
-				{ id: "bar456", type: "AuditableItemGraphAlias", dateCreated: expect.any(String) }
+				{ id: "foo123", type: AuditableItemGraphTypes.Alias, dateCreated: expect.any(String) },
+				{ id: "bar456", type: AuditableItemGraphTypes.Alias, dateCreated: expect.any(String) }
 			],
 			annotationObject: {
 				"@context": "https://www.w3.org/ns/activitystreams",
@@ -1121,6 +1193,8 @@ describe("AuditableItemGraphService", () => {
 	test("Can create and update and verify aliases", async () => {
 		const service = new AuditableItemGraphService();
 		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
 			annotationObject: {
 				"@context": "https://www.w3.org/ns/activitystreams",
 				type: "Create",
@@ -1135,11 +1209,16 @@ describe("AuditableItemGraphService", () => {
 				},
 				published: "2015-01-25T12:34:56Z"
 			},
-			aliases: [{ id: "foo123" }, { id: "bar456" }]
+			aliases: [
+				{ type: AuditableItemGraphTypes.Alias, id: "foo123" },
+				{ type: AuditableItemGraphTypes.Alias, id: "bar456" }
+			]
 		});
 
 		await service.update({
 			id,
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
 			annotationObject: {
 				"@context": "https://www.w3.org/ns/activitystreams",
 				type: "Create",
@@ -1154,7 +1233,10 @@ describe("AuditableItemGraphService", () => {
 				},
 				published: "2015-01-25T12:34:56Z"
 			},
-			aliases: [{ id: "foo321" }, { id: "bar456" }]
+			aliases: [
+				{ type: AuditableItemGraphTypes.Alias, id: "foo321" },
+				{ type: AuditableItemGraphTypes.Alias, id: "bar456" }
+			]
 		});
 
 		await waitForProofGeneration(2);
@@ -1172,18 +1254,18 @@ describe("AuditableItemGraphService", () => {
 				"https://schema.twindev.org/immutable-proof/"
 			],
 			id,
-			type: "AuditableItemGraphVertex",
+			type: AuditableItemGraphTypes.Vertex,
 			dateCreated: expect.any(String),
 			dateModified: expect.any(String),
 			aliases: [
 				{
-					type: "AuditableItemGraphAlias",
+					type: AuditableItemGraphTypes.Alias,
 					id: "foo123",
 					dateCreated: expect.any(String),
 					dateDeleted: expect.any(String)
 				},
-				{ type: "AuditableItemGraphAlias", id: "bar456", dateCreated: expect.any(String) },
-				{ type: "AuditableItemGraphAlias", id: "foo321", dateCreated: expect.any(String) }
+				{ type: AuditableItemGraphTypes.Alias, id: "bar456", dateCreated: expect.any(String) },
+				{ type: AuditableItemGraphTypes.Alias, id: "foo321", dateCreated: expect.any(String) }
 			],
 			organizationIdentity: TEST_ORGANIZATION_IDENTITY,
 			verified: true,
@@ -1304,6 +1386,8 @@ describe("AuditableItemGraphService", () => {
 	test("Can create and update and verify aliases and object", async () => {
 		const service = new AuditableItemGraphService();
 		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
 			annotationObject: {
 				"@context": "https://www.w3.org/ns/activitystreams",
 				type: "Create",
@@ -1318,10 +1402,15 @@ describe("AuditableItemGraphService", () => {
 				},
 				published: "2015-01-25T12:34:56Z"
 			},
-			aliases: [{ id: "foo123" }, { id: "bar456" }]
+			aliases: [
+				{ type: AuditableItemGraphTypes.Alias, id: "foo123" },
+				{ type: AuditableItemGraphTypes.Alias, id: "bar456" }
+			]
 		});
 
 		await service.update({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
 			id,
 			annotationObject: {
 				"@context": "https://www.w3.org/ns/activitystreams",
@@ -1337,7 +1426,10 @@ describe("AuditableItemGraphService", () => {
 				},
 				published: "2015-01-25T12:34:56Z"
 			},
-			aliases: [{ id: "foo123" }, { id: "bar456" }]
+			aliases: [
+				{ type: AuditableItemGraphTypes.Alias, id: "foo123" },
+				{ type: AuditableItemGraphTypes.Alias, id: "bar456" }
+			]
 		});
 
 		await waitForProofGeneration(2);
@@ -1354,12 +1446,12 @@ describe("AuditableItemGraphService", () => {
 				"https://schema.twindev.org/immutable-proof/"
 			],
 			id,
-			type: "AuditableItemGraphVertex",
+			type: AuditableItemGraphTypes.Vertex,
 			dateCreated: expect.any(String),
 			dateModified: expect.any(String),
 			aliases: [
-				{ id: "foo123", type: "AuditableItemGraphAlias", dateCreated: expect.any(String) },
-				{ id: "bar456", type: "AuditableItemGraphAlias", dateCreated: expect.any(String) }
+				{ id: "foo123", type: AuditableItemGraphTypes.Alias, dateCreated: expect.any(String) },
+				{ id: "bar456", type: AuditableItemGraphTypes.Alias, dateCreated: expect.any(String) }
 			],
 			annotationObject: {
 				"@context": "https://www.w3.org/ns/activitystreams",
@@ -1479,6 +1571,8 @@ describe("AuditableItemGraphService", () => {
 	test("Can create and update and verify resources, aliases and object", async () => {
 		const service = new AuditableItemGraphService();
 		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
 			annotationObject: {
 				"@context": "https://www.w3.org/ns/activitystreams",
 				type: "Create",
@@ -1493,9 +1587,13 @@ describe("AuditableItemGraphService", () => {
 				},
 				published: "2015-01-25T12:34:56Z"
 			},
-			aliases: [{ id: "foo123" }, { id: "bar456" }],
+			aliases: [
+				{ type: AuditableItemGraphTypes.Alias, id: "foo123" },
+				{ type: AuditableItemGraphTypes.Alias, id: "bar456" }
+			],
 			resources: [
 				{
+					type: AuditableItemGraphTypes.Resource,
 					id: "resource1",
 					resourceObject: {
 						"@context": "https://www.w3.org/ns/activitystreams",
@@ -1513,6 +1611,7 @@ describe("AuditableItemGraphService", () => {
 					}
 				},
 				{
+					type: AuditableItemGraphTypes.Resource,
 					id: "resource2",
 					resourceObject: {
 						"@context": "https://www.w3.org/ns/activitystreams",
@@ -1533,6 +1632,8 @@ describe("AuditableItemGraphService", () => {
 		});
 
 		await service.update({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
 			id,
 			annotationObject: {
 				"@context": "https://www.w3.org/ns/activitystreams",
@@ -1548,9 +1649,13 @@ describe("AuditableItemGraphService", () => {
 				},
 				published: "2015-01-25T12:34:56Z"
 			},
-			aliases: [{ id: "foo123" }, { id: "bar456" }],
+			aliases: [
+				{ type: AuditableItemGraphTypes.Alias, id: "foo123" },
+				{ type: AuditableItemGraphTypes.Alias, id: "bar456" }
+			],
 			resources: [
 				{
+					type: AuditableItemGraphTypes.Resource,
 					id: "resource1",
 					resourceObject: {
 						"@context": "https://www.w3.org/ns/activitystreams",
@@ -1568,6 +1673,7 @@ describe("AuditableItemGraphService", () => {
 					}
 				},
 				{
+					type: AuditableItemGraphTypes.Resource,
 					id: "resource2",
 					resourceObject: {
 						"@context": "https://www.w3.org/ns/activitystreams",
@@ -1601,17 +1707,17 @@ describe("AuditableItemGraphService", () => {
 				"https://schema.twindev.org/immutable-proof/"
 			],
 			id,
-			type: "AuditableItemGraphVertex",
+			type: AuditableItemGraphTypes.Vertex,
 			dateCreated: expect.any(String),
 			dateModified: expect.any(String),
 			aliases: [
-				{ id: "foo123", type: "AuditableItemGraphAlias", dateCreated: expect.any(String) },
-				{ id: "bar456", type: "AuditableItemGraphAlias", dateCreated: expect.any(String) }
+				{ id: "foo123", type: AuditableItemGraphTypes.Alias, dateCreated: expect.any(String) },
+				{ id: "bar456", type: AuditableItemGraphTypes.Alias, dateCreated: expect.any(String) }
 			],
 			resources: [
 				{
 					id: "resource1",
-					type: "AuditableItemGraphResource",
+					type: AuditableItemGraphTypes.Resource,
 					dateCreated: expect.any(String),
 					dateModified: expect.any(String),
 					resourceObject: {
@@ -1624,7 +1730,7 @@ describe("AuditableItemGraphService", () => {
 				},
 				{
 					id: "resource2",
-					type: "AuditableItemGraphResource",
+					type: AuditableItemGraphTypes.Resource,
 					dateCreated: expect.any(String),
 					dateModified: expect.any(String),
 					resourceObject: {
@@ -1794,8 +1900,11 @@ describe("AuditableItemGraphService", () => {
 	test("Can create and update and verify edges", async () => {
 		const service = new AuditableItemGraphService();
 		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
 			edges: [
 				{
+					type: AuditableItemGraphTypes.Edge,
 					targetId: "aig:1010101010101010101010101010101010101010101010101010101010101010",
 					edgeRelationships: ["friend"],
 					annotationObject: {
@@ -1821,9 +1930,12 @@ describe("AuditableItemGraphService", () => {
 		expect(createdEdgeId).toBeDefined();
 
 		await service.update({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
 			id,
 			edges: [
 				{
+					type: AuditableItemGraphTypes.Edge,
 					id: createdEdgeId,
 					targetId: "aig:1010101010101010101010101010101010101010101010101010101010101010",
 					edgeRelationships: ["frenemy"],
@@ -1852,7 +1964,7 @@ describe("AuditableItemGraphService", () => {
 		});
 
 		expect(result.id).toEqual(id);
-		expect(result.type).toEqual("AuditableItemGraphVertex");
+		expect(result.type).toEqual(AuditableItemGraphTypes.Vertex);
 		expect(result.dateCreated).toEqual(expect.any(String));
 		expect(result.dateModified).toEqual(expect.any(String));
 		expect(result.organizationIdentity).toEqual(TEST_ORGANIZATION_IDENTITY);
@@ -1862,7 +1974,7 @@ describe("AuditableItemGraphService", () => {
 			expect.objectContaining({
 				id: expect.stringMatching(/^aig:[\da-f]+:edge:[\da-f]+$/),
 				targetId: "aig:1010101010101010101010101010101010101010101010101010101010101010",
-				type: "AuditableItemGraphEdge",
+				type: AuditableItemGraphTypes.Edge,
 				dateCreated: expect.any(String),
 				annotationObject: {
 					"@context": "https://www.w3.org/ns/activitystreams",
@@ -1934,6 +2046,8 @@ describe("AuditableItemGraphService", () => {
 	test("Can create and update and verify aliases, object, resources and edges", async () => {
 		const service = new AuditableItemGraphService();
 		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
 			annotationObject: {
 				"@context": "https://www.w3.org/ns/activitystreams",
 				type: "Create",
@@ -1950,6 +2064,7 @@ describe("AuditableItemGraphService", () => {
 			},
 			aliases: [
 				{
+					type: AuditableItemGraphTypes.Alias,
 					id: "foo123",
 					annotationObject: {
 						"@context": "https://www.w3.org/ns/activitystreams",
@@ -1967,6 +2082,7 @@ describe("AuditableItemGraphService", () => {
 					}
 				},
 				{
+					type: AuditableItemGraphTypes.Alias,
 					id: "bar456",
 					annotationObject: {
 						"@context": "https://www.w3.org/ns/activitystreams",
@@ -1986,6 +2102,7 @@ describe("AuditableItemGraphService", () => {
 			],
 			resources: [
 				{
+					type: AuditableItemGraphTypes.Resource,
 					id: "resource1",
 					resourceObject: {
 						"@context": "https://www.w3.org/ns/activitystreams",
@@ -2003,6 +2120,7 @@ describe("AuditableItemGraphService", () => {
 					}
 				},
 				{
+					type: AuditableItemGraphTypes.Resource,
 					id: "resource2",
 					resourceObject: {
 						"@context": "https://www.w3.org/ns/activitystreams",
@@ -2022,6 +2140,7 @@ describe("AuditableItemGraphService", () => {
 			],
 			edges: [
 				{
+					type: AuditableItemGraphTypes.Edge,
 					targetId: "aig:0101010101010101010101010101010101010101010101010101010101010101",
 					edgeRelationships: ["friend"],
 					annotationObject: {
@@ -2040,6 +2159,7 @@ describe("AuditableItemGraphService", () => {
 					}
 				},
 				{
+					type: AuditableItemGraphTypes.Edge,
 					targetId: "aig:0202020202020202020202020202020202020202020202020202020202020202",
 					edgeRelationships: ["enemy"],
 					annotationObject: {
@@ -2066,6 +2186,8 @@ describe("AuditableItemGraphService", () => {
 		const [createdEdgeId1, createdEdgeId2] = createdEdgeIds;
 
 		await service.update({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
 			id,
 			annotationObject: {
 				"@context": "https://www.w3.org/ns/activitystreams",
@@ -2083,6 +2205,7 @@ describe("AuditableItemGraphService", () => {
 			},
 			aliases: [
 				{
+					type: AuditableItemGraphTypes.Alias,
 					id: "foo123",
 					annotationObject: {
 						"@context": "https://www.w3.org/ns/activitystreams",
@@ -2100,6 +2223,7 @@ describe("AuditableItemGraphService", () => {
 					}
 				},
 				{
+					type: AuditableItemGraphTypes.Alias,
 					id: "bar456",
 					annotationObject: {
 						"@context": "https://www.w3.org/ns/activitystreams",
@@ -2119,6 +2243,7 @@ describe("AuditableItemGraphService", () => {
 			],
 			resources: [
 				{
+					type: AuditableItemGraphTypes.Resource,
 					id: "resource1",
 					resourceObject: {
 						"@context": "https://www.w3.org/ns/activitystreams",
@@ -2136,6 +2261,7 @@ describe("AuditableItemGraphService", () => {
 					}
 				},
 				{
+					type: AuditableItemGraphTypes.Resource,
 					id: "resource2",
 					resourceObject: {
 						"@context": "https://www.w3.org/ns/activitystreams",
@@ -2155,6 +2281,7 @@ describe("AuditableItemGraphService", () => {
 			],
 			edges: [
 				{
+					type: AuditableItemGraphTypes.Edge,
 					id: createdEdgeId1,
 					targetId: "aig:0101010101010101010101010101010101010101010101010101010101010101",
 					edgeRelationships: ["friend"],
@@ -2174,6 +2301,7 @@ describe("AuditableItemGraphService", () => {
 					}
 				},
 				{
+					type: AuditableItemGraphTypes.Edge,
 					id: createdEdgeId2,
 					targetId: "aig:0202020202020202020202020202020202020202020202020202020202020202",
 					edgeRelationships: ["enemy"],
@@ -2202,7 +2330,7 @@ describe("AuditableItemGraphService", () => {
 		});
 
 		expect(result.id).toEqual(id);
-		expect(result.type).toEqual("AuditableItemGraphVertex");
+		expect(result.type).toEqual(AuditableItemGraphTypes.Vertex);
 		expect(result.dateCreated).toEqual(expect.any(String));
 		expect(result.dateModified).toEqual(expect.any(String));
 		expect(result.organizationIdentity).toEqual(TEST_ORGANIZATION_IDENTITY);
@@ -2211,7 +2339,7 @@ describe("AuditableItemGraphService", () => {
 		expect(result.aliases).toEqual([
 			expect.objectContaining({
 				id: "foo123",
-				type: "AuditableItemGraphAlias",
+				type: AuditableItemGraphTypes.Alias,
 				dateCreated: expect.any(String),
 				dateModified: expect.any(String),
 				annotationObject: {
@@ -2224,7 +2352,7 @@ describe("AuditableItemGraphService", () => {
 			}),
 			expect.objectContaining({
 				id: "bar456",
-				type: "AuditableItemGraphAlias",
+				type: AuditableItemGraphTypes.Alias,
 				dateCreated: expect.any(String),
 				dateModified: expect.any(String),
 				annotationObject: {
@@ -2240,7 +2368,7 @@ describe("AuditableItemGraphService", () => {
 		expect(result.resources).toEqual([
 			expect.objectContaining({
 				id: "resource1",
-				type: "AuditableItemGraphResource",
+				type: AuditableItemGraphTypes.Resource,
 				dateCreated: expect.any(String),
 				dateModified: expect.any(String),
 				resourceObject: {
@@ -2253,7 +2381,7 @@ describe("AuditableItemGraphService", () => {
 			}),
 			expect.objectContaining({
 				id: "resource2",
-				type: "AuditableItemGraphResource",
+				type: AuditableItemGraphTypes.Resource,
 				dateCreated: expect.any(String),
 				dateModified: expect.any(String),
 				resourceObject: {
@@ -2278,7 +2406,7 @@ describe("AuditableItemGraphService", () => {
 				expect.objectContaining({
 					id: createdEdgeId1,
 					targetId: "aig:0101010101010101010101010101010101010101010101010101010101010101",
-					type: "AuditableItemGraphEdge",
+					type: AuditableItemGraphTypes.Edge,
 					dateCreated: expect.any(String),
 					annotationObject: {
 						"@context": "https://www.w3.org/ns/activitystreams",
@@ -2292,7 +2420,7 @@ describe("AuditableItemGraphService", () => {
 				expect.objectContaining({
 					id: createdEdgeId2,
 					targetId: "aig:0202020202020202020202020202020202020202020202020202020202020202",
-					type: "AuditableItemGraphEdge",
+					type: AuditableItemGraphTypes.Edge,
 					dateCreated: expect.any(String),
 					annotationObject: {
 						"@context": "https://www.w3.org/ns/activitystreams",
@@ -2529,7 +2657,12 @@ describe("AuditableItemGraphService", () => {
 	test("Can remove the verifiable storage for a vertex", async () => {
 		const service = new AuditableItemGraphService();
 		const id = await service.create({
-			aliases: [{ id: "foo123" }, { id: "bar456" }]
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			aliases: [
+				{ type: AuditableItemGraphTypes.Alias, id: "foo123" },
+				{ type: AuditableItemGraphTypes.Alias, id: "bar456" }
+			]
 		});
 
 		await waitForProofGeneration();
@@ -2551,11 +2684,11 @@ describe("AuditableItemGraphService", () => {
 				"https://schema.twindev.org/immutable-proof/"
 			],
 			id,
-			type: "AuditableItemGraphVertex",
+			type: AuditableItemGraphTypes.Vertex,
 			dateCreated: expect.any(String),
 			aliases: [
-				{ id: "foo123", type: "AuditableItemGraphAlias", dateCreated: expect.any(String) },
-				{ id: "bar456", type: "AuditableItemGraphAlias", dateCreated: expect.any(String) }
+				{ id: "foo123", type: AuditableItemGraphTypes.Alias, dateCreated: expect.any(String) },
+				{ id: "bar456", type: AuditableItemGraphTypes.Alias, dateCreated: expect.any(String) }
 			],
 			organizationIdentity: TEST_ORGANIZATION_IDENTITY,
 			verified: false
@@ -2566,8 +2699,14 @@ describe("AuditableItemGraphService", () => {
 
 	test("Can query for a vertex by id", async () => {
 		const service = new AuditableItemGraphService();
-		const createdId1 = await service.create({});
-		const createdId2 = await service.create({});
+		const createdId1 = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex
+		});
+		const createdId2 = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex
+		});
 
 		const resultsAndCursor = await service.query({ id: "0" });
 
@@ -2578,19 +2717,19 @@ describe("AuditableItemGraphService", () => {
 					"https://schema.twindev.org/aig/",
 					"https://schema.twindev.org/common/"
 				],
-				type: ["ItemList", "AuditableItemGraphVertexList"]
+				type: ["ItemList", AuditableItemGraphTypes.VertexList]
 			})
 		);
 		expect(resultsAndCursor.entries.itemListElement).toHaveLength(2);
 		expect(resultsAndCursor.entries.itemListElement).toEqual(
 			expect.arrayContaining([
 				expect.objectContaining({
-					type: "AuditableItemGraphVertex",
+					type: AuditableItemGraphTypes.Vertex,
 					id: createdId1,
 					dateCreated: expect.any(String)
 				}),
 				expect.objectContaining({
-					type: "AuditableItemGraphVertex",
+					type: AuditableItemGraphTypes.Vertex,
 					id: createdId2,
 					dateCreated: expect.any(String)
 				})
@@ -2601,10 +2740,20 @@ describe("AuditableItemGraphService", () => {
 	test("Can query for a vertex by alias with partial match", async () => {
 		const service = new AuditableItemGraphService();
 		const createdId1 = await service.create({
-			aliases: [{ id: "foo123" }, { id: "bar123" }]
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			aliases: [
+				{ type: AuditableItemGraphTypes.Alias, id: "foo123" },
+				{ type: AuditableItemGraphTypes.Alias, id: "bar123" }
+			]
 		});
 		const createdId2 = await service.create({
-			aliases: [{ id: "foo456" }, { id: "bar456" }]
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			aliases: [
+				{ type: AuditableItemGraphTypes.Alias, id: "foo456" },
+				{ type: AuditableItemGraphTypes.Alias, id: "bar456" }
+			]
 		});
 
 		const resultsAndCursor = await service.query({ id: "foo" });
@@ -2615,42 +2764,42 @@ describe("AuditableItemGraphService", () => {
 					"https://schema.twindev.org/aig/",
 					"https://schema.twindev.org/common/"
 				],
-				type: ["ItemList", "AuditableItemGraphVertexList"]
+				type: ["ItemList", AuditableItemGraphTypes.VertexList]
 			})
 		);
 		expect(resultsAndCursor.entries.itemListElement).toHaveLength(2);
 		expect(resultsAndCursor.entries.itemListElement).toEqual(
 			expect.arrayContaining([
 				expect.objectContaining({
-					type: "AuditableItemGraphVertex",
+					type: AuditableItemGraphTypes.Vertex,
 					id: createdId2,
 					dateCreated: expect.any(String),
 					aliases: expect.arrayContaining([
 						expect.objectContaining({
 							id: "foo456",
-							type: "AuditableItemGraphAlias",
+							type: AuditableItemGraphTypes.Alias,
 							dateCreated: expect.any(String)
 						}),
 						expect.objectContaining({
 							id: "bar456",
-							type: "AuditableItemGraphAlias",
+							type: AuditableItemGraphTypes.Alias,
 							dateCreated: expect.any(String)
 						})
 					])
 				}),
 				expect.objectContaining({
-					type: "AuditableItemGraphVertex",
+					type: AuditableItemGraphTypes.Vertex,
 					id: createdId1,
 					dateCreated: expect.any(String),
 					aliases: expect.arrayContaining([
 						expect.objectContaining({
 							id: "foo123",
-							type: "AuditableItemGraphAlias",
+							type: AuditableItemGraphTypes.Alias,
 							dateCreated: expect.any(String)
 						}),
 						expect.objectContaining({
 							id: "bar123",
-							type: "AuditableItemGraphAlias",
+							type: AuditableItemGraphTypes.Alias,
 							dateCreated: expect.any(String)
 						})
 					])
@@ -2662,9 +2811,14 @@ describe("AuditableItemGraphService", () => {
 	test("Can query for a vertex by id or alias", async () => {
 		const service = new AuditableItemGraphService();
 		const createdId1 = await service.create({
-			aliases: [{ id: "foo1" }]
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			aliases: [{ type: AuditableItemGraphTypes.Alias, id: "foo1" }]
 		});
-		await service.create({});
+		await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex
+		});
 
 		const resultsAndCursor = await service.query({ id: "foo1" });
 		expect(resultsAndCursor.entries).toEqual(
@@ -2674,16 +2828,16 @@ describe("AuditableItemGraphService", () => {
 					"https://schema.twindev.org/aig/",
 					"https://schema.twindev.org/common/"
 				],
-				type: ["ItemList", "AuditableItemGraphVertexList"],
+				type: ["ItemList", AuditableItemGraphTypes.VertexList],
 				itemListElement: [
 					expect.objectContaining({
 						id: createdId1,
-						type: "AuditableItemGraphVertex",
+						type: AuditableItemGraphTypes.Vertex,
 						dateCreated: expect.any(String),
 						aliases: [
 							expect.objectContaining({
 								id: "foo1",
-								type: "AuditableItemGraphAlias",
+								type: AuditableItemGraphTypes.Alias,
 								dateCreated: expect.any(String)
 							})
 						]
@@ -2696,9 +2850,14 @@ describe("AuditableItemGraphService", () => {
 	test("Can query for a vertex by mode id", async () => {
 		const service = new AuditableItemGraphService();
 		await service.create({
-			aliases: [{ id: "foo5" }]
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			aliases: [{ type: AuditableItemGraphTypes.Alias, id: "foo5" }]
 		});
-		const createdId2 = await service.create({});
+		const createdId2 = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex
+		});
 
 		const resultsAndCursor = await service.query({ id: extractAigId(createdId2), idMode: "id" });
 		expect(resultsAndCursor.entries).toEqual(
@@ -2708,11 +2867,11 @@ describe("AuditableItemGraphService", () => {
 					"https://schema.twindev.org/aig/",
 					"https://schema.twindev.org/common/"
 				],
-				type: ["ItemList", "AuditableItemGraphVertexList"],
+				type: ["ItemList", AuditableItemGraphTypes.VertexList],
 				itemListElement: [
 					expect.objectContaining({
 						id: createdId2,
-						type: "AuditableItemGraphVertex",
+						type: AuditableItemGraphTypes.Vertex,
 						dateCreated: expect.any(String)
 					})
 				]
@@ -2723,9 +2882,14 @@ describe("AuditableItemGraphService", () => {
 	test("Can query for a vertex by using mode alias", async () => {
 		const service = new AuditableItemGraphService();
 		const createdId1 = await service.create({
-			aliases: [{ id: "foo4" }]
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			aliases: [{ type: AuditableItemGraphTypes.Alias, id: "foo4" }]
 		});
-		await service.create({});
+		await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex
+		});
 
 		await waitForProofGeneration();
 
@@ -2737,16 +2901,16 @@ describe("AuditableItemGraphService", () => {
 					"https://schema.twindev.org/aig/",
 					"https://schema.twindev.org/common/"
 				],
-				type: ["ItemList", "AuditableItemGraphVertexList"],
+				type: ["ItemList", AuditableItemGraphTypes.VertexList],
 				itemListElement: [
 					expect.objectContaining({
 						id: createdId1,
-						type: "AuditableItemGraphVertex",
+						type: AuditableItemGraphTypes.Vertex,
 						dateCreated: expect.any(String),
 						aliases: [
 							expect.objectContaining({
 								id: "foo4",
-								type: "AuditableItemGraphAlias",
+								type: AuditableItemGraphTypes.Alias,
 								dateCreated: expect.any(String)
 							})
 						]
@@ -2759,8 +2923,11 @@ describe("AuditableItemGraphService", () => {
 	test("Can query for a vertex using resource types", async () => {
 		const service = new AuditableItemGraphService();
 		const createdId1 = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
 			resources: [
 				{
+					type: AuditableItemGraphTypes.Resource,
 					id: "resource1",
 					resourceObject: {
 						"@context": "https://www.w3.org/ns/activitystreams",
@@ -2780,8 +2947,11 @@ describe("AuditableItemGraphService", () => {
 			]
 		});
 		const createdId2 = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
 			resources: [
 				{
+					type: AuditableItemGraphTypes.Resource,
 					id: "resource1",
 					resourceObject: {
 						"@context": "https://www.w3.org/ns/activitystreams",
@@ -2811,7 +2981,7 @@ describe("AuditableItemGraphService", () => {
 					"https://schema.twindev.org/aig/",
 					"https://schema.twindev.org/common/"
 				],
-				type: ["ItemList", "AuditableItemGraphVertexList"]
+				type: ["ItemList", AuditableItemGraphTypes.VertexList]
 			})
 		);
 		expect(resultsAndCursor.entries.itemListElement).toHaveLength(2);
@@ -2819,12 +2989,12 @@ describe("AuditableItemGraphService", () => {
 			expect.arrayContaining([
 				expect.objectContaining({
 					id: createdId1,
-					type: "AuditableItemGraphVertex",
+					type: AuditableItemGraphTypes.Vertex,
 					dateCreated: expect.any(String)
 				}),
 				expect.objectContaining({
 					id: createdId2,
-					type: "AuditableItemGraphVertex",
+					type: AuditableItemGraphTypes.Vertex,
 					dateCreated: expect.any(String)
 				})
 			])
@@ -2834,6 +3004,8 @@ describe("AuditableItemGraphService", () => {
 	test("Can query for a vertex using it's annotation object id", async () => {
 		const service = new AuditableItemGraphService();
 		const createdId1 = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
 			annotationObject: {
 				"@context": "https://www.w3.org/ns/activitystreams",
 				id: "http://example.org/notes/1",
@@ -2865,12 +3037,12 @@ describe("AuditableItemGraphService", () => {
 					"https://schema.twindev.org/aig/",
 					"https://schema.twindev.org/common/"
 				],
-				type: ["ItemList", "AuditableItemGraphVertexList"],
+				type: ["ItemList", AuditableItemGraphTypes.VertexList],
 				itemListElement: [
 					expect.objectContaining({
 						dateCreated: expect.any(String),
 						id: createdId1,
-						type: "AuditableItemGraphVertex",
+						type: AuditableItemGraphTypes.Vertex,
 						annotationObject: {
 							"@context": "https://www.w3.org/ns/activitystreams",
 							id: "http://example.org/notes/1",
@@ -2895,18 +3067,292 @@ describe("AuditableItemGraphService", () => {
 	test("Can fail to create a vertex with an alias that already exists and the unique flag set", async () => {
 		const service = new AuditableItemGraphService();
 		const id = await service.create({
-			aliases: [{ id: "foo123" }, { id: "bar456" }]
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			aliases: [
+				{ type: AuditableItemGraphTypes.Alias, id: "foo123" },
+				{ type: AuditableItemGraphTypes.Alias, id: "bar456" }
+			]
 		});
 		expect(id.startsWith("aig:")).toEqual(true);
 
 		await expect(
 			service.create({
-				aliases: [{ id: "foo123", unique: true }, { id: "bar456" }]
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex,
+				aliases: [
+					{ type: AuditableItemGraphTypes.Alias, id: "foo123", unique: true },
+					{ type: AuditableItemGraphTypes.Alias, id: "bar456" }
+				]
 			})
 		).rejects.toMatchObject({
 			message: "auditableItemGraphService.createFailed",
 			cause: {
 				message: "auditableItemGraphService.aliasNotUnique"
+			}
+		});
+	});
+
+	test("Validation fails when passing edges as a single object instead of array", async () => {
+		const service = new AuditableItemGraphService();
+		await expect(
+			service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex,
+				edges: {
+					type: AuditableItemGraphTypes.Edge,
+					targetId: "aig:0101010101010101010101010101010101010101010101010101010101010101"
+				} as unknown as IAuditableItemGraphEdge[]
+			})
+		).rejects.toMatchObject({
+			message: "auditableItemGraphService.createFailed",
+			cause: {
+				message: "common.validation",
+				properties: {
+					validationFailures: expect.arrayContaining([
+						expect.objectContaining({
+							property: "vertex.edges",
+							properties: expect.objectContaining({
+								keyword: "type",
+								message: "must be array"
+							})
+						})
+					])
+				}
+			}
+		});
+	});
+
+	test("Validation fails when passing aliases as a single object instead of array", async () => {
+		const service = new AuditableItemGraphService();
+		await expect(
+			service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex,
+				aliases: {
+					type: AuditableItemGraphTypes.Alias,
+					id: "foo123"
+				} as unknown as IAuditableItemGraphAlias[]
+			})
+		).rejects.toMatchObject({
+			message: "auditableItemGraphService.createFailed",
+			cause: {
+				message: "common.validation",
+				properties: {
+					validationFailures: expect.arrayContaining([
+						expect.objectContaining({
+							property: "vertex.aliases",
+							properties: expect.objectContaining({
+								keyword: "type",
+								message: "must be array"
+							})
+						})
+					])
+				}
+			}
+		});
+	});
+
+	test("Validation fails when passing resources as a single object instead of array", async () => {
+		const service = new AuditableItemGraphService();
+		await expect(
+			service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex,
+				resources: {
+					type: AuditableItemGraphTypes.Resource,
+					id: "resource1",
+					resourceObject: { type: "Note" }
+				} as unknown as IAuditableItemGraphResource[]
+			})
+		).rejects.toMatchObject({
+			message: "auditableItemGraphService.createFailed",
+			cause: {
+				message: "common.validation",
+				properties: {
+					validationFailures: expect.arrayContaining([
+						expect.objectContaining({
+							property: "vertex.resources",
+							properties: expect.objectContaining({
+								keyword: "type",
+								message: "must be array"
+							})
+						})
+					])
+				}
+			}
+		});
+	});
+
+	test("Validation fails when @context is a string instead of array", async () => {
+		const service = new AuditableItemGraphService();
+		const invalidVertex = {
+			"@context": "https://schema.twindev.org/aig/",
+			type: AuditableItemGraphTypes.Vertex
+		} as unknown as Omit<IAuditableItemGraphVertex, "id">;
+		await expect(service.create(invalidVertex)).rejects.toMatchObject({
+			message: "auditableItemGraphService.createFailed",
+			cause: {
+				message: "common.validation",
+				properties: {
+					validationFailures: expect.arrayContaining([
+						expect.objectContaining({
+							property: "vertex.@context",
+							properties: expect.objectContaining({
+								keyword: "type",
+								message: "must be array"
+							})
+						})
+					])
+				}
+			}
+		});
+	});
+
+	test("Validation fails when @context is missing", async () => {
+		const service = new AuditableItemGraphService();
+		await expect(
+			service.create({
+				type: AuditableItemGraphTypes.Vertex
+			} as unknown as Omit<IAuditableItemGraphVertex, "id">)
+		).rejects.toMatchObject({
+			message: "auditableItemGraphService.createFailed",
+			cause: {
+				message: "common.validation",
+				properties: {
+					validationFailures: expect.arrayContaining([
+						expect.objectContaining({
+							property: "vertex",
+							properties: expect.objectContaining({
+								keyword: "required"
+							})
+						})
+					])
+				}
+			}
+		});
+	});
+
+	test("Validation fails when type is missing", async () => {
+		const service = new AuditableItemGraphService();
+		await expect(
+			service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon]
+			} as unknown as Omit<IAuditableItemGraphVertex, "id">)
+		).rejects.toMatchObject({
+			message: "auditableItemGraphService.createFailed",
+			cause: {
+				message: "common.validation",
+				properties: {
+					validationFailures: expect.arrayContaining([
+						expect.objectContaining({
+							property: "vertex",
+							properties: expect.objectContaining({
+								keyword: "required"
+							})
+						})
+					])
+				}
+			}
+		});
+	});
+
+	test("Validation fails when alias is missing required type property", async () => {
+		const service = new AuditableItemGraphService();
+		await expect(
+			service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex,
+				aliases: [
+					{
+						id: "foo123"
+					} as unknown as IAuditableItemGraphAlias
+				]
+			})
+		).rejects.toMatchObject({
+			message: "auditableItemGraphService.createFailed",
+			cause: {
+				message: "common.validation",
+				properties: {
+					validationFailures: expect.arrayContaining([
+						expect.objectContaining({
+							property: expect.stringContaining("alias"),
+							properties: expect.objectContaining({
+								keyword: "required",
+								params: expect.objectContaining({
+									missingProperty: "type"
+								})
+							})
+						})
+					])
+				}
+			}
+		});
+	});
+
+	test("Validation fails when resource is missing required type property", async () => {
+		const service = new AuditableItemGraphService();
+		await expect(
+			service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex,
+				resources: [
+					{
+						id: "resource1",
+						resourceObject: { type: "Note" }
+					} as unknown as IAuditableItemGraphResource
+				]
+			})
+		).rejects.toMatchObject({
+			message: "auditableItemGraphService.createFailed",
+			cause: {
+				message: "common.validation",
+				properties: {
+					validationFailures: expect.arrayContaining([
+						expect.objectContaining({
+							property: expect.stringContaining("resource"),
+							properties: expect.objectContaining({
+								keyword: "required",
+								params: expect.objectContaining({
+									missingProperty: "type"
+								})
+							})
+						})
+					])
+				}
+			}
+		});
+	});
+
+	test("Validation fails when edge is missing required type property", async () => {
+		const service = new AuditableItemGraphService();
+		await expect(
+			service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex,
+				edges: [
+					{
+						targetId: "aig:0101010101010101010101010101010101010101010101010101010101010101"
+					} as unknown as IAuditableItemGraphEdge
+				]
+			})
+		).rejects.toMatchObject({
+			message: "auditableItemGraphService.createFailed",
+			cause: {
+				message: "common.validation",
+				properties: {
+					validationFailures: expect.arrayContaining([
+						expect.objectContaining({
+							property: expect.stringContaining("edge"),
+							properties: expect.objectContaining({
+								keyword: "required",
+								params: expect.objectContaining({
+									missingProperty: "type"
+								})
+							})
+						})
+					])
+				}
 			}
 		});
 	});

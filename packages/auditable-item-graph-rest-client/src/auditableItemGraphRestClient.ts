@@ -26,7 +26,6 @@ import type {
 	VerifyDepth
 } from "@twin.org/auditable-item-graph-models";
 import { Coerce, Guards, NotSupportedError, Urn } from "@twin.org/core";
-import type { IJsonLdNodeObject } from "@twin.org/data-json-ld";
 import type { IComparator, SortDirection } from "@twin.org/entity";
 import { nameof } from "@twin.org/nameof";
 import { HeaderHelper, HeaderTypes, MimeTypes } from "@twin.org/web";
@@ -68,24 +67,7 @@ export class AuditableItemGraphRestClient
 	 * @param vertex.edges The edges connected to the vertex.
 	 * @returns The id of the new graph item.
 	 */
-	public async create(vertex: {
-		annotationObject?: IJsonLdNodeObject;
-		aliases?: {
-			id: string;
-			aliasFormat?: string;
-			unique?: boolean;
-			annotationObject?: IJsonLdNodeObject;
-		}[];
-		resources?: {
-			id?: string;
-			resourceObject?: IJsonLdNodeObject;
-		}[];
-		edges?: {
-			targetId: string;
-			edgeRelationships: string[];
-			annotationObject?: IJsonLdNodeObject;
-		}[];
-	}): Promise<string> {
+	public async create(vertex: Omit<IAuditableItemGraphVertex, "id">): Promise<string> {
 		const response = await this.fetch<IAuditableItemGraphCreateRequest, ICreatedResponse>(
 			"/",
 			"POST",
@@ -231,26 +213,7 @@ export class AuditableItemGraphRestClient
 	 * @param vertex.edges The edges connected to the vertex.
 	 * @returns Nothing.
 	 */
-	public async update(vertex: {
-		id: string;
-		annotationObject?: IJsonLdNodeObject;
-		aliases?: {
-			id: string;
-			aliasFormat?: string;
-			unique?: boolean;
-			annotationObject?: IJsonLdNodeObject;
-		}[];
-		resources?: {
-			id?: string;
-			resourceObject?: IJsonLdNodeObject;
-		}[];
-		edges?: {
-			id?: string;
-			targetId: string;
-			edgeRelationships: string[];
-			annotationObject?: IJsonLdNodeObject;
-		}[];
-	}): Promise<void> {
+	public async update(vertex: IAuditableItemGraphVertex): Promise<void> {
 		Guards.object(AuditableItemGraphRestClient.CLASS_NAME, nameof(vertex), vertex);
 		Guards.stringValue(AuditableItemGraphRestClient.CLASS_NAME, nameof(vertex.id), vertex.id);
 

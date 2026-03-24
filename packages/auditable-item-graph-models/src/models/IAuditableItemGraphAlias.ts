@@ -12,7 +12,7 @@ export interface IAuditableItemGraphAlias extends IAuditableItemGraphAuditedElem
 	/**
 	 * JSON-LD Context.
 	 */
-	"@context":
+	"@context"?:
 		| typeof AuditableItemGraphContexts.Context
 		| [typeof AuditableItemGraphContexts.Context, ...IJsonLdContextDefinitionElement[]];
 
@@ -37,4 +37,10 @@ export interface IAuditableItemGraphAlias extends IAuditableItemGraphAuditedElem
 	 * @json-ld type:sch:Text
 	 */
 	aliasFormat?: string;
+
+	/**
+	 * Whether the alias should be unique across the graph, meaning that no other vertex can have the same alias. Defaults to false.
+	 * @json-ld type:sch:Boolean
+	 */
+	unique?: boolean;
 }

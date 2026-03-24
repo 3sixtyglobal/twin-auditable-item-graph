@@ -1,7 +1,6 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
 import type { IComponent } from "@twin.org/core";
-import type { IJsonLdNodeObject } from "@twin.org/data-json-ld";
 import type { IComparator, SortDirection } from "@twin.org/entity";
 import type { IAuditableItemGraphChangeset } from "./IAuditableItemGraphChangeset.js";
 import type { IAuditableItemGraphChangesetList } from "./IAuditableItemGraphChangesetList.js";
@@ -22,24 +21,7 @@ export interface IAuditableItemGraphComponent extends IComponent {
 	 * @param vertex.edges The edges connected to the vertex.
 	 * @returns The id of the new graph item.
 	 */
-	create(vertex: {
-		annotationObject?: IJsonLdNodeObject;
-		aliases?: {
-			id: string;
-			aliasFormat?: string;
-			unique?: boolean;
-			annotationObject?: IJsonLdNodeObject;
-		}[];
-		resources?: {
-			id?: string;
-			resourceObject?: IJsonLdNodeObject;
-		}[];
-		edges?: {
-			targetId: string;
-			edgeRelationships: string[];
-			annotationObject?: IJsonLdNodeObject;
-		}[];
-	}): Promise<string>;
+	create(vertex: Omit<IAuditableItemGraphVertex, "id">): Promise<string>;
 
 	/**
 	 * Update a graph vertex.
@@ -51,26 +33,7 @@ export interface IAuditableItemGraphComponent extends IComponent {
 	 * @param vertex.edges The edges connected to the vertex.
 	 * @returns Nothing.
 	 */
-	update(vertex: {
-		id: string;
-		annotationObject?: IJsonLdNodeObject;
-		aliases?: {
-			id: string;
-			aliasFormat?: string;
-			unique?: boolean;
-			annotationObject?: IJsonLdNodeObject;
-		}[];
-		resources?: {
-			id?: string;
-			resourceObject?: IJsonLdNodeObject;
-		}[];
-		edges?: {
-			id?: string;
-			targetId: string;
-			edgeRelationships: string[];
-			annotationObject?: IJsonLdNodeObject;
-		}[];
-	}): Promise<void>;
+	update(vertex: IAuditableItemGraphVertex): Promise<void>;
 
 	/**
 	 * Get a graph vertex.
