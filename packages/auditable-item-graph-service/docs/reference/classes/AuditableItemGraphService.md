@@ -80,31 +80,9 @@ Create a new graph vertex.
 
 ##### vertex
 
+`Omit`\<`IAuditableItemGraphVertex`, `"id"`\>
+
 The vertex to create.
-
-###### annotationObject?
-
-`IJsonLdNodeObject`
-
-The annotation object for the vertex as JSON-LD.
-
-###### aliases?
-
-`object`[]
-
-Alternative aliases that can be used to identify the vertex.
-
-###### resources?
-
-`object`[]
-
-The resources attached to the vertex.
-
-###### edges?
-
-`object`[]
-
-The edges connected to the vertex.
 
 #### Returns
 
@@ -115,6 +93,32 @@ The id of the new graph item.
 #### Implementation of
 
 `IAuditableItemGraphComponent.create`
+
+***
+
+### update() {#update}
+
+> **update**(`vertex`): `Promise`\<`void`\>
+
+Update a graph vertex.
+
+#### Parameters
+
+##### vertex
+
+`IAuditableItemGraphVertex`
+
+The vertex to update.
+
+#### Returns
+
+`Promise`\<`void`\>
+
+Nothing.
+
+#### Implementation of
+
+`IAuditableItemGraphComponent.update`
 
 ***
 
@@ -253,60 +257,6 @@ NotFoundError if the vertex is not found.
 #### Implementation of
 
 `IAuditableItemGraphComponent.getChangeset`
-
-***
-
-### update() {#update}
-
-> **update**(`vertex`): `Promise`\<`void`\>
-
-Update a graph vertex.
-
-#### Parameters
-
-##### vertex
-
-The vertex to update.
-
-###### id
-
-`string`
-
-The id of the vertex to update.
-
-###### annotationObject?
-
-`IJsonLdNodeObject`
-
-The annotation object for the vertex as JSON-LD.
-
-###### aliases?
-
-`object`[]
-
-Alternative aliases that can be used to identify the vertex.
-
-###### resources?
-
-`object`[]
-
-The resources attached to the vertex.
-
-###### edges?
-
-`object`[]
-
-The edges connected to the vertex.
-
-#### Returns
-
-`Promise`\<`void`\>
-
-Nothing.
-
-#### Implementation of
-
-`IAuditableItemGraphComponent.update`
 
 ***
 

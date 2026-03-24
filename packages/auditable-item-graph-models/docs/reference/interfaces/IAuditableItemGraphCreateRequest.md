@@ -6,30 +6,6 @@ Create an auditable item graph vertex.
 
 ### body {#body}
 
-> **body**: `object`
+> **body**: `Omit`\<[`IAuditableItemGraphVertex`](IAuditableItemGraphVertex.md), `"id"`\>
 
 The data to be used in the vertex.
-
-#### annotationObject?
-
-> `optional` **annotationObject?**: `IJsonLdNodeObject`
-
-The object to be used in the vertex as JSON-LD.
-
-#### aliases?
-
-> `optional` **aliases?**: `object`[]
-
-Alternative aliases that can be used to identify the vertex.
-
-#### resources?
-
-> `optional` **resources?**: `object`[]
-
-The resources attached to the vertex.
-
-#### edges?
-
-> `optional` **edges?**: `object`[]
-
-The edges connected to the vertex.

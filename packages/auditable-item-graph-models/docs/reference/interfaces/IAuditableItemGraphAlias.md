@@ -8,9 +8,9 @@ Interface describing an alias for a vertex.
 
 ## Properties
 
-### @context {#context}
+### @context? {#context}
 
-> **@context**: `"https://schema.twindev.org/aig/"` \| \[`"https://schema.twindev.org/aig/"`, `...IJsonLdContextDefinitionElement[]`\]
+> `optional` **@context?**: `"https://schema.twindev.org/aig/"` \| \[`"https://schema.twindev.org/aig/"`, `...IJsonLdContextDefinitionElement[]`\]
 
 JSON-LD Context.
 
@@ -49,6 +49,14 @@ The JSON-LD annotation object for the alias.
 > `optional` **aliasFormat?**: `string`
 
 The format of the id in the alias.
+
+***
+
+### unique? {#unique}
+
+> `optional` **unique?**: `boolean`
+
+Whether the alias should be unique across the graph, meaning that no other vertex can have the same alias. Defaults to false.
 
 ***
 

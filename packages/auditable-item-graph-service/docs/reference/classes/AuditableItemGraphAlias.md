@@ -59,3 +59,11 @@ The timestamp of when the alias was deleted, as we never actually remove items.
 > `optional` **annotationObject?**: `IJsonLdNodeObject`
 
 Object to associate with the alias as JSON-LD.
+
+***
+
+### unique? {#unique}
+
+> `optional` **unique?**: `boolean`
+
+Whether the alias should be unique across the graph, meaning that no other vertex can have the same alias. Defaults to false.
