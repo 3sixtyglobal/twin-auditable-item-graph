@@ -1,11 +1,11 @@
 # Changelog
 
-## [0.0.3-next.12](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.11...auditable-item-graph-service-v0.0.3-next.12) (2026-03-24)
+## [0.0.3-next.12](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.11...auditable-item-graph-service-v0.0.3-next.12) (2026-03-24)
 
 
 ### Features
 
-* add vertex validation ([#54](https://github.com/twinfoundation/auditable-item-graph/issues/54)) ([d3ef124](https://github.com/twinfoundation/auditable-item-graph/commit/d3ef1241f60956dc296e22d063f188921255d68c))
+* add vertex validation ([#54](https://github.com/iotaledger/twin-auditable-item-graph/issues/54)) ([d3ef124](https://github.com/iotaledger/twin-auditable-item-graph/commit/d3ef1241f60956dc296e22d063f188921255d68c))
 
 
 ### Dependencies
@@ -14,12 +14,12 @@
   * dependencies
     * @twin.org/auditable-item-graph-models bumped from 0.0.3-next.11 to 0.0.3-next.12
 
-## [0.0.3-next.11](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.10...auditable-item-graph-service-v0.0.3-next.11) (2026-02-25)
+## [0.0.3-next.11](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.10...auditable-item-graph-service-v0.0.3-next.11) (2026-02-25)
 
 
 ### Features
 
-* update schemas ([b00bcac](https://github.com/twinfoundation/auditable-item-graph/commit/b00bcac6551fa524e8871e1b573a712ed0f30943))
+* update schemas ([b00bcac](https://github.com/iotaledger/twin-auditable-item-graph/commit/b00bcac6551fa524e8871e1b573a712ed0f30943))
 
 
 ### Dependencies
@@ -28,43 +28,43 @@
   * dependencies
     * @twin.org/auditable-item-graph-models bumped from 0.0.3-next.10 to 0.0.3-next.11
 
-## [0.0.3-next.10](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.9...auditable-item-graph-service-v0.0.3-next.10) (2026-02-24)
+## [0.0.3-next.10](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.9...auditable-item-graph-service-v0.0.3-next.10) (2026-02-24)
 
 
 ### Features
 
-* add context id features ([#30](https://github.com/twinfoundation/auditable-item-graph/issues/30)) ([a35d37c](https://github.com/twinfoundation/auditable-item-graph/commit/a35d37c0db62a240adde493965c0a9f7971fec45))
-* add data types with fully qualified name ([93e1ee7](https://github.com/twinfoundation/auditable-item-graph/commit/93e1ee7c0f7bad81f003787f797f363864e201af))
-* add unique flag for alias, and exact match option for id query ([33dbd19](https://github.com/twinfoundation/auditable-item-graph/commit/33dbd19cabd9fbfaba81032f1d1a6527584c3f5a))
-* add validate-locales ([e76e6f6](https://github.com/twinfoundation/auditable-item-graph/commit/e76e6f6b3ec9c447a04315d353442e32233601d3))
-* changeset endpoints ([#44](https://github.com/twinfoundation/auditable-item-graph/issues/44)) ([7c854de](https://github.com/twinfoundation/auditable-item-graph/commit/7c854de39b247d6f24cd94a04a9f99fa9edde51d))
-* eslint migration to flat config ([1b42a3a](https://github.com/twinfoundation/auditable-item-graph/commit/1b42a3a27bd6e32d7816de406b92b6332472edf6))
-* id optional in edge updates ([6b63fe3](https://github.com/twinfoundation/auditable-item-graph/commit/6b63fe34553104843ae15aa5066775f5872859e9))
-* improve JSON schemas ([bec8dc1](https://github.com/twinfoundation/auditable-item-graph/commit/bec8dc1f270c6c9710623a192b984cf46f8a5613))
-* only set dateModified after update ([#4](https://github.com/twinfoundation/auditable-item-graph/issues/4)) ([43ea6e5](https://github.com/twinfoundation/auditable-item-graph/commit/43ea6e5f2d0b9181a80f0bf2935db64b3263839a))
-* remove unused namespace ([ff1a3b4](https://github.com/twinfoundation/auditable-item-graph/commit/ff1a3b4e414fe2ee311a03027456ee40fbb580d7))
-* replace nextItem property with Link header ([#39](https://github.com/twinfoundation/auditable-item-graph/issues/39)) ([b29a333](https://github.com/twinfoundation/auditable-item-graph/commit/b29a333ca78ca2091e54e3e6f4355f84c350007d))
-* update background task service ([e483ddb](https://github.com/twinfoundation/auditable-item-graph/commit/e483ddbc948f035334f92b8342248caa6abbe441))
-* update contexts ([#35](https://github.com/twinfoundation/auditable-item-graph/issues/35)) ([cdf0989](https://github.com/twinfoundation/auditable-item-graph/commit/cdf0989fe4677a88b757e97e752b7d4c29013a7e))
-* update contexts and namespaces ([#33](https://github.com/twinfoundation/auditable-item-graph/issues/33)) ([5dadb99](https://github.com/twinfoundation/auditable-item-graph/commit/5dadb99773d410aceacaba7ed92c1ccb8b46516b))
-* update dependencies ([6986689](https://github.com/twinfoundation/auditable-item-graph/commit/698668957a1fcb7f85ce2f117914d5980043924f))
-* update edges to use targetId instead of id ([6c5d0e3](https://github.com/twinfoundation/auditable-item-graph/commit/6c5d0e31b6e2ea74bfa2f3344e4be628e5f237af))
-* update framework core ([88ad4e6](https://github.com/twinfoundation/auditable-item-graph/commit/88ad4e6421132c3c6c45579b078d982a26f16990))
-* update naming ([39210c4](https://github.com/twinfoundation/auditable-item-graph/commit/39210c45baddd3cd48805140a1c0049f3004653f))
-* use new hosting url for cursor links ([809cdc6](https://github.com/twinfoundation/auditable-item-graph/commit/809cdc623491bad91000d0b0f740e40dc019198d))
-* use new nameof operators ([3921c4c](https://github.com/twinfoundation/auditable-item-graph/commit/3921c4c9ac53e42459e45f10d9e702afb2797a23))
-* use shared store mechanism ([#10](https://github.com/twinfoundation/auditable-item-graph/issues/10)) ([da035e5](https://github.com/twinfoundation/auditable-item-graph/commit/da035e5eb8f157482b4eb2bdbc689c6c0647ff7d))
-* use standard list json ld types ([8f53836](https://github.com/twinfoundation/auditable-item-graph/commit/8f53836d4c83a98d64d7f5fe0531bb9af09464ae))
-* uuidv7 ([#46](https://github.com/twinfoundation/auditable-item-graph/issues/46)) ([d0179f8](https://github.com/twinfoundation/auditable-item-graph/commit/d0179f81290e0beae2f1c398a028aca6dd754023))
+* add context id features ([#30](https://github.com/iotaledger/twin-auditable-item-graph/issues/30)) ([a35d37c](https://github.com/iotaledger/twin-auditable-item-graph/commit/a35d37c0db62a240adde493965c0a9f7971fec45))
+* add data types with fully qualified name ([93e1ee7](https://github.com/iotaledger/twin-auditable-item-graph/commit/93e1ee7c0f7bad81f003787f797f363864e201af))
+* add unique flag for alias, and exact match option for id query ([33dbd19](https://github.com/iotaledger/twin-auditable-item-graph/commit/33dbd19cabd9fbfaba81032f1d1a6527584c3f5a))
+* add validate-locales ([e76e6f6](https://github.com/iotaledger/twin-auditable-item-graph/commit/e76e6f6b3ec9c447a04315d353442e32233601d3))
+* changeset endpoints ([#44](https://github.com/iotaledger/twin-auditable-item-graph/issues/44)) ([7c854de](https://github.com/iotaledger/twin-auditable-item-graph/commit/7c854de39b247d6f24cd94a04a9f99fa9edde51d))
+* eslint migration to flat config ([1b42a3a](https://github.com/iotaledger/twin-auditable-item-graph/commit/1b42a3a27bd6e32d7816de406b92b6332472edf6))
+* id optional in edge updates ([6b63fe3](https://github.com/iotaledger/twin-auditable-item-graph/commit/6b63fe34553104843ae15aa5066775f5872859e9))
+* improve JSON schemas ([bec8dc1](https://github.com/iotaledger/twin-auditable-item-graph/commit/bec8dc1f270c6c9710623a192b984cf46f8a5613))
+* only set dateModified after update ([#4](https://github.com/iotaledger/twin-auditable-item-graph/issues/4)) ([43ea6e5](https://github.com/iotaledger/twin-auditable-item-graph/commit/43ea6e5f2d0b9181a80f0bf2935db64b3263839a))
+* remove unused namespace ([ff1a3b4](https://github.com/iotaledger/twin-auditable-item-graph/commit/ff1a3b4e414fe2ee311a03027456ee40fbb580d7))
+* replace nextItem property with Link header ([#39](https://github.com/iotaledger/twin-auditable-item-graph/issues/39)) ([b29a333](https://github.com/iotaledger/twin-auditable-item-graph/commit/b29a333ca78ca2091e54e3e6f4355f84c350007d))
+* update background task service ([e483ddb](https://github.com/iotaledger/twin-auditable-item-graph/commit/e483ddbc948f035334f92b8342248caa6abbe441))
+* update contexts ([#35](https://github.com/iotaledger/twin-auditable-item-graph/issues/35)) ([cdf0989](https://github.com/iotaledger/twin-auditable-item-graph/commit/cdf0989fe4677a88b757e97e752b7d4c29013a7e))
+* update contexts and namespaces ([#33](https://github.com/iotaledger/twin-auditable-item-graph/issues/33)) ([5dadb99](https://github.com/iotaledger/twin-auditable-item-graph/commit/5dadb99773d410aceacaba7ed92c1ccb8b46516b))
+* update dependencies ([6986689](https://github.com/iotaledger/twin-auditable-item-graph/commit/698668957a1fcb7f85ce2f117914d5980043924f))
+* update edges to use targetId instead of id ([6c5d0e3](https://github.com/iotaledger/twin-auditable-item-graph/commit/6c5d0e31b6e2ea74bfa2f3344e4be628e5f237af))
+* update framework core ([88ad4e6](https://github.com/iotaledger/twin-auditable-item-graph/commit/88ad4e6421132c3c6c45579b078d982a26f16990))
+* update naming ([39210c4](https://github.com/iotaledger/twin-auditable-item-graph/commit/39210c45baddd3cd48805140a1c0049f3004653f))
+* use new hosting url for cursor links ([809cdc6](https://github.com/iotaledger/twin-auditable-item-graph/commit/809cdc623491bad91000d0b0f740e40dc019198d))
+* use new nameof operators ([3921c4c](https://github.com/iotaledger/twin-auditable-item-graph/commit/3921c4c9ac53e42459e45f10d9e702afb2797a23))
+* use shared store mechanism ([#10](https://github.com/iotaledger/twin-auditable-item-graph/issues/10)) ([da035e5](https://github.com/iotaledger/twin-auditable-item-graph/commit/da035e5eb8f157482b4eb2bdbc689c6c0647ff7d))
+* use standard list json ld types ([8f53836](https://github.com/iotaledger/twin-auditable-item-graph/commit/8f53836d4c83a98d64d7f5fe0531bb9af09464ae))
+* uuidv7 ([#46](https://github.com/iotaledger/twin-auditable-item-graph/issues/46)) ([d0179f8](https://github.com/iotaledger/twin-auditable-item-graph/commit/d0179f81290e0beae2f1c398a028aca6dd754023))
 
 
 ### Bug Fixes
 
-* context usage ([9c8f64d](https://github.com/twinfoundation/auditable-item-graph/commit/9c8f64d342e9fb40d3514b87fd547a824ce50676))
-* only include alias in index if not deleted ([#6](https://github.com/twinfoundation/auditable-item-graph/issues/6)) ([5da3c41](https://github.com/twinfoundation/auditable-item-graph/commit/5da3c419fafa2afefd34b1c570d103012b888a75))
-* query params force coercion ([2dd9afe](https://github.com/twinfoundation/auditable-item-graph/commit/2dd9afe9ec37e2a91c110317fe289f7495c187a0))
-* query resource type property name ([b684b31](https://github.com/twinfoundation/auditable-item-graph/commit/b684b3108e1e16852ee319e47edd0e40d5a2fe99))
-* update tests with new deterministic background tasks ([#8](https://github.com/twinfoundation/auditable-item-graph/issues/8)) ([a96721c](https://github.com/twinfoundation/auditable-item-graph/commit/a96721c28128781f9cbd983d013dcf4c5542158c))
+* context usage ([9c8f64d](https://github.com/iotaledger/twin-auditable-item-graph/commit/9c8f64d342e9fb40d3514b87fd547a824ce50676))
+* only include alias in index if not deleted ([#6](https://github.com/iotaledger/twin-auditable-item-graph/issues/6)) ([5da3c41](https://github.com/iotaledger/twin-auditable-item-graph/commit/5da3c419fafa2afefd34b1c570d103012b888a75))
+* query params force coercion ([2dd9afe](https://github.com/iotaledger/twin-auditable-item-graph/commit/2dd9afe9ec37e2a91c110317fe289f7495c187a0))
+* query resource type property name ([b684b31](https://github.com/iotaledger/twin-auditable-item-graph/commit/b684b3108e1e16852ee319e47edd0e40d5a2fe99))
+* update tests with new deterministic background tasks ([#8](https://github.com/iotaledger/twin-auditable-item-graph/issues/8)) ([a96721c](https://github.com/iotaledger/twin-auditable-item-graph/commit/a96721c28128781f9cbd983d013dcf4c5542158c))
 
 
 ### Dependencies
@@ -73,12 +73,12 @@
   * dependencies
     * @twin.org/auditable-item-graph-models bumped from 0.0.3-next.9 to 0.0.3-next.10
 
-## [0.0.3-next.9](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.8...auditable-item-graph-service-v0.0.3-next.9) (2026-02-23)
+## [0.0.3-next.9](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.8...auditable-item-graph-service-v0.0.3-next.9) (2026-02-23)
 
 
 ### Bug Fixes
 
-* query resource type property name ([b684b31](https://github.com/twinfoundation/auditable-item-graph/commit/b684b3108e1e16852ee319e47edd0e40d5a2fe99))
+* query resource type property name ([b684b31](https://github.com/iotaledger/twin-auditable-item-graph/commit/b684b3108e1e16852ee319e47edd0e40d5a2fe99))
 
 
 ### Dependencies
@@ -87,12 +87,12 @@
   * dependencies
     * @twin.org/auditable-item-graph-models bumped from 0.0.3-next.8 to 0.0.3-next.9
 
-## [0.0.3-next.8](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.7...auditable-item-graph-service-v0.0.3-next.8) (2026-02-11)
+## [0.0.3-next.8](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.7...auditable-item-graph-service-v0.0.3-next.8) (2026-02-11)
 
 
 ### Features
 
-* uuidv7 ([#46](https://github.com/twinfoundation/auditable-item-graph/issues/46)) ([d0179f8](https://github.com/twinfoundation/auditable-item-graph/commit/d0179f81290e0beae2f1c398a028aca6dd754023))
+* uuidv7 ([#46](https://github.com/iotaledger/twin-auditable-item-graph/issues/46)) ([d0179f8](https://github.com/iotaledger/twin-auditable-item-graph/commit/d0179f81290e0beae2f1c398a028aca6dd754023))
 
 
 ### Dependencies
@@ -101,13 +101,13 @@
   * dependencies
     * @twin.org/auditable-item-graph-models bumped from 0.0.3-next.7 to 0.0.3-next.8
 
-## [0.0.3-next.7](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.6...auditable-item-graph-service-v0.0.3-next.7) (2026-02-11)
+## [0.0.3-next.7](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.6...auditable-item-graph-service-v0.0.3-next.7) (2026-02-11)
 
 
 ### Features
 
-* changeset endpoints ([#44](https://github.com/twinfoundation/auditable-item-graph/issues/44)) ([7c854de](https://github.com/twinfoundation/auditable-item-graph/commit/7c854de39b247d6f24cd94a04a9f99fa9edde51d))
-* update naming ([39210c4](https://github.com/twinfoundation/auditable-item-graph/commit/39210c45baddd3cd48805140a1c0049f3004653f))
+* changeset endpoints ([#44](https://github.com/iotaledger/twin-auditable-item-graph/issues/44)) ([7c854de](https://github.com/iotaledger/twin-auditable-item-graph/commit/7c854de39b247d6f24cd94a04a9f99fa9edde51d))
+* update naming ([39210c4](https://github.com/iotaledger/twin-auditable-item-graph/commit/39210c45baddd3cd48805140a1c0049f3004653f))
 
 
 ### Dependencies
@@ -116,12 +116,12 @@
   * dependencies
     * @twin.org/auditable-item-graph-models bumped from 0.0.3-next.6 to 0.0.3-next.7
 
-## [0.0.3-next.6](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.5...auditable-item-graph-service-v0.0.3-next.6) (2026-01-26)
+## [0.0.3-next.6](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.5...auditable-item-graph-service-v0.0.3-next.6) (2026-01-26)
 
 
 ### Features
 
-* use new hosting url for cursor links ([809cdc6](https://github.com/twinfoundation/auditable-item-graph/commit/809cdc623491bad91000d0b0f740e40dc019198d))
+* use new hosting url for cursor links ([809cdc6](https://github.com/iotaledger/twin-auditable-item-graph/commit/809cdc623491bad91000d0b0f740e40dc019198d))
 
 
 ### Dependencies
@@ -130,12 +130,12 @@
   * dependencies
     * @twin.org/auditable-item-graph-models bumped from 0.0.3-next.5 to 0.0.3-next.6
 
-## [0.0.3-next.5](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.4...auditable-item-graph-service-v0.0.3-next.5) (2026-01-23)
+## [0.0.3-next.5](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.4...auditable-item-graph-service-v0.0.3-next.5) (2026-01-23)
 
 
 ### Features
 
-* replace nextItem property with Link header ([#39](https://github.com/twinfoundation/auditable-item-graph/issues/39)) ([b29a333](https://github.com/twinfoundation/auditable-item-graph/commit/b29a333ca78ca2091e54e3e6f4355f84c350007d))
+* replace nextItem property with Link header ([#39](https://github.com/iotaledger/twin-auditable-item-graph/issues/39)) ([b29a333](https://github.com/iotaledger/twin-auditable-item-graph/commit/b29a333ca78ca2091e54e3e6f4355f84c350007d))
 
 
 ### Dependencies
@@ -144,12 +144,12 @@
   * dependencies
     * @twin.org/auditable-item-graph-models bumped from 0.0.3-next.4 to 0.0.3-next.5
 
-## [0.0.3-next.4](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.3...auditable-item-graph-service-v0.0.3-next.4) (2026-01-22)
+## [0.0.3-next.4](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.3...auditable-item-graph-service-v0.0.3-next.4) (2026-01-22)
 
 
 ### Bug Fixes
 
-* context usage ([9c8f64d](https://github.com/twinfoundation/auditable-item-graph/commit/9c8f64d342e9fb40d3514b87fd547a824ce50676))
+* context usage ([9c8f64d](https://github.com/iotaledger/twin-auditable-item-graph/commit/9c8f64d342e9fb40d3514b87fd547a824ce50676))
 
 
 ### Dependencies
@@ -158,12 +158,12 @@
   * dependencies
     * @twin.org/auditable-item-graph-models bumped from 0.0.3-next.3 to 0.0.3-next.4
 
-## [0.0.3-next.3](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.2...auditable-item-graph-service-v0.0.3-next.3) (2026-01-21)
+## [0.0.3-next.3](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.2...auditable-item-graph-service-v0.0.3-next.3) (2026-01-21)
 
 
 ### Features
 
-* update contexts ([#35](https://github.com/twinfoundation/auditable-item-graph/issues/35)) ([cdf0989](https://github.com/twinfoundation/auditable-item-graph/commit/cdf0989fe4677a88b757e97e752b7d4c29013a7e))
+* update contexts ([#35](https://github.com/iotaledger/twin-auditable-item-graph/issues/35)) ([cdf0989](https://github.com/iotaledger/twin-auditable-item-graph/commit/cdf0989fe4677a88b757e97e752b7d4c29013a7e))
 
 
 ### Dependencies
@@ -172,12 +172,12 @@
   * dependencies
     * @twin.org/auditable-item-graph-models bumped from 0.0.3-next.2 to 0.0.3-next.3
 
-## [0.0.3-next.2](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.1...auditable-item-graph-service-v0.0.3-next.2) (2026-01-14)
+## [0.0.3-next.2](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.1...auditable-item-graph-service-v0.0.3-next.2) (2026-01-14)
 
 
 ### Features
 
-* update contexts and namespaces ([#33](https://github.com/twinfoundation/auditable-item-graph/issues/33)) ([5dadb99](https://github.com/twinfoundation/auditable-item-graph/commit/5dadb99773d410aceacaba7ed92c1ccb8b46516b))
+* update contexts and namespaces ([#33](https://github.com/iotaledger/twin-auditable-item-graph/issues/33)) ([5dadb99](https://github.com/iotaledger/twin-auditable-item-graph/commit/5dadb99773d410aceacaba7ed92c1ccb8b46516b))
 
 
 ### Dependencies
@@ -186,34 +186,34 @@
   * dependencies
     * @twin.org/auditable-item-graph-models bumped from 0.0.3-next.1 to 0.0.3-next.2
 
-## [0.0.3-next.1](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.0...auditable-item-graph-service-v0.0.3-next.1) (2025-11-28)
+## [0.0.3-next.1](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.0...auditable-item-graph-service-v0.0.3-next.1) (2025-11-28)
 
 
 ### Features
 
-* add context id features ([#30](https://github.com/twinfoundation/auditable-item-graph/issues/30)) ([a35d37c](https://github.com/twinfoundation/auditable-item-graph/commit/a35d37c0db62a240adde493965c0a9f7971fec45))
-* add data types with fully qualified name ([93e1ee7](https://github.com/twinfoundation/auditable-item-graph/commit/93e1ee7c0f7bad81f003787f797f363864e201af))
-* add unique flag for alias, and exact match option for id query ([33dbd19](https://github.com/twinfoundation/auditable-item-graph/commit/33dbd19cabd9fbfaba81032f1d1a6527584c3f5a))
-* add validate-locales ([e76e6f6](https://github.com/twinfoundation/auditable-item-graph/commit/e76e6f6b3ec9c447a04315d353442e32233601d3))
-* eslint migration to flat config ([1b42a3a](https://github.com/twinfoundation/auditable-item-graph/commit/1b42a3a27bd6e32d7816de406b92b6332472edf6))
-* id optional in edge updates ([6b63fe3](https://github.com/twinfoundation/auditable-item-graph/commit/6b63fe34553104843ae15aa5066775f5872859e9))
-* improve JSON schemas ([bec8dc1](https://github.com/twinfoundation/auditable-item-graph/commit/bec8dc1f270c6c9710623a192b984cf46f8a5613))
-* only set dateModified after update ([#4](https://github.com/twinfoundation/auditable-item-graph/issues/4)) ([43ea6e5](https://github.com/twinfoundation/auditable-item-graph/commit/43ea6e5f2d0b9181a80f0bf2935db64b3263839a))
-* remove unused namespace ([ff1a3b4](https://github.com/twinfoundation/auditable-item-graph/commit/ff1a3b4e414fe2ee311a03027456ee40fbb580d7))
-* update background task service ([e483ddb](https://github.com/twinfoundation/auditable-item-graph/commit/e483ddbc948f035334f92b8342248caa6abbe441))
-* update dependencies ([6986689](https://github.com/twinfoundation/auditable-item-graph/commit/698668957a1fcb7f85ce2f117914d5980043924f))
-* update edges to use targetId instead of id ([6c5d0e3](https://github.com/twinfoundation/auditable-item-graph/commit/6c5d0e31b6e2ea74bfa2f3344e4be628e5f237af))
-* update framework core ([88ad4e6](https://github.com/twinfoundation/auditable-item-graph/commit/88ad4e6421132c3c6c45579b078d982a26f16990))
-* use new nameof operators ([3921c4c](https://github.com/twinfoundation/auditable-item-graph/commit/3921c4c9ac53e42459e45f10d9e702afb2797a23))
-* use shared store mechanism ([#10](https://github.com/twinfoundation/auditable-item-graph/issues/10)) ([da035e5](https://github.com/twinfoundation/auditable-item-graph/commit/da035e5eb8f157482b4eb2bdbc689c6c0647ff7d))
-* use standard list json ld types ([8f53836](https://github.com/twinfoundation/auditable-item-graph/commit/8f53836d4c83a98d64d7f5fe0531bb9af09464ae))
+* add context id features ([#30](https://github.com/iotaledger/twin-auditable-item-graph/issues/30)) ([a35d37c](https://github.com/iotaledger/twin-auditable-item-graph/commit/a35d37c0db62a240adde493965c0a9f7971fec45))
+* add data types with fully qualified name ([93e1ee7](https://github.com/iotaledger/twin-auditable-item-graph/commit/93e1ee7c0f7bad81f003787f797f363864e201af))
+* add unique flag for alias, and exact match option for id query ([33dbd19](https://github.com/iotaledger/twin-auditable-item-graph/commit/33dbd19cabd9fbfaba81032f1d1a6527584c3f5a))
+* add validate-locales ([e76e6f6](https://github.com/iotaledger/twin-auditable-item-graph/commit/e76e6f6b3ec9c447a04315d353442e32233601d3))
+* eslint migration to flat config ([1b42a3a](https://github.com/iotaledger/twin-auditable-item-graph/commit/1b42a3a27bd6e32d7816de406b92b6332472edf6))
+* id optional in edge updates ([6b63fe3](https://github.com/iotaledger/twin-auditable-item-graph/commit/6b63fe34553104843ae15aa5066775f5872859e9))
+* improve JSON schemas ([bec8dc1](https://github.com/iotaledger/twin-auditable-item-graph/commit/bec8dc1f270c6c9710623a192b984cf46f8a5613))
+* only set dateModified after update ([#4](https://github.com/iotaledger/twin-auditable-item-graph/issues/4)) ([43ea6e5](https://github.com/iotaledger/twin-auditable-item-graph/commit/43ea6e5f2d0b9181a80f0bf2935db64b3263839a))
+* remove unused namespace ([ff1a3b4](https://github.com/iotaledger/twin-auditable-item-graph/commit/ff1a3b4e414fe2ee311a03027456ee40fbb580d7))
+* update background task service ([e483ddb](https://github.com/iotaledger/twin-auditable-item-graph/commit/e483ddbc948f035334f92b8342248caa6abbe441))
+* update dependencies ([6986689](https://github.com/iotaledger/twin-auditable-item-graph/commit/698668957a1fcb7f85ce2f117914d5980043924f))
+* update edges to use targetId instead of id ([6c5d0e3](https://github.com/iotaledger/twin-auditable-item-graph/commit/6c5d0e31b6e2ea74bfa2f3344e4be628e5f237af))
+* update framework core ([88ad4e6](https://github.com/iotaledger/twin-auditable-item-graph/commit/88ad4e6421132c3c6c45579b078d982a26f16990))
+* use new nameof operators ([3921c4c](https://github.com/iotaledger/twin-auditable-item-graph/commit/3921c4c9ac53e42459e45f10d9e702afb2797a23))
+* use shared store mechanism ([#10](https://github.com/iotaledger/twin-auditable-item-graph/issues/10)) ([da035e5](https://github.com/iotaledger/twin-auditable-item-graph/commit/da035e5eb8f157482b4eb2bdbc689c6c0647ff7d))
+* use standard list json ld types ([8f53836](https://github.com/iotaledger/twin-auditable-item-graph/commit/8f53836d4c83a98d64d7f5fe0531bb9af09464ae))
 
 
 ### Bug Fixes
 
-* only include alias in index if not deleted ([#6](https://github.com/twinfoundation/auditable-item-graph/issues/6)) ([5da3c41](https://github.com/twinfoundation/auditable-item-graph/commit/5da3c419fafa2afefd34b1c570d103012b888a75))
-* query params force coercion ([2dd9afe](https://github.com/twinfoundation/auditable-item-graph/commit/2dd9afe9ec37e2a91c110317fe289f7495c187a0))
-* update tests with new deterministic background tasks ([#8](https://github.com/twinfoundation/auditable-item-graph/issues/8)) ([a96721c](https://github.com/twinfoundation/auditable-item-graph/commit/a96721c28128781f9cbd983d013dcf4c5542158c))
+* only include alias in index if not deleted ([#6](https://github.com/iotaledger/twin-auditable-item-graph/issues/6)) ([5da3c41](https://github.com/iotaledger/twin-auditable-item-graph/commit/5da3c419fafa2afefd34b1c570d103012b888a75))
+* query params force coercion ([2dd9afe](https://github.com/iotaledger/twin-auditable-item-graph/commit/2dd9afe9ec37e2a91c110317fe289f7495c187a0))
+* update tests with new deterministic background tasks ([#8](https://github.com/iotaledger/twin-auditable-item-graph/issues/8)) ([a96721c](https://github.com/iotaledger/twin-auditable-item-graph/commit/a96721c28128781f9cbd983d013dcf4c5542158c))
 
 
 ### Dependencies
@@ -222,12 +222,12 @@
   * dependencies
     * @twin.org/auditable-item-graph-models bumped from 0.0.3-next.0 to 0.0.3-next.1
 
-## [0.0.2-next.8](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.2-next.7...auditable-item-graph-service-v0.0.2-next.8) (2025-10-09)
+## [0.0.2-next.8](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.2-next.7...auditable-item-graph-service-v0.0.2-next.8) (2025-10-09)
 
 
 ### Features
 
-* add validate-locales ([e76e6f6](https://github.com/twinfoundation/auditable-item-graph/commit/e76e6f6b3ec9c447a04315d353442e32233601d3))
+* add validate-locales ([e76e6f6](https://github.com/iotaledger/twin-auditable-item-graph/commit/e76e6f6b3ec9c447a04315d353442e32233601d3))
 
 
 ### Dependencies
@@ -236,12 +236,12 @@
   * dependencies
     * @twin.org/auditable-item-graph-models bumped from 0.0.2-next.7 to 0.0.2-next.8
 
-## [0.0.2-next.7](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.2-next.6...auditable-item-graph-service-v0.0.2-next.7) (2025-09-29)
+## [0.0.2-next.7](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.2-next.6...auditable-item-graph-service-v0.0.2-next.7) (2025-09-29)
 
 
 ### Features
 
-* id optional in edge updates ([6b63fe3](https://github.com/twinfoundation/auditable-item-graph/commit/6b63fe34553104843ae15aa5066775f5872859e9))
+* id optional in edge updates ([6b63fe3](https://github.com/iotaledger/twin-auditable-item-graph/commit/6b63fe34553104843ae15aa5066775f5872859e9))
 
 
 ### Dependencies
@@ -250,12 +250,12 @@
   * dependencies
     * @twin.org/auditable-item-graph-models bumped from 0.0.2-next.6 to 0.0.2-next.7
 
-## [0.0.2-next.6](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.2-next.5...auditable-item-graph-service-v0.0.2-next.6) (2025-09-29)
+## [0.0.2-next.6](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.2-next.5...auditable-item-graph-service-v0.0.2-next.6) (2025-09-29)
 
 
 ### Features
 
-* use new nameof operators ([3921c4c](https://github.com/twinfoundation/auditable-item-graph/commit/3921c4c9ac53e42459e45f10d9e702afb2797a23))
+* use new nameof operators ([3921c4c](https://github.com/iotaledger/twin-auditable-item-graph/commit/3921c4c9ac53e42459e45f10d9e702afb2797a23))
 
 
 ### Dependencies
@@ -264,12 +264,12 @@
   * dependencies
     * @twin.org/auditable-item-graph-models bumped from 0.0.2-next.5 to 0.0.2-next.6
 
-## [0.0.2-next.5](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.2-next.4...auditable-item-graph-service-v0.0.2-next.5) (2025-09-26)
+## [0.0.2-next.5](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.2-next.4...auditable-item-graph-service-v0.0.2-next.5) (2025-09-26)
 
 
 ### Features
 
-* update edges to use targetId instead of id ([6c5d0e3](https://github.com/twinfoundation/auditable-item-graph/commit/6c5d0e31b6e2ea74bfa2f3344e4be628e5f237af))
+* update edges to use targetId instead of id ([6c5d0e3](https://github.com/iotaledger/twin-auditable-item-graph/commit/6c5d0e31b6e2ea74bfa2f3344e4be628e5f237af))
 
 
 ### Dependencies
@@ -278,12 +278,12 @@
   * dependencies
     * @twin.org/auditable-item-graph-models bumped from 0.0.2-next.4 to 0.0.2-next.5
 
-## [0.0.2-next.4](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.2-next.3...auditable-item-graph-service-v0.0.2-next.4) (2025-09-24)
+## [0.0.2-next.4](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.2-next.3...auditable-item-graph-service-v0.0.2-next.4) (2025-09-24)
 
 
 ### Features
 
-* add unique flag for alias, and exact match option for id query ([33dbd19](https://github.com/twinfoundation/auditable-item-graph/commit/33dbd19cabd9fbfaba81032f1d1a6527584c3f5a))
+* add unique flag for alias, and exact match option for id query ([33dbd19](https://github.com/iotaledger/twin-auditable-item-graph/commit/33dbd19cabd9fbfaba81032f1d1a6527584c3f5a))
 
 
 ### Dependencies
@@ -292,12 +292,12 @@
   * dependencies
     * @twin.org/auditable-item-graph-models bumped from 0.0.2-next.3 to 0.0.2-next.4
 
-## [0.0.2-next.3](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.2-next.2...auditable-item-graph-service-v0.0.2-next.3) (2025-08-29)
+## [0.0.2-next.3](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.2-next.2...auditable-item-graph-service-v0.0.2-next.3) (2025-08-29)
 
 
 ### Features
 
-* eslint migration to flat config ([1b42a3a](https://github.com/twinfoundation/auditable-item-graph/commit/1b42a3a27bd6e32d7816de406b92b6332472edf6))
+* eslint migration to flat config ([1b42a3a](https://github.com/iotaledger/twin-auditable-item-graph/commit/1b42a3a27bd6e32d7816de406b92b6332472edf6))
 
 
 ### Dependencies
@@ -306,13 +306,13 @@
   * dependencies
     * @twin.org/auditable-item-graph-models bumped from 0.0.2-next.2 to 0.0.2-next.3
 
-## [0.0.2-next.2](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.2-next.1...auditable-item-graph-service-v0.0.2-next.2) (2025-08-20)
+## [0.0.2-next.2](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.2-next.1...auditable-item-graph-service-v0.0.2-next.2) (2025-08-20)
 
 
 ### Features
 
-* remove unused namespace ([ff1a3b4](https://github.com/twinfoundation/auditable-item-graph/commit/ff1a3b4e414fe2ee311a03027456ee40fbb580d7))
-* update framework core ([88ad4e6](https://github.com/twinfoundation/auditable-item-graph/commit/88ad4e6421132c3c6c45579b078d982a26f16990))
+* remove unused namespace ([ff1a3b4](https://github.com/iotaledger/twin-auditable-item-graph/commit/ff1a3b4e414fe2ee311a03027456ee40fbb580d7))
+* update framework core ([88ad4e6](https://github.com/iotaledger/twin-auditable-item-graph/commit/88ad4e6421132c3c6c45579b078d982a26f16990))
 
 
 ### Dependencies
@@ -321,24 +321,24 @@
   * dependencies
     * @twin.org/auditable-item-graph-models bumped from 0.0.2-next.1 to 0.0.2-next.2
 
-## [0.0.2-next.1](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.2-next.0...auditable-item-graph-service-v0.0.2-next.1) (2025-07-21)
+## [0.0.2-next.1](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.2-next.0...auditable-item-graph-service-v0.0.2-next.1) (2025-07-21)
 
 
 ### Features
 
-* add data types with fully qualified name ([93e1ee7](https://github.com/twinfoundation/auditable-item-graph/commit/93e1ee7c0f7bad81f003787f797f363864e201af))
-* improve JSON schemas ([bec8dc1](https://github.com/twinfoundation/auditable-item-graph/commit/bec8dc1f270c6c9710623a192b984cf46f8a5613))
-* only set dateModified after update ([#4](https://github.com/twinfoundation/auditable-item-graph/issues/4)) ([43ea6e5](https://github.com/twinfoundation/auditable-item-graph/commit/43ea6e5f2d0b9181a80f0bf2935db64b3263839a))
-* update dependencies ([6986689](https://github.com/twinfoundation/auditable-item-graph/commit/698668957a1fcb7f85ce2f117914d5980043924f))
-* use shared store mechanism ([#10](https://github.com/twinfoundation/auditable-item-graph/issues/10)) ([da035e5](https://github.com/twinfoundation/auditable-item-graph/commit/da035e5eb8f157482b4eb2bdbc689c6c0647ff7d))
-* use standard list json ld types ([8f53836](https://github.com/twinfoundation/auditable-item-graph/commit/8f53836d4c83a98d64d7f5fe0531bb9af09464ae))
+* add data types with fully qualified name ([93e1ee7](https://github.com/iotaledger/twin-auditable-item-graph/commit/93e1ee7c0f7bad81f003787f797f363864e201af))
+* improve JSON schemas ([bec8dc1](https://github.com/iotaledger/twin-auditable-item-graph/commit/bec8dc1f270c6c9710623a192b984cf46f8a5613))
+* only set dateModified after update ([#4](https://github.com/iotaledger/twin-auditable-item-graph/issues/4)) ([43ea6e5](https://github.com/iotaledger/twin-auditable-item-graph/commit/43ea6e5f2d0b9181a80f0bf2935db64b3263839a))
+* update dependencies ([6986689](https://github.com/iotaledger/twin-auditable-item-graph/commit/698668957a1fcb7f85ce2f117914d5980043924f))
+* use shared store mechanism ([#10](https://github.com/iotaledger/twin-auditable-item-graph/issues/10)) ([da035e5](https://github.com/iotaledger/twin-auditable-item-graph/commit/da035e5eb8f157482b4eb2bdbc689c6c0647ff7d))
+* use standard list json ld types ([8f53836](https://github.com/iotaledger/twin-auditable-item-graph/commit/8f53836d4c83a98d64d7f5fe0531bb9af09464ae))
 
 
 ### Bug Fixes
 
-* only include alias in index if not deleted ([#6](https://github.com/twinfoundation/auditable-item-graph/issues/6)) ([5da3c41](https://github.com/twinfoundation/auditable-item-graph/commit/5da3c419fafa2afefd34b1c570d103012b888a75))
-* query params force coercion ([2dd9afe](https://github.com/twinfoundation/auditable-item-graph/commit/2dd9afe9ec37e2a91c110317fe289f7495c187a0))
-* update tests with new deterministic background tasks ([#8](https://github.com/twinfoundation/auditable-item-graph/issues/8)) ([a96721c](https://github.com/twinfoundation/auditable-item-graph/commit/a96721c28128781f9cbd983d013dcf4c5542158c))
+* only include alias in index if not deleted ([#6](https://github.com/iotaledger/twin-auditable-item-graph/issues/6)) ([5da3c41](https://github.com/iotaledger/twin-auditable-item-graph/commit/5da3c419fafa2afefd34b1c570d103012b888a75))
+* query params force coercion ([2dd9afe](https://github.com/iotaledger/twin-auditable-item-graph/commit/2dd9afe9ec37e2a91c110317fe289f7495c187a0))
+* update tests with new deterministic background tasks ([#8](https://github.com/iotaledger/twin-auditable-item-graph/issues/8)) ([a96721c](https://github.com/iotaledger/twin-auditable-item-graph/commit/a96721c28128781f9cbd983d013dcf4c5542158c))
 
 
 ### Dependencies
@@ -352,7 +352,7 @@
 
 ### Features
 
-* release to production ([0ce06f7](https://github.com/twinfoundation/auditable-item-graph/commit/0ce06f7825aa72d04b7a2ffd8c98cb56290b9d16))
+* release to production ([0ce06f7](https://github.com/iotaledger/twin-auditable-item-graph/commit/0ce06f7825aa72d04b7a2ffd8c98cb56290b9d16))
 
 
 ### Dependencies
@@ -361,12 +361,12 @@
   * dependencies
     * @twin.org/auditable-item-graph-models bumped from ^0.0.0 to ^0.0.1
 
-## [0.0.1-next.44](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.1-next.43...auditable-item-graph-service-v0.0.1-next.44) (2025-06-20)
+## [0.0.1-next.44](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.1-next.43...auditable-item-graph-service-v0.0.1-next.44) (2025-06-20)
 
 
 ### Bug Fixes
 
-* query params force coercion ([2dd9afe](https://github.com/twinfoundation/auditable-item-graph/commit/2dd9afe9ec37e2a91c110317fe289f7495c187a0))
+* query params force coercion ([2dd9afe](https://github.com/iotaledger/twin-auditable-item-graph/commit/2dd9afe9ec37e2a91c110317fe289f7495c187a0))
 
 
 ### Dependencies
@@ -375,12 +375,12 @@
   * dependencies
     * @twin.org/auditable-item-graph-models bumped from 0.0.1-next.43 to 0.0.1-next.44
 
-## [0.0.1-next.43](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.1-next.42...auditable-item-graph-service-v0.0.1-next.43) (2025-06-17)
+## [0.0.1-next.43](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.1-next.42...auditable-item-graph-service-v0.0.1-next.43) (2025-06-17)
 
 
 ### Features
 
-* improve JSON schemas ([bec8dc1](https://github.com/twinfoundation/auditable-item-graph/commit/bec8dc1f270c6c9710623a192b984cf46f8a5613))
+* improve JSON schemas ([bec8dc1](https://github.com/iotaledger/twin-auditable-item-graph/commit/bec8dc1f270c6c9710623a192b984cf46f8a5613))
 
 
 ### Dependencies
@@ -389,12 +389,12 @@
   * dependencies
     * @twin.org/auditable-item-graph-models bumped from 0.0.1-next.42 to 0.0.1-next.43
 
-## [0.0.1-next.42](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.1-next.41...auditable-item-graph-service-v0.0.1-next.42) (2025-06-12)
+## [0.0.1-next.42](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.1-next.41...auditable-item-graph-service-v0.0.1-next.42) (2025-06-12)
 
 
 ### Features
 
-* update dependencies ([6986689](https://github.com/twinfoundation/auditable-item-graph/commit/698668957a1fcb7f85ce2f117914d5980043924f))
+* update dependencies ([6986689](https://github.com/iotaledger/twin-auditable-item-graph/commit/698668957a1fcb7f85ce2f117914d5980043924f))
 
 
 ### Dependencies
@@ -403,7 +403,7 @@
   * dependencies
     * @twin.org/auditable-item-graph-models bumped from 0.0.1-next.41 to 0.0.1-next.42
 
-## [0.0.1-next.41](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.1-next.40...auditable-item-graph-service-v0.0.1-next.41) (2025-06-03)
+## [0.0.1-next.41](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.1-next.40...auditable-item-graph-service-v0.0.1-next.41) (2025-06-03)
 
 
 ### Miscellaneous Chores
@@ -417,12 +417,12 @@
   * dependencies
     * @twin.org/auditable-item-graph-models bumped from 0.0.1-next.40 to 0.0.1-next.41
 
-## [0.0.1-next.40](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.1-next.39...auditable-item-graph-service-v0.0.1-next.40) (2025-05-28)
+## [0.0.1-next.40](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.1-next.39...auditable-item-graph-service-v0.0.1-next.40) (2025-05-28)
 
 
 ### Features
 
-* add data types with fully qualified name ([93e1ee7](https://github.com/twinfoundation/auditable-item-graph/commit/93e1ee7c0f7bad81f003787f797f363864e201af))
+* add data types with fully qualified name ([93e1ee7](https://github.com/iotaledger/twin-auditable-item-graph/commit/93e1ee7c0f7bad81f003787f797f363864e201af))
 
 
 ### Dependencies
@@ -431,12 +431,12 @@
   * dependencies
     * @twin.org/auditable-item-graph-models bumped from 0.0.1-next.39 to 0.0.1-next.40
 
-## [0.0.1-next.39](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.1-next.38...auditable-item-graph-service-v0.0.1-next.39) (2025-05-08)
+## [0.0.1-next.39](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.1-next.38...auditable-item-graph-service-v0.0.1-next.39) (2025-05-08)
 
 
 ### Features
 
-* use standard list json ld types ([8f53836](https://github.com/twinfoundation/auditable-item-graph/commit/8f53836d4c83a98d64d7f5fe0531bb9af09464ae))
+* use standard list json ld types ([8f53836](https://github.com/iotaledger/twin-auditable-item-graph/commit/8f53836d4c83a98d64d7f5fe0531bb9af09464ae))
 
 
 ### Dependencies
@@ -445,12 +445,12 @@
   * dependencies
     * @twin.org/auditable-item-graph-models bumped from 0.0.1-next.38 to 0.0.1-next.39
 
-## [0.0.1-next.38](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.1-next.37...auditable-item-graph-service-v0.0.1-next.38) (2025-04-17)
+## [0.0.1-next.38](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.1-next.37...auditable-item-graph-service-v0.0.1-next.38) (2025-04-17)
 
 
 ### Features
 
-* use shared store mechanism ([#10](https://github.com/twinfoundation/auditable-item-graph/issues/10)) ([da035e5](https://github.com/twinfoundation/auditable-item-graph/commit/da035e5eb8f157482b4eb2bdbc689c6c0647ff7d))
+* use shared store mechanism ([#10](https://github.com/iotaledger/twin-auditable-item-graph/issues/10)) ([da035e5](https://github.com/iotaledger/twin-auditable-item-graph/commit/da035e5eb8f157482b4eb2bdbc689c6c0647ff7d))
 
 
 ### Dependencies
@@ -459,18 +459,18 @@
   * dependencies
     * @twin.org/auditable-item-graph-models bumped from 0.0.1-next.37 to 0.0.1-next.38
 
-## [0.0.1-next.37](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.1-next.36...auditable-item-graph-service-v0.0.1-next.37) (2025-04-11)
+## [0.0.1-next.37](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.1-next.36...auditable-item-graph-service-v0.0.1-next.37) (2025-04-11)
 
 
 ### Features
 
-* only set dateModified after update ([#4](https://github.com/twinfoundation/auditable-item-graph/issues/4)) ([43ea6e5](https://github.com/twinfoundation/auditable-item-graph/commit/43ea6e5f2d0b9181a80f0bf2935db64b3263839a))
+* only set dateModified after update ([#4](https://github.com/iotaledger/twin-auditable-item-graph/issues/4)) ([43ea6e5](https://github.com/iotaledger/twin-auditable-item-graph/commit/43ea6e5f2d0b9181a80f0bf2935db64b3263839a))
 
 
 ### Bug Fixes
 
-* only include alias in index if not deleted ([#6](https://github.com/twinfoundation/auditable-item-graph/issues/6)) ([5da3c41](https://github.com/twinfoundation/auditable-item-graph/commit/5da3c419fafa2afefd34b1c570d103012b888a75))
-* update tests with new deterministic background tasks ([#8](https://github.com/twinfoundation/auditable-item-graph/issues/8)) ([a96721c](https://github.com/twinfoundation/auditable-item-graph/commit/a96721c28128781f9cbd983d013dcf4c5542158c))
+* only include alias in index if not deleted ([#6](https://github.com/iotaledger/twin-auditable-item-graph/issues/6)) ([5da3c41](https://github.com/iotaledger/twin-auditable-item-graph/commit/5da3c419fafa2afefd34b1c570d103012b888a75))
+* update tests with new deterministic background tasks ([#8](https://github.com/iotaledger/twin-auditable-item-graph/issues/8)) ([a96721c](https://github.com/iotaledger/twin-auditable-item-graph/commit/a96721c28128781f9cbd983d013dcf4c5542158c))
 
 
 ### Dependencies
@@ -479,12 +479,12 @@
   * dependencies
     * @twin.org/auditable-item-graph-models bumped from 0.0.1-next.36 to 0.0.1-next.37
 
-## [0.0.1-next.36](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.1-next.35...auditable-item-graph-service-v0.0.1-next.36) (2025-04-11)
+## [0.0.1-next.36](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.1-next.35...auditable-item-graph-service-v0.0.1-next.36) (2025-04-11)
 
 
 ### Bug Fixes
 
-* only include alias in index if not deleted ([#6](https://github.com/twinfoundation/auditable-item-graph/issues/6)) ([5da3c41](https://github.com/twinfoundation/auditable-item-graph/commit/5da3c419fafa2afefd34b1c570d103012b888a75))
+* only include alias in index if not deleted ([#6](https://github.com/iotaledger/twin-auditable-item-graph/issues/6)) ([5da3c41](https://github.com/iotaledger/twin-auditable-item-graph/commit/5da3c419fafa2afefd34b1c570d103012b888a75))
 
 
 ### Dependencies
@@ -493,12 +493,12 @@
   * dependencies
     * @twin.org/auditable-item-graph-models bumped from 0.0.1-next.35 to 0.0.1-next.36
 
-## [0.0.1-next.35](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.1-next.34...auditable-item-graph-service-v0.0.1-next.35) (2025-04-10)
+## [0.0.1-next.35](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.1-next.34...auditable-item-graph-service-v0.0.1-next.35) (2025-04-10)
 
 
 ### Features
 
-* only set dateModified after update ([#4](https://github.com/twinfoundation/auditable-item-graph/issues/4)) ([43ea6e5](https://github.com/twinfoundation/auditable-item-graph/commit/43ea6e5f2d0b9181a80f0bf2935db64b3263839a))
+* only set dateModified after update ([#4](https://github.com/iotaledger/twin-auditable-item-graph/issues/4)) ([43ea6e5](https://github.com/iotaledger/twin-auditable-item-graph/commit/43ea6e5f2d0b9181a80f0bf2935db64b3263839a))
 
 
 ### Dependencies
@@ -507,7 +507,7 @@
   * dependencies
     * @twin.org/auditable-item-graph-models bumped from 0.0.1-next.34 to 0.0.1-next.35
 
-## [0.0.1-next.34](https://github.com/twinfoundation/auditable-item-graph/compare/auditable-item-graph-service-v0.0.1-next.33...auditable-item-graph-service-v0.0.1-next.34) (2025-03-28)
+## [0.0.1-next.34](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.1-next.33...auditable-item-graph-service-v0.0.1-next.34) (2025-03-28)
 
 
 ### Miscellaneous Chores
