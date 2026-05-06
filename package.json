@@ -4,7 +4,7 @@
 	"description": "Modular packages for implementing and consuming an auditable item graph.",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/twinfoundation/auditable-item-graph.git"
+		"url": "git+https://github.com/iotaledger/auditable-item-graph.git"
 	},
 	"author": "martyn.janes@iota.org",
 	"license": "Apache-2.0",
@@ -60,7 +60,7 @@
 	],
 	"type": "module",
 	"bugs": {
-		"url": "git+https://github.com/twinfoundation/auditable-item-graph/issues"
+		"url": "git+https://github.com/iotaledger/auditable-item-graph/issues"
 	},
 	"homepage": "https://twindev.org"
 }

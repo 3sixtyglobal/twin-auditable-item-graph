@@ -4,7 +4,7 @@
 	"description": "Implements graph lifecycle operations and audited change tracking with API route definitions.",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/twinfoundation/auditable-item-graph.git",
+		"url": "git+https://github.com/iotaledger/auditable-item-graph.git",
 		"directory": "packages/auditable-item-graph-service"
 	},
 	"author": "martyn.janes@iota.org",
@@ -99,7 +99,7 @@
 		"business-logic"
 	],
 	"bugs": {
-		"url": "git+https://github.com/twinfoundation/auditable-item-graph/issues"
+		"url": "git+https://github.com/iotaledger/auditable-item-graph/issues"
 	},
 	"homepage": "https://twindev.org"
 }
