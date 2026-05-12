@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.3-next.13](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-models-v0.0.3-next.12...auditable-item-graph-models-v0.0.3-next.13) (2026-05-12)
+
+
+### Features
+
+* typescript 6 update ([2483c31](https://github.com/iotaledger/twin-auditable-item-graph/commit/2483c3171cff4c5ecedc83d958ab551291a4a487))
+
 ## [0.0.3-next.12](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-models-v0.0.3-next.11...auditable-item-graph-models-v0.0.3-next.12) (2026-03-24)
 
 
