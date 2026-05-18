@@ -16,6 +16,7 @@
 - [IAuditableItemGraphResource](interfaces/IAuditableItemGraphResource.md)
 - [IAuditableItemGraphVertex](interfaces/IAuditableItemGraphVertex.md)
 - [IAuditableItemGraphVertexList](interfaces/IAuditableItemGraphVertexList.md)
+- [IAuditableItemGraphVertexVersionList](interfaces/IAuditableItemGraphVertexVersionList.md)
 - [IAuditableItemGraphChangesetGetRequest](interfaces/IAuditableItemGraphChangesetGetRequest.md)
 - [IAuditableItemGraphChangesetGetResponse](interfaces/IAuditableItemGraphChangesetGetResponse.md)
 - [IAuditableItemGraphChangesetListRequest](interfaces/IAuditableItemGraphChangesetListRequest.md)
@@ -26,6 +27,10 @@
 - [IAuditableItemGraphListRequest](interfaces/IAuditableItemGraphListRequest.md)
 - [IAuditableItemGraphListResponse](interfaces/IAuditableItemGraphListResponse.md)
 - [IAuditableItemGraphUpdateRequest](interfaces/IAuditableItemGraphUpdateRequest.md)
+- [IAuditableItemGraphVersionGetRequest](interfaces/IAuditableItemGraphVersionGetRequest.md)
+- [IAuditableItemGraphVersionGetResponse](interfaces/IAuditableItemGraphVersionGetResponse.md)
+- [IAuditableItemGraphVersionListRequest](interfaces/IAuditableItemGraphVersionListRequest.md)
+- [IAuditableItemGraphVersionListResponse](interfaces/IAuditableItemGraphVersionListResponse.md)
 - [IAuditableItemGraphEventBusVertexCreated](interfaces/IAuditableItemGraphEventBusVertexCreated.md)
 - [IAuditableItemGraphEventBusVertexUpdated](interfaces/IAuditableItemGraphEventBusVertexUpdated.md)
 

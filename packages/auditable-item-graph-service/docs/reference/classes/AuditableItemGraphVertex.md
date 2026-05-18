@@ -91,3 +91,11 @@ The resources attached to the vertex.
 > `optional` **edges?**: [`AuditableItemGraphEdge`](AuditableItemGraphEdge.md)[]
 
 Edges connected to the vertex.
+
+***
+
+### version? {#version}
+
+> `optional` **version?**: `number`
+
+The current version of the vertex, incremented on each changeset.

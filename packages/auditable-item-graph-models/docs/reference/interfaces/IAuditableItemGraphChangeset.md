@@ -65,3 +65,12 @@ The immutable proof id which contains the signature for this changeset.
 > `optional` **verification?**: `IImmutableProofVerification`
 
 The verification for the changeset.
+
+***
+
+### version? {#version}
+
+> `optional` **version?**: `number`
+
+The version number of the vertex after this changeset was applied.
+Maps to https://schema.org/version.

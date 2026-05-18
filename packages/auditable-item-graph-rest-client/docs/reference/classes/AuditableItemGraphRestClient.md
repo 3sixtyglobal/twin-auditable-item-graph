@@ -222,6 +222,88 @@ NotFoundError if the vertex or changeset is not found.
 
 ***
 
+### getVersion() {#getversion}
+
+> **getVersion**(`id`, `versionId`): `Promise`\<`IAuditableItemGraphVertex`\>
+
+Get a graph vertex at a specific version.
+
+#### Parameters
+
+##### id
+
+`string`
+
+The id of the vertex.
+
+##### versionId
+
+`string`
+
+The id of the version (changeset id) to retrieve.
+
+#### Returns
+
+`Promise`\<`IAuditableItemGraphVertex`\>
+
+The vertex reconstructed at that version.
+
+#### Throws
+
+NotFoundError if the vertex or version is not found.
+
+#### Implementation of
+
+`IAuditableItemGraphComponent.getVersion`
+
+***
+
+### getVersions() {#getversions}
+
+> **getVersions**(`id`, `options?`): `Promise`\<`IAuditableItemGraphVertexVersionList`\>
+
+Get all versions of a graph vertex.
+
+#### Parameters
+
+##### id
+
+`string`
+
+The id of the vertex.
+
+##### options?
+
+Additional options for the operation.
+
+###### after?
+
+`string`
+
+Only return versions created after this ISO 8601 timestamp (exclusive).
+
+###### before?
+
+`string`
+
+Only return versions created before this ISO 8601 timestamp (exclusive).
+
+#### Returns
+
+`Promise`\<`IAuditableItemGraphVertexVersionList`\>
+
+The list of vertex versions.
+
+#### Throws
+
+NotFoundError if the vertex is not found.
+
+#### Implementation of
+
+`IAuditableItemGraphComponent.getVersions`
+
+***
+
 ### update() {#update}
 
 > **update**(`vertex`): `Promise`\<`void`\>

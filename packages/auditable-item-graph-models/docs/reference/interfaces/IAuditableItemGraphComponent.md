@@ -178,6 +178,80 @@ NotFoundError if the vertex or changeset is not found.
 
 ***
 
+### getVersion() {#getversion}
+
+> **getVersion**(`id`, `versionId`): `Promise`\<[`IAuditableItemGraphVertex`](IAuditableItemGraphVertex.md)\>
+
+Get a graph vertex at a specific version.
+
+#### Parameters
+
+##### id
+
+`string`
+
+The id of the vertex.
+
+##### versionId
+
+`string`
+
+The id of the version (changeset id) to retrieve.
+
+#### Returns
+
+`Promise`\<[`IAuditableItemGraphVertex`](IAuditableItemGraphVertex.md)\>
+
+The vertex reconstructed at that version.
+
+#### Throws
+
+NotFoundError if the vertex or version is not found.
+
+***
+
+### getVersions() {#getversions}
+
+> **getVersions**(`id`, `options?`): `Promise`\<[`IAuditableItemGraphVertexVersionList`](IAuditableItemGraphVertexVersionList.md)\>
+
+Get all versions of a graph vertex.
+
+#### Parameters
+
+##### id
+
+`string`
+
+The id of the vertex.
+
+##### options?
+
+Additional options for the operation.
+
+###### after?
+
+`string`
+
+Only return versions created after this ISO 8601 timestamp (exclusive).
+
+###### before?
+
+`string`
+
+Only return versions created before this ISO 8601 timestamp (exclusive).
+
+#### Returns
+
+`Promise`\<[`IAuditableItemGraphVertexVersionList`](IAuditableItemGraphVertexVersionList.md)\>
+
+The list of vertex versions.
+
+#### Throws
+
+NotFoundError if the vertex is not found.
+
+***
+
 ### removeVerifiable() {#removeverifiable}
 
 > **removeVerifiable**(`id`): `Promise`\<`void`\>

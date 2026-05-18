@@ -53,3 +53,9 @@ Represents auditable item graph changeset list.
 > `readonly` **PatchOperation**: `"AuditableItemGraphPatchOperation"` = `"AuditableItemGraphPatchOperation"`
 
 Represents patch operation.
+
+### VertexVersionList {#vertexversionlist}
+
+> `readonly` **VertexVersionList**: `"AuditableItemGraphVertexVersionList"` = `"AuditableItemGraphVertexVersionList"`
+
+Represents auditable item graph vertex version list.

@@ -117,3 +117,12 @@ Edges connected to the vertex.
 > `optional` **verified?**: `boolean`
 
 Is the vertex verified, will only be populated when verification is requested.
+
+***
+
+### version? {#version}
+
+> `optional` **version?**: `number`
+
+The version of the vertex, populated only when getting a specific version.
+Maps to https://schema.org/version.

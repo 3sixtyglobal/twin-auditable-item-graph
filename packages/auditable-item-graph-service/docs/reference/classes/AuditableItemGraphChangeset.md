@@ -59,3 +59,11 @@ The patches in the changeset.
 > `optional` **proofId?**: `string`
 
 The immutable proof id which contains the signature for this changeset.
+
+***
+
+### version? {#version}
+
+> `optional` **version?**: `number`
+
+The version number of the vertex after this changeset was applied.
