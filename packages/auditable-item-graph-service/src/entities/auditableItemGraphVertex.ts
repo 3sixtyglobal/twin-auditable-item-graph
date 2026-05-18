@@ -75,4 +75,10 @@ export class AuditableItemGraphVertex {
 	 */
 	@property({ type: "array", itemTypeRef: "AuditableItemGraphEdge", optional: true })
 	public edges?: AuditableItemGraphEdge[];
+
+	/**
+	 * The current version of the vertex, incremented on each changeset.
+	 */
+	@property({ type: "integer", optional: true })
+	public version?: number;
 }

@@ -18,6 +18,7 @@
 		"./src/models/IAuditableItemGraphPatchOperation.ts",
 		"./src/models/IAuditableItemGraphResource.ts",
 		"./src/models/IAuditableItemGraphVertex.ts",
-		"./src/models/IAuditableItemGraphVertexList.ts"
+		"./src/models/IAuditableItemGraphVertexList.ts",
+		"./src/models/IAuditableItemGraphVertexVersionList.ts"
 	]
 }

@@ -620,7 +620,8 @@ describe("AuditableItemGraphService", () => {
 						}
 					],
 					proofId: expect.stringMatching(IMMUTABLE_PROOF_URN_PATTERN),
-					userIdentity: TEST_USER_IDENTITY
+					userIdentity: TEST_USER_IDENTITY,
+					version: 0
 				}
 			]
 		});
@@ -636,6 +637,7 @@ describe("AuditableItemGraphService", () => {
 				dateCreated: expect.any(String),
 				userIdentity: TEST_USER_IDENTITY,
 				proofId: expect.stringMatching(IMMUTABLE_PROOF_URN_PATTERN),
+				version: 0,
 				patches: [
 					{
 						op: "add",
@@ -3095,14 +3097,16 @@ describe("AuditableItemGraphService", () => {
 
 	test("Validation fails when passing edges as a single object instead of array", async () => {
 		const service = new AuditableItemGraphService();
+		const edges = {
+			type: AuditableItemGraphTypes.Edge,
+			targetId: "aig:0101010101010101010101010101010101010101010101010101010101010101",
+			edgeRelationships: ["friend"]
+		} as unknown as IAuditableItemGraphEdge[];
 		await expect(
 			service.create({
 				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
 				type: AuditableItemGraphTypes.Vertex,
-				edges: {
-					type: AuditableItemGraphTypes.Edge,
-					targetId: "aig:0101010101010101010101010101010101010101010101010101010101010101"
-				} as unknown as IAuditableItemGraphEdge[]
+				edges
 			})
 		).rejects.toMatchObject({
 			message: "auditableItemGraphService.createFailed",
@@ -3125,14 +3129,15 @@ describe("AuditableItemGraphService", () => {
 
 	test("Validation fails when passing aliases as a single object instead of array", async () => {
 		const service = new AuditableItemGraphService();
+		const aliases = {
+			type: AuditableItemGraphTypes.Alias,
+			id: "foo123"
+		} as unknown as IAuditableItemGraphAlias[];
 		await expect(
 			service.create({
 				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
 				type: AuditableItemGraphTypes.Vertex,
-				aliases: {
-					type: AuditableItemGraphTypes.Alias,
-					id: "foo123"
-				} as unknown as IAuditableItemGraphAlias[]
+				aliases
 			})
 		).rejects.toMatchObject({
 			message: "auditableItemGraphService.createFailed",
@@ -3155,15 +3160,16 @@ describe("AuditableItemGraphService", () => {
 
 	test("Validation fails when passing resources as a single object instead of array", async () => {
 		const service = new AuditableItemGraphService();
+		const resources = {
+			type: AuditableItemGraphTypes.Resource,
+			id: "resource1",
+			resourceObject: { type: "Note" }
+		} as unknown as IAuditableItemGraphResource[];
 		await expect(
 			service.create({
 				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
 				type: AuditableItemGraphTypes.Vertex,
-				resources: {
-					type: AuditableItemGraphTypes.Resource,
-					id: "resource1",
-					resourceObject: { type: "Note" }
-				} as unknown as IAuditableItemGraphResource[]
+				resources
 			})
 		).rejects.toMatchObject({
 			message: "auditableItemGraphService.createFailed",
@@ -3211,11 +3217,10 @@ describe("AuditableItemGraphService", () => {
 
 	test("Validation fails when @context is missing", async () => {
 		const service = new AuditableItemGraphService();
-		await expect(
-			service.create({
-				type: AuditableItemGraphTypes.Vertex
-			} as unknown as Omit<IAuditableItemGraphVertex, "id">)
-		).rejects.toMatchObject({
+		const missingContextVertex = {
+			type: AuditableItemGraphTypes.Vertex
+		} as unknown as Omit<IAuditableItemGraphVertex, "id">;
+		await expect(service.create(missingContextVertex)).rejects.toMatchObject({
 			message: "auditableItemGraphService.createFailed",
 			cause: {
 				message: "common.validation",
@@ -3235,11 +3240,10 @@ describe("AuditableItemGraphService", () => {
 
 	test("Validation fails when type is missing", async () => {
 		const service = new AuditableItemGraphService();
-		await expect(
-			service.create({
-				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon]
-			} as unknown as Omit<IAuditableItemGraphVertex, "id">)
-		).rejects.toMatchObject({
+		const missingTypeVertex = {
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon]
+		} as unknown as Omit<IAuditableItemGraphVertex, "id">;
+		await expect(service.create(missingTypeVertex)).rejects.toMatchObject({
 			message: "auditableItemGraphService.createFailed",
 			cause: {
 				message: "common.validation",
@@ -3259,15 +3263,14 @@ describe("AuditableItemGraphService", () => {
 
 	test("Validation fails when alias is missing required type property", async () => {
 		const service = new AuditableItemGraphService();
+		const invalidAlias = {
+			id: "foo123"
+		} as unknown as IAuditableItemGraphAlias;
 		await expect(
 			service.create({
 				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
 				type: AuditableItemGraphTypes.Vertex,
-				aliases: [
-					{
-						id: "foo123"
-					} as unknown as IAuditableItemGraphAlias
-				]
+				aliases: [invalidAlias]
 			})
 		).rejects.toMatchObject({
 			message: "auditableItemGraphService.createFailed",
@@ -3292,16 +3295,15 @@ describe("AuditableItemGraphService", () => {
 
 	test("Validation fails when resource is missing required type property", async () => {
 		const service = new AuditableItemGraphService();
+		const invalidResource = {
+			id: "resource1",
+			resourceObject: { type: "Note" }
+		} as unknown as IAuditableItemGraphResource;
 		await expect(
 			service.create({
 				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
 				type: AuditableItemGraphTypes.Vertex,
-				resources: [
-					{
-						id: "resource1",
-						resourceObject: { type: "Note" }
-					} as unknown as IAuditableItemGraphResource
-				]
+				resources: [invalidResource]
 			})
 		).rejects.toMatchObject({
 			message: "auditableItemGraphService.createFailed",
@@ -3324,17 +3326,181 @@ describe("AuditableItemGraphService", () => {
 		});
 	});
 
+	test("Can get a vertex at version 0", async () => {
+		const service = new AuditableItemGraphService();
+		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			aliases: [{ type: AuditableItemGraphTypes.Alias, id: "foo123" }]
+		});
+
+		const storedChangesetId = changesetStorage.getStore()[0].id;
+
+		const result = await service.getVersion(id, storedChangesetId);
+
+		expect(result).toEqual(
+			expect.objectContaining({
+				"@context": expect.arrayContaining(["https://schema.twindev.org/aig/"]),
+				type: AuditableItemGraphTypes.Vertex,
+				id,
+				dateCreated: expect.any(String),
+				organizationIdentity: TEST_ORGANIZATION_IDENTITY,
+				aliases: expect.arrayContaining([
+					expect.objectContaining({
+						type: AuditableItemGraphTypes.Alias,
+						id: "foo123",
+						dateCreated: expect.any(String)
+					})
+				]),
+				version: 0
+			})
+		);
+	});
+
+	test("Can get vertex at version 0 and version 1 after update", async () => {
+		const service = new AuditableItemGraphService();
+		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			aliases: [{ type: AuditableItemGraphTypes.Alias, id: "foo123" }]
+		});
+
+		await service.update({
+			id,
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			aliases: [{ type: AuditableItemGraphTypes.Alias, id: "bar456" }]
+		});
+
+		const changesets = changesetStorage.getStore();
+		expect(changesets).toHaveLength(2);
+
+		const v1 = await service.getVersion(id, changesets[0].id);
+		expect(v1.version).toEqual(0);
+		expect(v1.aliases).toEqual(expect.arrayContaining([expect.objectContaining({ id: "foo123" })]));
+		expect(v1.aliases?.find(a => a.id === "bar456")).toBeUndefined();
+
+		const v2 = await service.getVersion(id, changesets[1].id);
+		expect(v2.version).toEqual(1);
+		expect(v2.aliases).toEqual(expect.arrayContaining([expect.objectContaining({ id: "bar456" })]));
+	});
+
+	test("Throws not found when getting a version from an unknown vertex", async () => {
+		const service = new AuditableItemGraphService();
+		await expect(
+			service.getVersion("aig:00000000000000000000000000000000", "nonexistent")
+		).rejects.toMatchObject({
+			message: "auditableItemGraphService.getVersionFailed"
+		});
+	});
+
+	test("Throws not found when getting an unknown version id", async () => {
+		const service = new AuditableItemGraphService();
+		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex
+		});
+
+		await expect(service.getVersion(id, "nonexistentchangesetid")).rejects.toMatchObject({
+			message: "auditableItemGraphService.getVersionFailed"
+		});
+	});
+
+	test("Can get all versions of a vertex", async () => {
+		const service = new AuditableItemGraphService();
+		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			aliases: [{ type: AuditableItemGraphTypes.Alias, id: "foo123" }]
+		});
+
+		await service.update({
+			id,
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			aliases: [{ type: AuditableItemGraphTypes.Alias, id: "bar456" }]
+		});
+
+		const result = await service.getVersions(id);
+
+		expect(result).toEqual(
+			expect.objectContaining({
+				"@context": expect.arrayContaining(["https://schema.org"]),
+				type: expect.arrayContaining([AuditableItemGraphTypes.VertexVersionList])
+			})
+		);
+		expect(result.itemListElement).toHaveLength(2);
+		expect(result.itemListElement[0]).toEqual(0);
+		expect(result.itemListElement[1]).toEqual(1);
+	});
+
+	test("Can get versions after a timestamp", async () => {
+		const service = new AuditableItemGraphService();
+		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			aliases: [{ type: AuditableItemGraphTypes.Alias, id: "foo123" }]
+		});
+
+		// Using a date well before all changesets — all versions should be included.
+		const allIncluded = await service.getVersions(id, { after: "2024-01-01T00:00:00.000Z" });
+		expect(allIncluded.itemListElement).toHaveLength(1);
+
+		// Using a date well after all changesets — no versions should be included.
+		const noneIncluded = await service.getVersions(id, { after: "2025-01-01T00:00:00.000Z" });
+		expect(noneIncluded.itemListElement).toHaveLength(0);
+	});
+
+	test("Can get versions before a timestamp", async () => {
+		const service = new AuditableItemGraphService();
+		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			aliases: [{ type: AuditableItemGraphTypes.Alias, id: "foo123" }]
+		});
+
+		// Using a date well after all changesets — all versions should be included.
+		const allIncluded = await service.getVersions(id, { before: "2025-01-01T00:00:00.000Z" });
+		expect(allIncluded.itemListElement).toHaveLength(1);
+
+		// Using a date well before all changesets — no versions should be included.
+		const noneIncluded = await service.getVersions(id, { before: "2024-01-01T00:00:00.000Z" });
+		expect(noneIncluded.itemListElement).toHaveLength(0);
+	});
+
+	test("Can get versions between two timestamps", async () => {
+		const service = new AuditableItemGraphService();
+		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			aliases: [{ type: AuditableItemGraphTypes.Alias, id: "foo123" }]
+		});
+
+		// Range that spans the changeset timestamp — version is included.
+		const included = await service.getVersions(id, {
+			after: "2024-01-01T00:00:00.000Z",
+			before: "2025-01-01T00:00:00.000Z"
+		});
+		expect(included.itemListElement).toHaveLength(1);
+
+		// Range entirely before all changesets — no versions included.
+		const excluded = await service.getVersions(id, {
+			after: "2023-01-01T00:00:00.000Z",
+			before: "2024-01-01T00:00:00.000Z"
+		});
+		expect(excluded.itemListElement).toHaveLength(0);
+	});
+
 	test("Validation fails when edge is missing required type property", async () => {
 		const service = new AuditableItemGraphService();
+		const invalidEdge = {
+			targetId: "aig:0101010101010101010101010101010101010101010101010101010101010101"
+		} as unknown as IAuditableItemGraphEdge;
 		await expect(
 			service.create({
 				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
 				type: AuditableItemGraphTypes.Vertex,
-				edges: [
-					{
-						targetId: "aig:0101010101010101010101010101010101010101010101010101010101010101"
-					} as unknown as IAuditableItemGraphEdge
-				]
+				edges: [invalidEdge]
 			})
 		).rejects.toMatchObject({
 			message: "auditableItemGraphService.createFailed",

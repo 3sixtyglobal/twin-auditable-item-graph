@@ -23,6 +23,11 @@ import type {
 	IAuditableItemGraphUpdateRequest,
 	IAuditableItemGraphVertex,
 	IAuditableItemGraphVertexList,
+	IAuditableItemGraphVertexVersionList,
+	IAuditableItemGraphVersionGetRequest,
+	IAuditableItemGraphVersionGetResponse,
+	IAuditableItemGraphVersionListRequest,
+	IAuditableItemGraphVersionListResponse,
 	VerifyDepth
 } from "@twin.org/auditable-item-graph-models";
 import { Coerce, Guards, NotSupportedError, Urn } from "@twin.org/core";
@@ -197,6 +202,75 @@ export class AuditableItemGraphRestClient
 			},
 			query: {
 				verifySignatureDepth: options?.verifySignatureDepth
+			}
+		});
+
+		return response.body;
+	}
+
+	/**
+	 * Get a graph vertex at a specific version.
+	 * @param id The id of the vertex.
+	 * @param versionId The id of the version (changeset id) to retrieve.
+	 * @returns The vertex reconstructed at that version.
+	 * @throws NotFoundError if the vertex or version is not found.
+	 */
+	public async getVersion(id: string, versionId: string): Promise<IAuditableItemGraphVertex> {
+		Guards.stringValue(AuditableItemGraphRestClient.CLASS_NAME, nameof(id), id);
+		Guards.stringValue(AuditableItemGraphRestClient.CLASS_NAME, nameof(versionId), versionId);
+
+		const urnParsed = Urn.fromValidString(id);
+		const vertexId = urnParsed.namespaceSpecific(0);
+
+		Guards.stringValue(AuditableItemGraphRestClient.CLASS_NAME, "vertexId", vertexId);
+
+		const response = await this.fetch<
+			IAuditableItemGraphVersionGetRequest,
+			IAuditableItemGraphVersionGetResponse
+		>("/:id/versions/:versionId", "GET", {
+			headers: {
+				[HeaderTypes.Accept]: MimeTypes.JsonLd
+			},
+			pathParams: {
+				id: vertexId,
+				versionId
+			}
+		});
+
+		return response.body;
+	}
+
+	/**
+	 * Get all versions of a graph vertex.
+	 * @param id The id of the vertex.
+	 * @param options Additional options for the operation.
+	 * @param options.after Only return versions created after this ISO 8601 timestamp (exclusive).
+	 * @param options.before Only return versions created before this ISO 8601 timestamp (exclusive).
+	 * @returns The list of vertex versions.
+	 * @throws NotFoundError if the vertex is not found.
+	 */
+	public async getVersions(
+		id: string,
+		options?: {
+			after?: string;
+			before?: string;
+		}
+	): Promise<IAuditableItemGraphVertexVersionList> {
+		Guards.stringValue(AuditableItemGraphRestClient.CLASS_NAME, nameof(id), id);
+
+		const response = await this.fetch<
+			IAuditableItemGraphVersionListRequest,
+			IAuditableItemGraphVersionListResponse
+		>("/:id/versions", "GET", {
+			headers: {
+				[HeaderTypes.Accept]: MimeTypes.JsonLd
+			},
+			pathParams: {
+				id
+			},
+			query: {
+				after: options?.after,
+				before: options?.before
 			}
 		});
 

@@ -58,4 +58,11 @@ export interface IAuditableItemGraphChangeset {
 	 * @json-ld id
 	 */
 	verification?: IImmutableProofVerification;
+
+	/**
+	 * The version number of the vertex after this changeset was applied.
+	 * Maps to https://schema.org/version.
+	 * @json-ld namespace:sch
+	 */
+	version?: number;
 }

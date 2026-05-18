@@ -15,11 +15,13 @@ import {
 	type IAuditableItemGraphEventBusVertexUpdated,
 	type IAuditableItemGraphResource,
 	type IAuditableItemGraphVertex,
-	type IAuditableItemGraphVertexList
+	type IAuditableItemGraphVertexList,
+	type IAuditableItemGraphVertexVersionList
 } from "@twin.org/auditable-item-graph-models";
 import { ContextIdKeys, ContextIdStore } from "@twin.org/context";
 import {
 	ArrayHelper,
+	Coerce,
 	ComponentFactory,
 	GeneralError,
 	Guards,
@@ -231,7 +233,9 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 			delete originalEntity.aliasIndex;
 			delete originalEntity.resourceTypeIndex;
-			await this.addChangeset(context, originalEntity, vertexModel, true);
+			await this.addChangeset(context, originalEntity, vertexModel, true, 0);
+
+			vertexModel.version = 0;
 
 			await this._vertexStorage.set({
 				...vertexModel,
@@ -327,9 +331,19 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			await this.updateResourceList(context, newEntity, vertex.resources);
 			await this.updateEdgeList(context, newEntity, vertex.edges);
 
-			const patches = await this.addChangeset(context, originalEntity, newEntity, false);
+			const nextVersion = Is.empty(vertexEntity.version)
+				? (await this.internalGetChangesets(vertexId)).length
+				: vertexEntity.version + 1;
+			const patches = await this.addChangeset(
+				context,
+				originalEntity,
+				newEntity,
+				false,
+				nextVersion
+			);
 			if (patches.length > 0) {
 				newEntity.dateModified = context.now;
+				newEntity.version = nextVersion;
 
 				const indexes = this.buildIndexes(newEntity);
 
@@ -556,6 +570,141 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			return result;
 		} catch (error) {
 			throw new GeneralError(AuditableItemGraphService.CLASS_NAME, "getFailed", undefined, error);
+		}
+	}
+
+	/**
+	 * Get a graph vertex at a specific version.
+	 * @param id The id of the vertex.
+	 * @param versionId The id of the version (changeset id) to retrieve.
+	 * @returns The vertex reconstructed at that version.
+	 * @throws NotFoundError if the vertex or version is not found.
+	 */
+	public async getVersion(id: string, versionId: string): Promise<IAuditableItemGraphVertex> {
+		Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(id), id);
+		Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(versionId), versionId);
+
+		const urnParsed = Urn.fromValidString(id);
+
+		if (urnParsed.namespaceIdentifier() !== AuditableItemGraphService.NAMESPACE) {
+			throw new GeneralError(AuditableItemGraphService.CLASS_NAME, "namespaceMismatch", {
+				namespace: AuditableItemGraphService.NAMESPACE,
+				id
+			});
+		}
+
+		try {
+			const vertexId = urnParsed.namespaceSpecific(0);
+
+			const vertexEntity = await this._vertexStorage.get(vertexId);
+			if (Is.empty(vertexEntity)) {
+				throw new NotFoundError(AuditableItemGraphService.CLASS_NAME, "vertexNotFound", id);
+			}
+
+			const targetChangeset = await this._changesetStorage.get(versionId);
+			if (Is.empty(targetChangeset) || targetChangeset.vertexId !== vertexId) {
+				throw new NotFoundError(AuditableItemGraphService.CLASS_NAME, "versionNotFound", versionId);
+			}
+
+			const changesets = await this.internalGetChangesets(vertexId, {
+				maxVersion: targetChangeset.version
+			});
+
+			let entityState: AuditableItemGraphVertex = {
+				id: vertexEntity.id,
+				dateCreated: vertexEntity.dateCreated,
+				organizationIdentity: vertexEntity.organizationIdentity
+			};
+			for (const changeset of changesets) {
+				entityState = JsonHelper.patch(entityState, changeset.patches);
+			}
+
+			const vertexModel = this.vertexEntityToJsonLd(entityState);
+			vertexModel.version = targetChangeset.version;
+
+			const result = await JsonLdProcessor.compact(vertexModel, vertexModel["@context"]);
+			return result;
+		} catch (error) {
+			throw new GeneralError(
+				AuditableItemGraphService.CLASS_NAME,
+				"getVersionFailed",
+				undefined,
+				error
+			);
+		}
+	}
+
+	/**
+	 * Get all versions of a graph vertex.
+	 * @param id The id of the vertex.
+	 * @param options Additional options for the operation.
+	 * @param options.after Only return versions created after this ISO 8601 timestamp (exclusive).
+	 * @param options.before Only return versions created before this ISO 8601 timestamp (exclusive).
+	 * @returns The list of vertex versions.
+	 * @throws NotFoundError if the vertex is not found.
+	 */
+	public async getVersions(
+		id: string,
+		options?: {
+			after?: string;
+			before?: string;
+		}
+	): Promise<IAuditableItemGraphVertexVersionList> {
+		Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(id), id);
+
+		const urnParsed = Urn.fromValidString(id);
+
+		if (urnParsed.namespaceIdentifier() !== AuditableItemGraphService.NAMESPACE) {
+			throw new GeneralError(AuditableItemGraphService.CLASS_NAME, "namespaceMismatch", {
+				namespace: AuditableItemGraphService.NAMESPACE,
+				id
+			});
+		}
+
+		try {
+			const vertexId = urnParsed.namespaceSpecific(0);
+
+			const vertexEntity = await this._vertexStorage.get(vertexId);
+			if (Is.empty(vertexEntity)) {
+				throw new NotFoundError(AuditableItemGraphService.CLASS_NAME, "vertexNotFound", id);
+			}
+
+			const beforeDate = Coerce.dateTime(options?.before);
+			const afterDate = Coerce.dateTime(options?.after);
+
+			const allChangesets = await this.internalGetChangesets(vertexId, {
+				before: beforeDate?.toISOString()
+			});
+
+			const versions: number[] = [];
+			for (const changeset of allChangesets) {
+				const changesetDate = Coerce.dateTime(changeset.dateCreated);
+				const afterExcluded =
+					!Is.empty(afterDate) && !Is.empty(changesetDate) && changesetDate <= afterDate;
+
+				if (!afterExcluded) {
+					versions.push(changeset.version ?? 0);
+				}
+			}
+
+			const versionList: IAuditableItemGraphVertexVersionList = {
+				"@context": [
+					SchemaOrgContexts.Context,
+					AuditableItemGraphContexts.Context,
+					AuditableItemGraphContexts.ContextCommon
+				],
+				type: [SchemaOrgTypes.ItemList, AuditableItemGraphTypes.VertexVersionList],
+				[SchemaOrgTypes.ItemListElement]: versions
+			};
+
+			return await JsonLdProcessor.compact(versionList, versionList["@context"]);
+		} catch (error) {
+			throw new GeneralError(
+				AuditableItemGraphService.CLASS_NAME,
+				"getVersionsFailed",
+				undefined,
+				error
+			);
 		}
 	}
 
@@ -870,10 +1019,59 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				patchFrom: p.from,
 				patchValue: p.value
 			})),
-			proofId: changesetEntity.proofId
+			proofId: changesetEntity.proofId,
+			version: changesetEntity.version
 		};
 
 		return model;
+	}
+
+	/**
+	 * Fetch all changesets for a vertex in ascending date order.
+	 * @param vertexId The internal vertex id.
+	 * @param options Optional filtering options.
+	 * @param options.before Only fetch changesets created strictly before this ISO 8601 timestamp.
+	 * @param options.maxVersion Only fetch changesets with version <= this value.
+	 * @returns All changeset entities sorted ascending by dateCreated.
+	 * @internal
+	 */
+	private async internalGetChangesets(
+		vertexId: string,
+		options?: { before?: string; maxVersion?: number }
+	): Promise<AuditableItemGraphChangeset[]> {
+		const all: AuditableItemGraphChangeset[] = [];
+		let cursor: string | undefined;
+
+		const conditions: IComparator[] = [
+			{ property: "vertexId", value: vertexId, comparison: ComparisonOperator.Equals }
+		];
+		if (Is.stringValue(options?.before)) {
+			conditions.push({
+				property: "dateCreated",
+				value: options.before,
+				comparison: ComparisonOperator.LessThan
+			});
+		}
+		if (!Is.empty(options?.maxVersion)) {
+			conditions.push({
+				property: "version",
+				value: options.maxVersion,
+				comparison: ComparisonOperator.LessThanOrEqual
+			});
+		}
+
+		do {
+			const result = await this._changesetStorage.query(
+				{ conditions, logicalOperator: LogicalOperator.And },
+				[{ property: "dateCreated", sortDirection: SortDirection.Ascending }],
+				undefined,
+				cursor
+			);
+			all.push(...(result.entities as AuditableItemGraphChangeset[]));
+			cursor = result.cursor;
+		} while (Is.stringValue(cursor));
+
+		return all;
 	}
 
 	/**
@@ -1166,6 +1364,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	 * @param original The original vertex.
 	 * @param updated The updated vertex.
 	 * @param isNew Whether this is a new item.
+	 * @param version The version number of the vertex after this changeset.
 	 * @returns True if there were changes.
 	 * @internal
 	 */
@@ -1173,7 +1372,8 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 		context: IAuditableItemGraphServiceContext,
 		original: AuditableItemGraphVertex,
 		updated: AuditableItemGraphVertex,
-		isNew: boolean
+		isNew: boolean,
+		version: number
 	): Promise<IPatchOperation[]> {
 		const patches = JsonHelper.diff(original, updated);
 
@@ -1184,7 +1384,8 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				vertexId: updated.id,
 				dateCreated: context.now,
 				userIdentity: context.contextIds?.[ContextIdKeys.User],
-				patches
+				patches,
+				version
 			};
 
 			// Create the JSON-LD object we want to use for the proof
@@ -1199,7 +1400,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 			// Create the proof for the changeset object
 			changesetEntity.proofId = await this._immutableProofComponent.create(
-				reducedChangesetJsonLd as unknown as IJsonLdNodeObject
+				JsonLdHelper.toNodeObject(reducedChangesetJsonLd)
 			);
 
 			// Link the verifiable storage id to the changeset

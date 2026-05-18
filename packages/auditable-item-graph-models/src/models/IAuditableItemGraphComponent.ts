@@ -6,6 +6,7 @@ import type { IAuditableItemGraphChangeset } from "./IAuditableItemGraphChangese
 import type { IAuditableItemGraphChangesetList } from "./IAuditableItemGraphChangesetList.js";
 import type { IAuditableItemGraphVertex } from "./IAuditableItemGraphVertex.js";
 import type { IAuditableItemGraphVertexList } from "./IAuditableItemGraphVertexList.js";
+import type { IAuditableItemGraphVertexVersionList } from "./IAuditableItemGraphVertexVersionList.js";
 import type { VerifyDepth } from "./verifyDepth.js";
 
 /**
@@ -86,6 +87,32 @@ export interface IAuditableItemGraphComponent extends IComponent {
 		id: string,
 		options?: { verifySignatureDepth?: VerifyDepth }
 	): Promise<IAuditableItemGraphChangeset>;
+
+	/**
+	 * Get a graph vertex at a specific version.
+	 * @param id The id of the vertex.
+	 * @param versionId The id of the version (changeset id) to retrieve.
+	 * @returns The vertex reconstructed at that version.
+	 * @throws NotFoundError if the vertex or version is not found.
+	 */
+	getVersion(id: string, versionId: string): Promise<IAuditableItemGraphVertex>;
+
+	/**
+	 * Get all versions of a graph vertex.
+	 * @param id The id of the vertex.
+	 * @param options Additional options for the operation.
+	 * @param options.after Only return versions created after this ISO 8601 timestamp (exclusive).
+	 * @param options.before Only return versions created before this ISO 8601 timestamp (exclusive).
+	 * @returns The list of vertex versions.
+	 * @throws NotFoundError if the vertex is not found.
+	 */
+	getVersions(
+		id: string,
+		options?: {
+			after?: string;
+			before?: string;
+		}
+	): Promise<IAuditableItemGraphVertexVersionList>;
 
 	/**
 	 * Remove the verifiable storage for an item.

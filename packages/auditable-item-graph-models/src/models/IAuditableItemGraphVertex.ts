@@ -69,4 +69,11 @@ export interface IAuditableItemGraphVertex extends Omit<
 	 * @json-ld namespace:twin-common
 	 */
 	verified?: boolean;
+
+	/**
+	 * The version of the vertex, populated only when getting a specific version.
+	 * Maps to https://schema.org/version.
+	 * @json-ld namespace:sch
+	 */
+	version?: number;
 }

@@ -22,7 +22,11 @@ import {
 	type IAuditableItemGraphGetResponse,
 	type IAuditableItemGraphListRequest,
 	type IAuditableItemGraphListResponse,
-	type IAuditableItemGraphUpdateRequest
+	type IAuditableItemGraphUpdateRequest,
+	type IAuditableItemGraphVersionGetRequest,
+	type IAuditableItemGraphVersionGetResponse,
+	type IAuditableItemGraphVersionListRequest,
+	type IAuditableItemGraphVersionListResponse
 } from "@twin.org/auditable-item-graph-models";
 import { Coerce, ComponentFactory, Guards, Is } from "@twin.org/core";
 import { nameof } from "@twin.org/nameof";
@@ -546,6 +550,120 @@ export function generateRestRoutesAuditableItemGraph(
 		]
 	};
 
+	const getVersionRoute: IRestRoute<
+		IAuditableItemGraphVersionGetRequest,
+		IAuditableItemGraphVersionGetResponse
+	> = {
+		operationId: "auditableItemGraphVersionGet",
+		summary: "Get a graph vertex at a specific version",
+		tag: tagsAuditableItemGraph[0].name,
+		method: "GET",
+		path: `${baseRouteName}/:id/versions/:versionId`,
+		handler: async (httpRequestContext, request) =>
+			auditableItemGraphVersionGet(httpRequestContext, componentName, request),
+		requestType: {
+			type: nameof<IAuditableItemGraphVersionGetRequest>(),
+			examples: [
+				{
+					id: "auditableItemGraphVersionGetRequestExample",
+					request: {
+						headers: {
+							[HeaderTypes.Accept]: MimeTypes.Json
+						},
+						pathParams: {
+							id: "aig:1234567890",
+							versionId: "changeset:1234567890"
+						}
+					}
+				}
+			]
+		},
+		responseType: [
+			{
+				type: nameof<IAuditableItemGraphVersionGetResponse>(),
+				examples: [
+					{
+						id: "auditableItemGraphVersionGetResponseExample",
+						response: {
+							body: {
+								"@context": [
+									AuditableItemGraphContexts.Context,
+									AuditableItemGraphContexts.ContextCommon,
+									SchemaOrgContexts.Context
+								],
+								type: AuditableItemGraphTypes.Vertex,
+								id: "aig:1234567890",
+								dateCreated: "2024-08-22T11:55:16.271Z",
+								version: 1
+							}
+						}
+					}
+				]
+			}
+		]
+	};
+
+	const getVersionListRoute: IRestRoute<
+		IAuditableItemGraphVersionListRequest,
+		IAuditableItemGraphVersionListResponse
+	> = {
+		operationId: "auditableItemGraphVersionList",
+		summary: "Get all versions of a graph vertex",
+		tag: tagsAuditableItemGraph[0].name,
+		method: "GET",
+		path: `${baseRouteName}/:id/versions`,
+		handler: async (httpRequestContext, request) =>
+			auditableItemGraphVersionList(httpRequestContext, componentName, request),
+		requestType: {
+			type: nameof<IAuditableItemGraphVersionListRequest>(),
+			examples: [
+				{
+					id: "auditableItemGraphVersionListRequestExample",
+					request: {
+						headers: {
+							[HeaderTypes.Accept]: MimeTypes.Json
+						},
+						pathParams: {
+							id: "aig:1234567890"
+						}
+					}
+				},
+				{
+					id: "auditableItemGraphVersionListAfterRequestExample",
+					request: {
+						pathParams: {
+							id: "aig:1234567890"
+						},
+						query: {
+							after: "2026-04-03T12:00:00Z"
+						}
+					}
+				}
+			]
+		},
+		responseType: [
+			{
+				type: nameof<IAuditableItemGraphVersionListResponse>(),
+				examples: [
+					{
+						id: "auditableItemGraphVersionListResponseExample",
+						response: {
+							body: {
+								"@context": [
+									SchemaOrgContexts.Context,
+									AuditableItemGraphContexts.Context,
+									AuditableItemGraphContexts.ContextCommon
+								],
+								type: [SchemaOrgTypes.ItemList, AuditableItemGraphTypes.VertexVersionList],
+								[SchemaOrgTypes.ItemListElement]: [0, 1, 2]
+							}
+						}
+					}
+				]
+			}
+		]
+	};
+
 	const updateRoute: IRestRoute<IAuditableItemGraphUpdateRequest, INoContentResponse> = {
 		operationId: "auditableItemGraphUpdate",
 		summary: "Update a graph vertex",
@@ -767,7 +885,16 @@ export function generateRestRoutesAuditableItemGraph(
 		]
 	};
 
-	return [createRoute, getRoute, getChangesetRoute, getChangesetListRoute, updateRoute, listRoute];
+	return [
+		createRoute,
+		getRoute,
+		getVersionRoute,
+		getVersionListRoute,
+		getChangesetRoute,
+		getChangesetListRoute,
+		updateRoute,
+		listRoute
+	];
 }
 
 /**
@@ -1014,5 +1141,81 @@ export async function auditableItemGraphList(
 	return {
 		headers,
 		body: result.entries
+	};
+}
+
+/**
+ * Get the graph vertex at a specific version.
+ * @param httpRequestContext The request context for the API.
+ * @param componentName The name of the component to use in the routes.
+ * @param request The request.
+ * @returns The response object with additional http response properties.
+ */
+export async function auditableItemGraphVersionGet(
+	httpRequestContext: IHttpRequestContext,
+	componentName: string,
+	request: IAuditableItemGraphVersionGetRequest
+): Promise<IAuditableItemGraphVersionGetResponse> {
+	Guards.object<IAuditableItemGraphVersionGetRequest>(ROUTES_SOURCE, nameof(request), request);
+	Guards.object<IAuditableItemGraphVersionGetRequest["pathParams"]>(
+		ROUTES_SOURCE,
+		nameof(request.pathParams),
+		request.pathParams
+	);
+	Guards.stringValue(ROUTES_SOURCE, nameof(request.pathParams.id), request.pathParams.id);
+	Guards.stringValue(
+		ROUTES_SOURCE,
+		nameof(request.pathParams.versionId),
+		request.pathParams.versionId
+	);
+
+	const component = ComponentFactory.get<IAuditableItemGraphComponent>(componentName);
+	const result = await component.getVersion(request.pathParams.id, request.pathParams.versionId);
+
+	return {
+		headers: {
+			[HeaderTypes.ContentType]:
+				request.headers?.[HeaderTypes.Accept] === MimeTypes.JsonLd
+					? MimeTypes.JsonLd
+					: MimeTypes.Json
+		},
+		body: result
+	};
+}
+
+/**
+ * Get all versions of a graph vertex.
+ * @param httpRequestContext The request context for the API.
+ * @param componentName The name of the component to use in the routes.
+ * @param request The request.
+ * @returns The response object with additional http response properties.
+ */
+export async function auditableItemGraphVersionList(
+	httpRequestContext: IHttpRequestContext,
+	componentName: string,
+	request: IAuditableItemGraphVersionListRequest
+): Promise<IAuditableItemGraphVersionListResponse> {
+	Guards.object<IAuditableItemGraphVersionListRequest>(ROUTES_SOURCE, nameof(request), request);
+	Guards.object<IAuditableItemGraphVersionListRequest["pathParams"]>(
+		ROUTES_SOURCE,
+		nameof(request.pathParams),
+		request.pathParams
+	);
+	Guards.stringValue(ROUTES_SOURCE, nameof(request.pathParams.id), request.pathParams.id);
+
+	const component = ComponentFactory.get<IAuditableItemGraphComponent>(componentName);
+	const result = await component.getVersions(request.pathParams.id, {
+		after: request.query?.after,
+		before: request.query?.before
+	});
+
+	return {
+		headers: {
+			[HeaderTypes.ContentType]:
+				request.headers?.[HeaderTypes.Accept] === MimeTypes.JsonLd
+					? MimeTypes.JsonLd
+					: MimeTypes.Json
+		},
+		body: result
 	};
 }

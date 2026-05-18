@@ -43,4 +43,10 @@ export class AuditableItemGraphChangeset {
 	 */
 	@property({ type: "string", optional: true })
 	public proofId?: string;
+
+	/**
+	 * The version number of the vertex after this changeset was applied.
+	 */
+	@property({ type: "integer", optional: true })
+	public version?: number;
 }

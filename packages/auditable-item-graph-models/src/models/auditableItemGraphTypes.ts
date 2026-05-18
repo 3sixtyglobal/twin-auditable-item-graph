@@ -44,7 +44,12 @@ export const AuditableItemGraphTypes = {
 	/**
 	 * Represents patch operation.
 	 */
-	PatchOperation: "AuditableItemGraphPatchOperation"
+	PatchOperation: "AuditableItemGraphPatchOperation",
+
+	/**
+	 * Represents auditable item graph vertex version list.
+	 */
+	VertexVersionList: "AuditableItemGraphVertexVersionList"
 } as const;
 
 /**
