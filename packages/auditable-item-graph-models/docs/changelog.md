@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.3-next.14](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-models-v0.0.3-next.13...auditable-item-graph-models-v0.0.3-next.14) (2026-05-18)
+
+
+### Features
+
+* add versions ([#60](https://github.com/iotaledger/twin-auditable-item-graph/issues/60)) ([5c36f94](https://github.com/iotaledger/twin-auditable-item-graph/commit/5c36f94b1155c01dddbc8d62f3f65d599916c521))
+
 ## [0.0.3-next.13](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-models-v0.0.3-next.12...auditable-item-graph-models-v0.0.3-next.13) (2026-05-12)
 
 
