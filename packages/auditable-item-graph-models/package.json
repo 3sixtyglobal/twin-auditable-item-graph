@@ -37,6 +37,7 @@
 		"@twin.org/nameof": "next",
 		"@twin.org/immutable-proof-models": "next",
 		"@twin.org/standards-schema-org": "next",
+		"@twin.org/telemetry-models": "next",
 		"@twin.org/web": "next"
 	},
 	"devDependencies": {

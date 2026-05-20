@@ -30,6 +30,11 @@ export interface IAuditableItemGraphServiceConstructorOptions {
 	eventBusComponentType?: string;
 
 	/**
+	 * The component type for the optional telemetry component used for event metrics, defaults to no telemetry.
+	 */
+	telemetryComponentType?: string;
+
+	/**
 	 * The configuration for the service.
 	 */
 	config?: IAuditableItemGraphServiceConfig;

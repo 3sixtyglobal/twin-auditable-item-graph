@@ -3,6 +3,8 @@
 import {
 	AuditableItemGraphContexts,
 	AuditableItemGraphDataTypes,
+	AuditableItemGraphMetricIds,
+	AuditableItemGraphMetrics,
 	AuditableItemGraphTopics,
 	AuditableItemGraphTypes,
 	VerifyDepth,
@@ -67,6 +69,7 @@ import {
 	SchemaOrgDataTypes,
 	SchemaOrgTypes
 } from "@twin.org/standards-schema-org";
+import { MetricHelper, type ITelemetryComponent } from "@twin.org/telemetry-models";
 import type { AuditableItemGraphAlias } from "./entities/auditableItemGraphAlias.js";
 import type { AuditableItemGraphChangeset } from "./entities/auditableItemGraphChangeset.js";
 import type { AuditableItemGraphEdge } from "./entities/auditableItemGraphEdge.js";
@@ -137,6 +140,12 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	private readonly _eventBusComponent?: IEventBusComponent;
 
 	/**
+	 * The telemetry component.
+	 * @internal
+	 */
+	private readonly _telemetryComponent?: ITelemetryComponent;
+
+	/**
 	 * Create a new instance of AuditableItemGraphService.
 	 * @param options The dependencies for the auditable item graph connector.
 	 */
@@ -153,9 +162,13 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			options?.changesetEntityStorageType ?? nameofKebabCase<AuditableItemGraphChangeset>()
 		);
 
-		if (Is.stringValue(options?.eventBusComponentType)) {
-			this._eventBusComponent = ComponentFactory.get(options.eventBusComponentType);
-		}
+		this._eventBusComponent = ComponentFactory.getIfExists<IEventBusComponent>(
+			options?.eventBusComponentType
+		);
+
+		this._telemetryComponent = ComponentFactory.getIfExists<ITelemetryComponent>(
+			options?.telemetryComponentType
+		);
 
 		SchemaOrgDataTypes.registerRedirects();
 		AuditableItemGraphDataTypes.registerTypes();
@@ -168,6 +181,17 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	 */
 	public className(): string {
 		return AuditableItemGraphService.CLASS_NAME;
+	}
+
+	/**
+	 * Register all AIG metrics with the telemetry component.
+	 */
+	public async start(): Promise<void> {
+		if (Is.undefined(this._telemetryComponent)) {
+			return;
+		}
+
+		await MetricHelper.createMetrics(this._telemetryComponent, AuditableItemGraphMetrics);
 	}
 
 	/**
@@ -241,6 +265,11 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				...vertexModel,
 				...this.buildIndexes(vertexModel)
 			});
+
+			await MetricHelper.metricIncrement(
+				this._telemetryComponent,
+				AuditableItemGraphMetricIds.VerticesCreated
+			);
 
 			const fullId = new Urn(AuditableItemGraphService.NAMESPACE, id).toString();
 
@@ -351,6 +380,14 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 					...newEntity,
 					...indexes
 				});
+
+				await MetricHelper.metricIncrement(
+					this._telemetryComponent,
+					AuditableItemGraphMetricIds.VerticesUpdated,
+					{
+						patchCount: patches.length
+					}
+				);
 
 				await this._eventBusComponent?.publish<IAuditableItemGraphEventBusVertexUpdated>(
 					AuditableItemGraphTopics.VertexUpdated,
@@ -498,6 +535,20 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				limit
 			);
 
+			if ((options?.verifySignatureDepth ?? VerifyDepth.None) !== VerifyDepth.None) {
+				if (chunk.verified) {
+					await MetricHelper.metricIncrement(
+						this._telemetryComponent,
+						AuditableItemGraphMetricIds.VerificationsSucceeded
+					);
+				} else {
+					await MetricHelper.metricIncrement(
+						this._telemetryComponent,
+						AuditableItemGraphMetricIds.VerificationsFailed
+					);
+				}
+			}
+
 			const changesetList: IAuditableItemGraphChangesetList = {
 				"@context": [
 					SchemaOrgContexts.Context,
@@ -564,6 +615,20 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			if (verifySignatureDepth !== VerifyDepth.None) {
 				changesetModel["@context"]?.push(ImmutableProofContexts.Context);
 				changesetModel.verification = await this.verifyChangesetSignature(changesetModel);
+				if (changesetModel.verification?.verified) {
+					await MetricHelper.metricIncrement(
+						this._telemetryComponent,
+						AuditableItemGraphMetricIds.VerificationsSucceeded
+					);
+				} else {
+					await MetricHelper.metricIncrement(
+						this._telemetryComponent,
+						AuditableItemGraphMetricIds.VerificationsFailed,
+						{
+							failureReason: changesetModel.verification?.failure
+						}
+					);
+				}
 			}
 
 			const result = await JsonLdProcessor.compact(changesetModel, changesetModel["@context"]);
@@ -881,6 +946,16 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			};
 
 			const result = await JsonLdProcessor.compact(vertexList, vertexList["@context"]);
+
+			await MetricHelper.metricIncrement(
+				this._telemetryComponent,
+				AuditableItemGraphMetricIds.QueriesExecuted,
+				{
+					resultCount: models.length,
+					hasMore: Is.stringValue(results.cursor)
+				}
+			);
+
 			return {
 				entries: result,
 				cursor: results.cursor
@@ -1093,6 +1168,10 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			for (const alias of active) {
 				if (!aliases?.find(a => a.id === alias.id)) {
 					alias.dateDeleted = context.now;
+					await MetricHelper.metricIncrement(
+						this._telemetryComponent,
+						AuditableItemGraphMetricIds.AliasesDeleted
+					);
 				}
 			}
 		}
@@ -1154,6 +1233,10 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			};
 
 			vertex.aliases.push(model);
+			await MetricHelper.metricIncrement(
+				this._telemetryComponent,
+				AuditableItemGraphMetricIds.AliasesAdded
+			);
 		} else if (
 			existing.aliasFormat !== alias.aliasFormat ||
 			!ObjectHelper.equal(existing.annotationObject, alias.annotationObject, false) ||
@@ -1164,6 +1247,10 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			existing.aliasFormat = alias.aliasFormat;
 			existing.annotationObject = alias.annotationObject;
 			existing.unique = alias.unique;
+			await MetricHelper.metricIncrement(
+				this._telemetryComponent,
+				AuditableItemGraphMetricIds.AliasesModified
+			);
 		}
 	}
 
@@ -1197,6 +1284,10 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			for (const resource of active) {
 				if (!resources?.find(a => this.getResourceId(a) === this.getResourceId(resource))) {
 					resource.dateDeleted = context.now;
+					await MetricHelper.metricIncrement(
+						this._telemetryComponent,
+						AuditableItemGraphMetricIds.ResourcesDeleted
+					);
 				}
 			}
 		}
@@ -1248,10 +1339,18 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			};
 
 			vertex.resources.push(model);
+			await MetricHelper.metricIncrement(
+				this._telemetryComponent,
+				AuditableItemGraphMetricIds.ResourcesAdded
+			);
 		} else if (!ObjectHelper.equal(existing.resourceObject, resource.resourceObject, false)) {
 			// Existing resource found, update the resourceObject.
 			existing.dateModified = context.now;
 			existing.resourceObject = resource.resourceObject;
+			await MetricHelper.metricIncrement(
+				this._telemetryComponent,
+				AuditableItemGraphMetricIds.ResourcesModified
+			);
 		}
 	}
 
@@ -1274,6 +1373,10 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			for (const edge of active) {
 				if (!edges?.find(e => Is.stringValue(e.id) && this.reduceEdgeId(e.id) === edge.id)) {
 					edge.dateDeleted = context.now;
+					await MetricHelper.metricIncrement(
+						this._telemetryComponent,
+						AuditableItemGraphMetricIds.EdgesDeleted
+					);
 				}
 			}
 		}
@@ -1345,6 +1448,10 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			};
 
 			vertex.edges.push(model);
+			await MetricHelper.metricIncrement(
+				this._telemetryComponent,
+				AuditableItemGraphMetricIds.EdgesAdded
+			);
 		} else if (
 			existing.targetId !== edge.targetId ||
 			!ArrayHelper.matches(existing.edgeRelationships, edge.edgeRelationships) ||
@@ -1355,6 +1462,10 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			existing.dateModified = context.now;
 			existing.edgeRelationships = edge.edgeRelationships;
 			existing.annotationObject = edge.annotationObject;
+			await MetricHelper.metricIncrement(
+				this._telemetryComponent,
+				AuditableItemGraphMetricIds.EdgesModified
+			);
 		}
 	}
 
@@ -1405,6 +1516,10 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 			// Link the verifiable storage id to the changeset
 			await this._changesetStorage.set(changesetEntity);
+			await MetricHelper.metricIncrement(
+				this._telemetryComponent,
+				AuditableItemGraphMetricIds.ChangesetsCreated
+			);
 
 			return patches;
 		}
@@ -1441,6 +1556,18 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			}
 			changesets.push(...chunk.changesets);
 		} while (Is.stringValue(cursor));
+
+		if (verified) {
+			await MetricHelper.metricIncrement(
+				this._telemetryComponent,
+				AuditableItemGraphMetricIds.VerificationsSucceeded
+			);
+		} else {
+			await MetricHelper.metricIncrement(
+				this._telemetryComponent,
+				AuditableItemGraphMetricIds.VerificationsFailed
+			);
+		}
 
 		return {
 			verified,
