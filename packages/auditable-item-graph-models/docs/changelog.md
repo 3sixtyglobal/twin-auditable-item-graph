@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.3-next.15](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-models-v0.0.3-next.14...auditable-item-graph-models-v0.0.3-next.15) (2026-05-20)
+
+
+### Features
+
+* add event-driven telemetry metrics ([#63](https://github.com/iotaledger/twin-auditable-item-graph/issues/63)) ([8fe6cdd](https://github.com/iotaledger/twin-auditable-item-graph/commit/8fe6cdd0d56496402b766c151f002f475ddb8c0e))
+
 ## [0.0.3-next.14](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-models-v0.0.3-next.13...auditable-item-graph-models-v0.0.3-next.14) (2026-05-18)
 
 
