@@ -61,7 +61,7 @@
 		"@twin.org/ts-to-openapi": "next",
 		"@twin.org/vault-connector-entity-storage": "next",
 		"@twin.org/verifiable-storage-connector-entity-storage": "next",
-		"@types/node": "25.7.0",
+		"@types/node": "25.9.1",
 		"@vitest/coverage-v8": "4.1.6",
 		"copyfiles": "2.4.1",
 		"nodemon": "3.1.14",

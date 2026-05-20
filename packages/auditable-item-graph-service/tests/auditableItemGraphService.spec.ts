@@ -46,7 +46,6 @@ import {
 	TEST_NODE_IDENTITY,
 	TEST_ORGANIZATION_IDENTITY,
 	TEST_TENANT_IDENTITY,
-	TEST_TENANT_IDENTITY_SHORT,
 	TEST_USER_IDENTITY
 } from "./setupTestEnv.js";
 import { AuditableItemGraphService } from "../src/auditableItemGraphService.js";
@@ -207,7 +206,6 @@ describe("AuditableItemGraphService", () => {
 
 		expect(vertex).toEqual(
 			expect.objectContaining({
-				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				id: expect.stringMatching(HEX_ID_PATTERN),
 				dateCreated: expect.any(String),
 				organizationIdentity: TEST_ORGANIZATION_IDENTITY
@@ -222,7 +220,6 @@ describe("AuditableItemGraphService", () => {
 		expect(changesetStore).toHaveLength(1);
 		expect(changesetStore[0]).toEqual(
 			expect.objectContaining({
-				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				id: expect.stringMatching(HEX_ID_PATTERN),
 				vertexId: storedVertexId,
 				dateCreated: expect.any(String),
@@ -236,7 +233,6 @@ describe("AuditableItemGraphService", () => {
 		expect(immutableStore).toHaveLength(1);
 		expect(immutableStore[0]).toEqual(
 			expect.objectContaining({
-				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				id: expect.stringMatching(HEX_ID_PATTERN),
 				data: expect.any(String),
 				creator: TEST_ORGANIZATION_IDENTITY,
@@ -278,7 +274,6 @@ describe("AuditableItemGraphService", () => {
 
 		expect(vertex).toEqual(
 			expect.objectContaining({
-				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				id: storedVertexId,
 				dateCreated: expect.any(String),
 				organizationIdentity: TEST_ORGANIZATION_IDENTITY,
@@ -301,7 +296,6 @@ describe("AuditableItemGraphService", () => {
 		expect(changesetStore).toHaveLength(1);
 		expect(changesetStore[0]).toEqual(
 			expect.objectContaining({
-				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				id: expect.stringMatching(HEX_ID_PATTERN),
 				vertexId: storedVertexId,
 				dateCreated: expect.any(String),
@@ -332,7 +326,6 @@ describe("AuditableItemGraphService", () => {
 		expect(immutableStore).toHaveLength(1);
 		expect(immutableStore[0]).toEqual(
 			expect.objectContaining({
-				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				id: expect.stringMatching(HEX_ID_PATTERN),
 				data: expect.any(String),
 				creator: TEST_ORGANIZATION_IDENTITY,
@@ -384,7 +377,6 @@ describe("AuditableItemGraphService", () => {
 
 		expect(vertex).toEqual(
 			expect.objectContaining({
-				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				id: storedVertexId,
 				dateCreated: expect.any(String),
 				organizationIdentity: TEST_ORGANIZATION_IDENTITY,
@@ -412,7 +404,6 @@ describe("AuditableItemGraphService", () => {
 		expect(changesetStore).toHaveLength(1);
 		expect(changesetStore[0]).toEqual(
 			expect.objectContaining({
-				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				id: expect.stringMatching(HEX_ID_PATTERN),
 				vertexId: storedVertexId,
 				dateCreated: expect.any(String),
@@ -447,7 +438,6 @@ describe("AuditableItemGraphService", () => {
 		expect(immutableStore).toHaveLength(1);
 		expect(immutableStore[0]).toEqual(
 			expect.objectContaining({
-				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				allowList: [TEST_ORGANIZATION_IDENTITY],
 				creator: TEST_ORGANIZATION_IDENTITY,
 				data: expect.any(String),
@@ -631,7 +621,6 @@ describe("AuditableItemGraphService", () => {
 		expect(changesetStore).toHaveLength(1);
 		expect(changesetStore[0]).toEqual(
 			expect.objectContaining({
-				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				id: storedChangesetId,
 				vertexId: storedVertexId,
 				dateCreated: expect.any(String),
@@ -1002,7 +991,6 @@ describe("AuditableItemGraphService", () => {
 		expect(changesetStore).toHaveLength(1);
 		expect(changesetStore[0]).toEqual(
 			expect.objectContaining({
-				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				id: expect.stringMatching(HEX_ID_PATTERN),
 				vertexId: storedVertexId,
 				dateCreated: expect.any(String),
@@ -1051,7 +1039,6 @@ describe("AuditableItemGraphService", () => {
 		expect(immutableStore).toHaveLength(1);
 		expect(immutableStore[0]).toEqual(
 			expect.objectContaining({
-				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				allowList: [TEST_ORGANIZATION_IDENTITY],
 				creator: TEST_ORGANIZATION_IDENTITY,
 				data: expect.any(String),
@@ -1161,7 +1148,6 @@ describe("AuditableItemGraphService", () => {
 		expect(changesetStore).toHaveLength(1);
 		expect(changesetStore[0]).toEqual(
 			expect.objectContaining({
-				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				id: expect.stringMatching(HEX_ID_PATTERN),
 				vertexId: storedVertexId,
 				dateCreated: expect.any(String),
@@ -1285,7 +1271,6 @@ describe("AuditableItemGraphService", () => {
 		expect(changesetStore).toHaveLength(2);
 		expect(changesetStore[0]).toEqual(
 			expect.objectContaining({
-				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				id: expect.stringMatching(HEX_ID_PATTERN),
 				vertexId: storedVertexId,
 				dateCreated: expect.any(String),
@@ -1316,7 +1301,6 @@ describe("AuditableItemGraphService", () => {
 		);
 		expect(changesetStore[1]).toEqual(
 			expect.objectContaining({
-				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				vertexId: storedVertexId,
 				dateCreated: expect.any(String),
 				id: expect.stringMatching(HEX_ID_PATTERN),
@@ -1337,7 +1321,6 @@ describe("AuditableItemGraphService", () => {
 		expect(immutableStore).toHaveLength(2);
 		expect(immutableStore[0]).toEqual(
 			expect.objectContaining({
-				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				allowList: [TEST_ORGANIZATION_IDENTITY],
 				creator: TEST_ORGANIZATION_IDENTITY,
 				data: expect.any(String),
@@ -1347,7 +1330,6 @@ describe("AuditableItemGraphService", () => {
 		);
 		expect(immutableStore[1]).toEqual(
 			expect.objectContaining({
-				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				allowList: [TEST_ORGANIZATION_IDENTITY],
 				creator: TEST_ORGANIZATION_IDENTITY,
 				data: expect.any(String),
@@ -1471,7 +1453,6 @@ describe("AuditableItemGraphService", () => {
 		expect(changesetStore).toHaveLength(2);
 		expect(changesetStore[0]).toEqual(
 			expect.objectContaining({
-				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				id: expect.stringMatching(HEX_ID_PATTERN),
 				vertexId: storedVertexId,
 				dateCreated: expect.any(String),
@@ -1502,7 +1483,6 @@ describe("AuditableItemGraphService", () => {
 		);
 		expect(changesetStore[1]).toEqual(
 			expect.objectContaining({
-				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				id: expect.stringMatching(HEX_ID_PATTERN),
 				vertexId: storedVertexId,
 				dateCreated: expect.any(String),
@@ -1522,7 +1502,6 @@ describe("AuditableItemGraphService", () => {
 		expect(immutableStore).toHaveLength(2);
 		expect(immutableStore[0]).toEqual(
 			expect.objectContaining({
-				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				allowList: [TEST_ORGANIZATION_IDENTITY],
 				creator: TEST_ORGANIZATION_IDENTITY,
 				data: expect.any(String),
@@ -1532,7 +1511,6 @@ describe("AuditableItemGraphService", () => {
 		);
 		expect(immutableStore[1]).toEqual(
 			expect.objectContaining({
-				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				allowList: [TEST_ORGANIZATION_IDENTITY],
 				creator: TEST_ORGANIZATION_IDENTITY,
 				data: expect.any(String),
@@ -1760,7 +1738,6 @@ describe("AuditableItemGraphService", () => {
 		expect(changesetStore).toHaveLength(2);
 		expect(changesetStore[0]).toEqual(
 			expect.objectContaining({
-				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				id: expect.stringMatching(HEX_ID_PATTERN),
 				vertexId: storedVertexId,
 				dateCreated: expect.any(String),
@@ -1819,7 +1796,6 @@ describe("AuditableItemGraphService", () => {
 		);
 		expect(changesetStore[1]).toEqual(
 			expect.objectContaining({
-				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				id: expect.stringMatching(HEX_ID_PATTERN),
 				vertexId: storedVertexId,
 				dateCreated: expect.any(String),
@@ -1851,7 +1827,6 @@ describe("AuditableItemGraphService", () => {
 		expect(immutableStore).toHaveLength(2);
 		expect(immutableStore[0]).toEqual(
 			expect.objectContaining({
-				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				allowList: [TEST_ORGANIZATION_IDENTITY],
 				creator: TEST_ORGANIZATION_IDENTITY,
 				data: expect.any(String),
@@ -1861,7 +1836,6 @@ describe("AuditableItemGraphService", () => {
 		);
 		expect(immutableStore[1]).toEqual(
 			expect.objectContaining({
-				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				allowList: [TEST_ORGANIZATION_IDENTITY],
 				creator: TEST_ORGANIZATION_IDENTITY,
 				data: expect.any(String),
@@ -1995,7 +1969,6 @@ describe("AuditableItemGraphService", () => {
 		expect(changesetStore).toHaveLength(2);
 		expect(changesetStore[0]).toEqual(
 			expect.objectContaining({
-				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				id: expect.stringMatching(HEX_ID_PATTERN),
 				vertexId: storedVertexId,
 				dateCreated: expect.any(String),
@@ -2026,7 +1999,6 @@ describe("AuditableItemGraphService", () => {
 		);
 		expect(changesetStore[1]).toEqual(
 			expect.objectContaining({
-				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				vertexId: storedVertexId,
 				id: expect.stringMatching(HEX_ID_PATTERN),
 				dateCreated: expect.any(String),
@@ -2441,7 +2413,6 @@ describe("AuditableItemGraphService", () => {
 		expect(changesetStore).toHaveLength(2);
 		expect(changesetStore[0]).toEqual(
 			expect.objectContaining({
-				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				id: expect.stringMatching(HEX_ID_PATTERN),
 				vertexId: storedVertexId,
 				dateCreated: expect.any(String),
@@ -2552,7 +2523,6 @@ describe("AuditableItemGraphService", () => {
 		);
 		expect(changesetStore[1]).toEqual(
 			expect.objectContaining({
-				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				vertexId: storedVertexId,
 				id: expect.stringMatching(HEX_ID_PATTERN),
 				dateCreated: expect.any(String),
@@ -2608,7 +2578,6 @@ describe("AuditableItemGraphService", () => {
 		expect(immutableStore).toHaveLength(2);
 		expect(immutableStore[0]).toEqual(
 			expect.objectContaining({
-				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				allowList: [TEST_ORGANIZATION_IDENTITY],
 				creator: TEST_ORGANIZATION_IDENTITY,
 				data: expect.any(String),
@@ -2618,7 +2587,6 @@ describe("AuditableItemGraphService", () => {
 		);
 		expect(immutableStore[1]).toEqual(
 			expect.objectContaining({
-				partitionId: TEST_TENANT_IDENTITY_SHORT,
 				allowList: [TEST_ORGANIZATION_IDENTITY],
 				creator: TEST_ORGANIZATION_IDENTITY,
 				data: expect.any(String),
@@ -2669,8 +2637,7 @@ describe("AuditableItemGraphService", () => {
 
 		await waitForProofGeneration();
 
-		const immutableStore = verifiableStorage.getStore();
-		expect(immutableStore.length).toEqual(1);
+		expect(verifiableStorage.getStore().length).toEqual(1);
 
 		await service.removeVerifiable(id);
 
@@ -2696,7 +2663,7 @@ describe("AuditableItemGraphService", () => {
 			verified: false
 		});
 
-		expect(immutableStore.length).toEqual(0);
+		expect(verifiableStorage.getStore().length).toEqual(0);
 	});
 
 	test("Can query for a vertex by id", async () => {

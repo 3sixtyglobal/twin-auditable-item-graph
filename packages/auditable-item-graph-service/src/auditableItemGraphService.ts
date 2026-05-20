@@ -1503,10 +1503,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			// this is a subset of fixed properties from the changeset object.
 			const reducedChangesetJsonLd = this.changesetEntityToJsonLd(
 				original.id,
-				ObjectHelper.pick(
-					changesetEntity,
-					AuditableItemGraphService._PROOF_KEYS_CHANGESET
-				) as AuditableItemGraphChangeset
+				ObjectHelper.pick(changesetEntity, AuditableItemGraphService._PROOF_KEYS_CHANGESET)
 			);
 
 			// Create the proof for the changeset object
