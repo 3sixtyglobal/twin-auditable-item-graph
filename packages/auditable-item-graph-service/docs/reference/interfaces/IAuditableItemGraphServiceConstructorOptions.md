@@ -54,6 +54,14 @@ The event bus component type, defaults to no event bus.
 
 ***
 
+### telemetryComponentType? {#telemetrycomponenttype}
+
+> `optional` **telemetryComponentType?**: `string`
+
+The component type for the optional telemetry component used for event metrics, defaults to no telemetry.
+
+***
+
 ### config? {#config}
 
 > `optional` **config?**: [`IAuditableItemGraphServiceConfig`](IAuditableItemGraphServiceConfig.md)

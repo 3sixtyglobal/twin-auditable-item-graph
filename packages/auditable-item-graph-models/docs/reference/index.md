@@ -37,6 +37,7 @@
 ## Type Aliases
 
 - [AuditableItemGraphContexts](type-aliases/AuditableItemGraphContexts.md)
+- [AuditableItemGraphMetricIds](type-aliases/AuditableItemGraphMetricIds.md)
 - [AuditableItemGraphTopics](type-aliases/AuditableItemGraphTopics.md)
 - [AuditableItemGraphTypes](type-aliases/AuditableItemGraphTypes.md)
 - [VerifyDepth](type-aliases/VerifyDepth.md)
@@ -44,6 +45,8 @@
 ## Variables
 
 - [AuditableItemGraphContexts](variables/AuditableItemGraphContexts.md)
+- [AuditableItemGraphMetricIds](variables/AuditableItemGraphMetricIds.md)
+- [AuditableItemGraphMetrics](variables/AuditableItemGraphMetrics.md)
 - [AuditableItemGraphTopics](variables/AuditableItemGraphTopics.md)
 - [AuditableItemGraphTypes](variables/AuditableItemGraphTypes.md)
 - [VerifyDepth](variables/VerifyDepth.md)
