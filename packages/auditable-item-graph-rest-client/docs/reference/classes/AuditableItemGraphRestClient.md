@@ -224,7 +224,7 @@ NotFoundError if the vertex or changeset is not found.
 
 ### getVersion() {#getversion}
 
-> **getVersion**(`id`, `versionId`): `Promise`\<`IAuditableItemGraphVertex`\>
+> **getVersion**(`id`, `version`): `Promise`\<`IAuditableItemGraphVertex`\>
 
 Get a graph vertex at a specific version.
 
@@ -236,11 +236,11 @@ Get a graph vertex at a specific version.
 
 The id of the vertex.
 
-##### versionId
+##### version
 
-`string`
+`number`
 
-The id of the version (changeset id) to retrieve.
+The version number to retrieve.
 
 #### Returns
 

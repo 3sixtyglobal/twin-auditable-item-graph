@@ -867,7 +867,7 @@
 				}
 			}
 		},
-		"/auditable-item-graph/{id}/versions/{versionId}": {
+		"/auditable-item-graph/{id}/versions/{version}": {
 			"get": {
 				"operationId": "auditableItemGraphVersionGet",
 				"summary": "Get a graph vertex at a specific version",
@@ -887,15 +887,15 @@
 						"example": "aig:1234567890"
 					},
 					{
-						"name": "versionId",
-						"description": "The id of the version (changeset id) to get.",
+						"name": "version",
+						"description": "The version number to get.",
 						"in": "path",
 						"required": true,
 						"schema": {
 							"type": "string"
 						},
 						"style": "simple",
-						"example": "changeset:1234567890"
+						"example": "1"
 					},
 					{
 						"name": "accept",
@@ -1073,9 +1073,18 @@
 												"AuditableItemGraphVertexVersionList"
 											],
 											"itemListElement": [
-												0,
-												1,
-												2
+												{
+													"version": 0,
+													"dateCreated": "2024-08-22T11:55:16.271Z"
+												},
+												{
+													"version": 1,
+													"dateCreated": "2024-08-22T11:56:00.000Z"
+												},
+												{
+													"version": 2,
+													"dateCreated": "2024-08-22T11:57:00.000Z"
+												}
 											]
 										}
 									}

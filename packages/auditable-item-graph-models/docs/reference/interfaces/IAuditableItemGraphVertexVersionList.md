@@ -22,6 +22,14 @@ JSON-LD Type.
 
 ### itemListElement {#itemlistelement}
 
-> **itemListElement**: `number`[]
+> **itemListElement**: `object`[]
 
-The list of version numbers.
+The list of versions.
+
+#### version
+
+> **version**: `number`
+
+#### dateCreated
+
+> **dateCreated**: `string`

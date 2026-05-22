@@ -28,8 +28,8 @@ The parameters from the path.
 
 The id of the vertex.
 
-#### versionId
+#### version
 
-> **versionId**: `string`
+> **version**: `string`
 
-The id of the version (changeset id) to get.
+The version number to get.
