@@ -47,6 +47,6 @@ export class AuditableItemGraphChangeset {
 	/**
 	 * The version number of the vertex after this changeset was applied.
 	 */
-	@property({ type: "integer", optional: true })
+	@property({ type: "integer", optional: true, isSecondary: true })
 	public version?: number;
 }

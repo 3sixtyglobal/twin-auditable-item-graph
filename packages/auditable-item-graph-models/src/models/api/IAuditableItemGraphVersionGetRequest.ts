@@ -23,8 +23,8 @@ export interface IAuditableItemGraphVersionGetRequest {
 		id: string;
 
 		/**
-		 * The id of the version (changeset id) to get.
+		 * The version number to get.
 		 */
-		versionId: string;
+		version: string;
 	};
 }

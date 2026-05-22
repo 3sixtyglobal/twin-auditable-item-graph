@@ -91,11 +91,11 @@ export interface IAuditableItemGraphComponent extends IComponent {
 	/**
 	 * Get a graph vertex at a specific version.
 	 * @param id The id of the vertex.
-	 * @param versionId The id of the version (changeset id) to retrieve.
+	 * @param version The version number to retrieve.
 	 * @returns The vertex reconstructed at that version.
 	 * @throws NotFoundError if the vertex or version is not found.
 	 */
-	getVersion(id: string, versionId: string): Promise<IAuditableItemGraphVertex>;
+	getVersion(id: string, version: number): Promise<IAuditableItemGraphVertex>;
 
 	/**
 	 * Get all versions of a graph vertex.

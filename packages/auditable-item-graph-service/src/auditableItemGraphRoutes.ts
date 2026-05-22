@@ -558,7 +558,7 @@ export function generateRestRoutesAuditableItemGraph(
 		summary: "Get a graph vertex at a specific version",
 		tag: tagsAuditableItemGraph[0].name,
 		method: "GET",
-		path: `${baseRouteName}/:id/versions/:versionId`,
+		path: `${baseRouteName}/:id/versions/:version`,
 		handler: async (httpRequestContext, request) =>
 			auditableItemGraphVersionGet(httpRequestContext, componentName, request),
 		requestType: {
@@ -572,7 +572,7 @@ export function generateRestRoutesAuditableItemGraph(
 						},
 						pathParams: {
 							id: "aig:1234567890",
-							versionId: "changeset:1234567890"
+							version: "1"
 						}
 					}
 				}
@@ -655,7 +655,11 @@ export function generateRestRoutesAuditableItemGraph(
 									AuditableItemGraphContexts.ContextCommon
 								],
 								type: [SchemaOrgTypes.ItemList, AuditableItemGraphTypes.VertexVersionList],
-								[SchemaOrgTypes.ItemListElement]: [0, 1, 2]
+								[SchemaOrgTypes.ItemListElement]: [
+									{ version: 0, dateCreated: "2024-08-22T11:55:16.271Z" },
+									{ version: 1, dateCreated: "2024-08-22T11:56:00.000Z" },
+									{ version: 2, dateCreated: "2024-08-22T11:57:00.000Z" }
+								]
 							}
 						}
 					}
@@ -1037,7 +1041,7 @@ export async function auditableItemGraphChangesetGet(
 	Guards.stringValue(ROUTES_SOURCE, nameof(request.pathParams.id), request.pathParams.id);
 
 	const component = ComponentFactory.get<IAuditableItemGraphComponent>(componentName);
-	const changesetUrn = `aig:${request.pathParams.id}:changeset:${request.pathParams.changesetId}`;
+	const changesetUrn = `${request.pathParams.id}:changeset:${request.pathParams.changesetId}`;
 	const result = await component.getChangeset(changesetUrn, {
 		verifySignatureDepth: request.query?.verifySignatureDepth
 	});
@@ -1163,14 +1167,12 @@ export async function auditableItemGraphVersionGet(
 		request.pathParams
 	);
 	Guards.stringValue(ROUTES_SOURCE, nameof(request.pathParams.id), request.pathParams.id);
-	Guards.stringValue(
-		ROUTES_SOURCE,
-		nameof(request.pathParams.versionId),
-		request.pathParams.versionId
-	);
+
+	const version = Coerce.integer(request.pathParams.version);
+	Guards.integer(ROUTES_SOURCE, nameof(request.pathParams.version), version);
 
 	const component = ComponentFactory.get<IAuditableItemGraphComponent>(componentName);
-	const result = await component.getVersion(request.pathParams.id, request.pathParams.versionId);
+	const result = await component.getVersion(request.pathParams.id, version);
 
 	return {
 		headers: {

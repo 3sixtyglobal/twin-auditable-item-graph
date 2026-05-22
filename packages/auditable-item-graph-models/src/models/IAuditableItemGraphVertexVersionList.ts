@@ -24,8 +24,8 @@ export interface IAuditableItemGraphVertexVersionList {
 	type: [typeof SchemaOrgTypes.ItemList, typeof AuditableItemGraphTypes.VertexVersionList];
 
 	/**
-	 * The list of version numbers.
+	 * The list of versions.
 	 * @json-ld namespace:sch
 	 */
-	[SchemaOrgTypes.ItemListElement]: number[];
+	[SchemaOrgTypes.ItemListElement]: { version: number; dateCreated: string }[];
 }

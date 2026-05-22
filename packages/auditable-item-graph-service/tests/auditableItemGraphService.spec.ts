@@ -3301,9 +3301,7 @@ describe("AuditableItemGraphService", () => {
 			aliases: [{ type: AuditableItemGraphTypes.Alias, id: "foo123" }]
 		});
 
-		const storedChangesetId = changesetStorage.getStore()[0].id;
-
-		const result = await service.getVersion(id, storedChangesetId);
+		const result = await service.getVersion(id, 0);
 
 		expect(result).toEqual(
 			expect.objectContaining({
@@ -3342,12 +3340,12 @@ describe("AuditableItemGraphService", () => {
 		const changesets = changesetStorage.getStore();
 		expect(changesets).toHaveLength(2);
 
-		const v1 = await service.getVersion(id, changesets[0].id);
+		const v1 = await service.getVersion(id, 0);
 		expect(v1.version).toEqual(0);
 		expect(v1.aliases).toEqual(expect.arrayContaining([expect.objectContaining({ id: "foo123" })]));
 		expect(v1.aliases?.find(a => a.id === "bar456")).toBeUndefined();
 
-		const v2 = await service.getVersion(id, changesets[1].id);
+		const v2 = await service.getVersion(id, 1);
 		expect(v2.version).toEqual(1);
 		expect(v2.aliases).toEqual(expect.arrayContaining([expect.objectContaining({ id: "bar456" })]));
 	});
@@ -3355,7 +3353,7 @@ describe("AuditableItemGraphService", () => {
 	test("Throws not found when getting a version from an unknown vertex", async () => {
 		const service = new AuditableItemGraphService();
 		await expect(
-			service.getVersion("aig:00000000000000000000000000000000", "nonexistent")
+			service.getVersion("aig:00000000000000000000000000000000", 1000)
 		).rejects.toMatchObject({
 			message: "auditableItemGraphService.getVersionFailed"
 		});
@@ -3368,7 +3366,7 @@ describe("AuditableItemGraphService", () => {
 			type: AuditableItemGraphTypes.Vertex
 		});
 
-		await expect(service.getVersion(id, "nonexistentchangesetid")).rejects.toMatchObject({
+		await expect(service.getVersion(id, 1000)).rejects.toMatchObject({
 			message: "auditableItemGraphService.getVersionFailed"
 		});
 	});
@@ -3397,8 +3395,8 @@ describe("AuditableItemGraphService", () => {
 			})
 		);
 		expect(result.itemListElement).toHaveLength(2);
-		expect(result.itemListElement[0]).toEqual(0);
-		expect(result.itemListElement[1]).toEqual(1);
+		expect(result.itemListElement[0]).toEqual({ version: 0, dateCreated: expect.any(String) });
+		expect(result.itemListElement[1]).toEqual({ version: 1, dateCreated: expect.any(String) });
 	});
 
 	test("Can get versions after a timestamp", async () => {

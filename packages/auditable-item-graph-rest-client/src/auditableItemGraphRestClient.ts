@@ -211,13 +211,13 @@ export class AuditableItemGraphRestClient
 	/**
 	 * Get a graph vertex at a specific version.
 	 * @param id The id of the vertex.
-	 * @param versionId The id of the version (changeset id) to retrieve.
+	 * @param version The version number to retrieve.
 	 * @returns The vertex reconstructed at that version.
 	 * @throws NotFoundError if the vertex or version is not found.
 	 */
-	public async getVersion(id: string, versionId: string): Promise<IAuditableItemGraphVertex> {
+	public async getVersion(id: string, version: number): Promise<IAuditableItemGraphVertex> {
 		Guards.stringValue(AuditableItemGraphRestClient.CLASS_NAME, nameof(id), id);
-		Guards.stringValue(AuditableItemGraphRestClient.CLASS_NAME, nameof(versionId), versionId);
+		Guards.integer(AuditableItemGraphRestClient.CLASS_NAME, nameof(version), version);
 
 		const urnParsed = Urn.fromValidString(id);
 		const vertexId = urnParsed.namespaceSpecific(0);
@@ -227,13 +227,13 @@ export class AuditableItemGraphRestClient
 		const response = await this.fetch<
 			IAuditableItemGraphVersionGetRequest,
 			IAuditableItemGraphVersionGetResponse
-		>("/:id/versions/:versionId", "GET", {
+		>("/:id/versions/:version", "GET", {
 			headers: {
 				[HeaderTypes.Accept]: MimeTypes.JsonLd
 			},
 			pathParams: {
 				id: vertexId,
-				versionId
+				version: version.toString()
 			}
 		});
 
