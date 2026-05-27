@@ -59,3 +59,15 @@ Represents patch operation.
 > `readonly` **VertexVersionList**: `"AuditableItemGraphVertexVersionList"` = `"AuditableItemGraphVertexVersionList"`
 
 Represents auditable item graph vertex version list.
+
+### PartialVertex {#partialvertex}
+
+> `readonly` **PartialVertex**: `"AuditableItemGraphPartialVertex"` = `"AuditableItemGraphPartialVertex"`
+
+Represents auditable item graph partial vertex.
+
+### ListPatch {#listpatch}
+
+> `readonly` **ListPatch**: `"AuditableItemGraphListPatch"` = `"AuditableItemGraphListPatch"`
+
+Represents auditable item graph list patch.

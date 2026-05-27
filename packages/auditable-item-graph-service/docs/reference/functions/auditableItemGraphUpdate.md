@@ -2,7 +2,7 @@
 
 > **auditableItemGraphUpdate**(`httpRequestContext`, `componentName`, `request`): `Promise`\<`INoContentResponse`\>
 
-Update the graph vertex (PUT — full replacement for each provided sub-list).
+Update the graph vertex (PUT — full replacement of vertex state).
 
 ## Parameters
 

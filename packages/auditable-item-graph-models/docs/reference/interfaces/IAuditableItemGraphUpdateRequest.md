@@ -1,6 +1,6 @@
 # Interface: IAuditableItemGraphUpdateRequest
 
-Update an auditable item graph vertex (PUT — full replacement for each provided sub-list).
+Update an auditable item graph vertex (PUT — full replacement of vertex state).
 
 ## Properties
 
@@ -22,4 +22,4 @@ The id of the vertex to update.
 
 > **body**: `Omit`\<[`IAuditableItemGraphVertex`](IAuditableItemGraphVertex.md), `"id"`\>
 
-The vertex payload. Provided sub-lists replace the active set; omitted top-level fields are unchanged.
+The full vertex payload. Replaces annotation and active sub-lists; omitted collections are cleared.

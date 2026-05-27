@@ -12,6 +12,8 @@
 - [IAuditableItemGraphChangesetList](interfaces/IAuditableItemGraphChangesetList.md)
 - [IAuditableItemGraphComponent](interfaces/IAuditableItemGraphComponent.md)
 - [IAuditableItemGraphEdge](interfaces/IAuditableItemGraphEdge.md)
+- [IAuditableItemGraphListPatch](interfaces/IAuditableItemGraphListPatch.md)
+- [IAuditableItemGraphPartialVertex](interfaces/IAuditableItemGraphPartialVertex.md)
 - [IAuditableItemGraphPatchOperation](interfaces/IAuditableItemGraphPatchOperation.md)
 - [IAuditableItemGraphResource](interfaces/IAuditableItemGraphResource.md)
 - [IAuditableItemGraphVertex](interfaces/IAuditableItemGraphVertex.md)
@@ -37,7 +39,6 @@
 
 ## Type Aliases
 
-- [IAuditableItemGraphPartialVertex](type-aliases/IAuditableItemGraphPartialVertex.md)
 - [AuditableItemGraphContexts](type-aliases/AuditableItemGraphContexts.md)
 - [AuditableItemGraphMetricIds](type-aliases/AuditableItemGraphMetricIds.md)
 - [AuditableItemGraphTopics](type-aliases/AuditableItemGraphTopics.md)

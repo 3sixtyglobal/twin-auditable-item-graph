@@ -308,8 +308,8 @@ NotFoundError if the vertex is not found.
 
 > **update**(`vertex`): `Promise`\<`void`\>
 
-Update a graph vertex (PUT — full replacement for each provided sub-list).
-The server serializes concurrent updates for the same vertex via async queue + Mutex;
+Update a graph vertex (PUT — full replacement of vertex state).
+The server serializes concurrent updates for the same vertex via `Mutex` on the vertex id;
 requests load-balanced across replicas can still race.
 
 #### Parameters
@@ -336,7 +336,7 @@ Nothing.
 
 > **updatePartial**(`partial`): `Promise`\<`void`\>
 
-Partially update a graph vertex (PATCH — merge provided sub-lists; only defined properties applied).
+Partially update a graph vertex (PATCH — optional scalars; list fields use `{ add, remove }`).
 
 #### Parameters
 

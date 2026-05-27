@@ -116,9 +116,8 @@ The id of the new graph item.
 
 > **update**(`vertex`): `Promise`\<`void`\>
 
-Update a graph vertex (PUT — full replacement for each provided sub-list).
-Omitted top-level fields are not modified. Serialized with `updatePartial` via
-per-vertex async queue + Mutex within this instance.
+Update a graph vertex (PUT — full replacement of vertex state).
+Concurrent updates for the same vertex are serialized via `Mutex` on the vertex id.
 
 #### Parameters
 
@@ -144,8 +143,8 @@ Nothing.
 
 > **updatePartial**(`partial`): `Promise`\<`void`\>
 
-Partially update a graph vertex (PATCH — merge provided sub-lists; only defined properties applied).
-Serialized with `update` via per-vertex async queue + Mutex within this instance.
+Partially update a graph vertex (PATCH — explicit list patches; only defined properties applied).
+Serialized with `update` via `Mutex` on the same vertex id within this instance.
 
 #### Parameters
 

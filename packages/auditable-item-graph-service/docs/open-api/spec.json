@@ -901,7 +901,11 @@
 							"examples": {
 								"auditableItemGraphUpdatePartialRequestExample": {
 									"value": {
-										"edges": {
+										"@context": [
+											"https://schema.twindev.org/aig/",
+											"https://schema.twindev.org/common/"
+										],
+										"edgePatches": {
 											"add": [
 												{
 													"type": "AuditableItemGraphEdge",
@@ -1873,6 +1877,18 @@
 				"description": "Partial vertex data; only defined properties are applied.\nSub-lists use `{ add, remove }` patch objects.",
 				"type": "object",
 				"properties": {
+					"dateCreated": {
+						"type": "string",
+						"description": "The date/time of when the element was created."
+					},
+					"dateModified": {
+						"type": "string",
+						"description": "The date/time of when the element was modified."
+					},
+					"dateDeleted": {
+						"type": "string",
+						"description": "The date/time of when the element was deleted, as we never actually remove items."
+					},
 					"@context": {
 						"type": "array",
 						"prefixItems": [
@@ -1889,23 +1905,38 @@
 						"minItems": 2,
 						"description": "JSON-LD Context."
 					},
-					"type": {
-						"const": "AuditableItemGraphVertex",
-						"description": "JSON-LD Type."
+					"organizationIdentity": {
+						"type": "string",
+						"description": "The identity of the organization which controls the vertex."
 					},
 					"annotationObject": {
 						"$ref": "https://schema.twindev.org/json-ld/JsonLdNodeObject"
 					},
-					"aliases": {
+					"verified": {
+						"type": "boolean",
+						"description": "Is the vertex verified, will only be populated when verification is requested."
+					},
+					"version": {
+						"type": "number",
+						"description": "The version of the vertex, populated only when getting a specific version.\nMaps to https://schema.org/version."
+					},
+					"type": {
+						"const": "AuditableItemGraphVertex",
+						"description": "JSON-LD Type."
+					},
+					"aliasPatches": {
 						"$ref": "https://schema.twindev.org/aig/AuditableItemGraphListPatch"
 					},
-					"resources": {
+					"resourcePatches": {
 						"$ref": "https://schema.twindev.org/aig/AuditableItemGraphListPatch"
 					},
-					"edges": {
+					"edgePatches": {
 						"$ref": "https://schema.twindev.org/aig/AuditableItemGraphListPatch"
 					}
-				}
+				},
+				"required": [
+					"@context"
+				]
 			},
 			"AuditableItemGraphUpdateRequest": {
 				"description": "The full vertex payload. Replaces annotation and active sub-lists; omitted collections are cleared.",
