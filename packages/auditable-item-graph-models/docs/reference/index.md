@@ -26,6 +26,7 @@
 - [IAuditableItemGraphGetResponse](interfaces/IAuditableItemGraphGetResponse.md)
 - [IAuditableItemGraphListRequest](interfaces/IAuditableItemGraphListRequest.md)
 - [IAuditableItemGraphListResponse](interfaces/IAuditableItemGraphListResponse.md)
+- [IAuditableItemGraphUpdatePartialRequest](interfaces/IAuditableItemGraphUpdatePartialRequest.md)
 - [IAuditableItemGraphUpdateRequest](interfaces/IAuditableItemGraphUpdateRequest.md)
 - [IAuditableItemGraphVersionGetRequest](interfaces/IAuditableItemGraphVersionGetRequest.md)
 - [IAuditableItemGraphVersionGetResponse](interfaces/IAuditableItemGraphVersionGetResponse.md)
@@ -36,6 +37,7 @@
 
 ## Type Aliases
 
+- [IAuditableItemGraphPartialVertex](type-aliases/IAuditableItemGraphPartialVertex.md)
 - [AuditableItemGraphContexts](type-aliases/AuditableItemGraphContexts.md)
 - [AuditableItemGraphMetricIds](type-aliases/AuditableItemGraphMetricIds.md)
 - [AuditableItemGraphTopics](type-aliases/AuditableItemGraphTopics.md)

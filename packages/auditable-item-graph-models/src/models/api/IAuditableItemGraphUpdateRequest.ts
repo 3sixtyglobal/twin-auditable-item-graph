@@ -3,7 +3,7 @@
 import type { IAuditableItemGraphVertex } from "../IAuditableItemGraphVertex.js";
 
 /**
- * Update an auditable item graph vertex.
+ * Update an auditable item graph vertex (PUT — full replacement of vertex state).
  */
 export interface IAuditableItemGraphUpdateRequest {
 	/**
@@ -17,7 +17,7 @@ export interface IAuditableItemGraphUpdateRequest {
 	};
 
 	/**
-	 * The data to be used in the vertex.
+	 * The full vertex payload. Replaces annotation and active sub-lists; omitted collections are cleared.
 	 */
 	body: Omit<IAuditableItemGraphVertex, "id">;
 }

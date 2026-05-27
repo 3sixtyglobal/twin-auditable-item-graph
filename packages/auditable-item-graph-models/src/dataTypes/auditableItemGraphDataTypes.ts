@@ -7,6 +7,8 @@ import AuditableItemGraphAliasSchema from "../schemas/AuditableItemGraphAlias.js
 import AuditableItemGraphAuditedElementSchema from "../schemas/AuditableItemGraphAuditedElement.json" with { type: "json" };
 import AuditableItemGraphChangesetSchema from "../schemas/AuditableItemGraphChangeset.json" with { type: "json" };
 import AuditableItemGraphEdgeSchema from "../schemas/AuditableItemGraphEdge.json" with { type: "json" };
+import AuditableItemGraphListPatchSchema from "../schemas/AuditableItemGraphListPatch.json" with { type: "json" };
+import AuditableItemGraphPartialVertexSchema from "../schemas/AuditableItemGraphPartialVertex.json" with { type: "json" };
 import AuditableItemGraphPatchOperationSchema from "../schemas/AuditableItemGraphPatchOperation.json" with { type: "json" };
 import AuditableItemGraphResourceSchema from "../schemas/AuditableItemGraphResource.json" with { type: "json" };
 import AuditableItemGraphVertexSchema from "../schemas/AuditableItemGraphVertex.json" with { type: "json" };
@@ -52,6 +54,14 @@ export class AuditableItemGraphDataTypes {
 			{
 				type: "AuditableItemGraphAuditedElement",
 				schema: AuditableItemGraphAuditedElementSchema
+			},
+			{
+				type: AuditableItemGraphTypes.ListPatch,
+				schema: AuditableItemGraphListPatchSchema
+			},
+			{
+				type: AuditableItemGraphTypes.PartialVertex,
+				schema: AuditableItemGraphPartialVertexSchema
 			}
 		];
 

@@ -1,8 +1,8 @@
-# Function: auditableItemGraphUpdate()
+# Function: auditableItemGraphUpdatePartial()
 
-> **auditableItemGraphUpdate**(`httpRequestContext`, `componentName`, `request`): `Promise`\<`INoContentResponse`\>
+> **auditableItemGraphUpdatePartial**(`httpRequestContext`, `componentName`, `request`): `Promise`\<`INoContentResponse`\>
 
-Update the graph vertex (PUT — full replacement for each provided sub-list).
+Partially update the graph vertex (PATCH — merge provided sub-lists).
 
 ## Parameters
 
@@ -20,7 +20,7 @@ The name of the component to use in the routes.
 
 ### request
 
-`IAuditableItemGraphUpdateRequest`
+`IAuditableItemGraphUpdatePartialRequest`
 
 The request.
 

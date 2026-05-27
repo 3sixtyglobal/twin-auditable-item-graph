@@ -28,6 +28,7 @@
 - [auditableItemGraphChangesetList](functions/auditableItemGraphChangesetList.md)
 - [auditableItemGraphChangesetGet](functions/auditableItemGraphChangesetGet.md)
 - [auditableItemGraphUpdate](functions/auditableItemGraphUpdate.md)
+- [auditableItemGraphUpdatePartial](functions/auditableItemGraphUpdatePartial.md)
 - [auditableItemGraphList](functions/auditableItemGraphList.md)
 - [auditableItemGraphVersionGet](functions/auditableItemGraphVersionGet.md)
 - [auditableItemGraphVersionList](functions/auditableItemGraphVersionList.md)

@@ -15,6 +15,8 @@ import {
 	type IAuditableItemGraphEdge,
 	type IAuditableItemGraphEventBusVertexCreated,
 	type IAuditableItemGraphEventBusVertexUpdated,
+	type IAuditableItemGraphListPatch,
+	type IAuditableItemGraphPartialVertex,
 	type IAuditableItemGraphResource,
 	type IAuditableItemGraphVertex,
 	type IAuditableItemGraphVertexList,
@@ -29,6 +31,7 @@ import {
 	Guards,
 	Is,
 	JsonHelper,
+	Mutex,
 	NotFoundError,
 	ObjectHelper,
 	RandomHelper,
@@ -290,117 +293,170 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	}
 
 	/**
-	 * Update a graph vertex.
+	 * Update a graph vertex (PUT — full replacement of vertex state).
+	 * Concurrent updates for the same vertex are serialized via `Mutex` on the vertex id.
 	 * @param vertex The vertex to update.
-	 * @param vertex.id The id of the vertex to update.
-	 * @param vertex.annotationObject The annotation object for the vertex as JSON-LD.
-	 * @param vertex.aliases Alternative aliases that can be used to identify the vertex.
-	 * @param vertex.resources The resources attached to the vertex.
-	 * @param vertex.edges The edges connected to the vertex.
 	 * @returns Nothing.
 	 */
 	public async update(vertex: IAuditableItemGraphVertex): Promise<void> {
 		Guards.object(AuditableItemGraphService.CLASS_NAME, nameof(vertex), vertex);
 		Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(vertex.id), vertex.id);
 
-		const contextIds = await ContextIdStore.getContextIds();
+		const vertexId = this.parseVertexId(vertex.id);
 
-		const urnParsed = Urn.fromValidString(vertex.id);
-
-		if (urnParsed.namespaceIdentifier() !== AuditableItemGraphService.NAMESPACE) {
-			throw new GeneralError(AuditableItemGraphService.CLASS_NAME, "namespaceMismatch", {
-				namespace: AuditableItemGraphService.NAMESPACE,
-				id: vertex.id
-			});
-		}
-
+		await Mutex.lock(vertexId, { throwOnTimeout: true });
 		try {
-			const schemaValidationFailures: IValidationFailure[] = [];
-			await DataTypeHelper.validate(
-				nameof(vertex),
-				`${AuditableItemGraphContexts.Namespace}${AuditableItemGraphTypes.Vertex}`,
-				vertex,
-				schemaValidationFailures
-			);
-			Validation.asValidationError(
-				AuditableItemGraphService.CLASS_NAME,
-				nameof(vertex),
-				schemaValidationFailures
-			);
+			const contextIds = await ContextIdStore.getContextIds();
 
-			const vertexId = urnParsed.namespaceSpecific(0);
-			const vertexEntity = await this._vertexStorage.get(vertexId);
-
-			if (Is.empty(vertexEntity)) {
-				throw new NotFoundError(AuditableItemGraphService.CLASS_NAME, "vertexNotFound", vertex.id);
-			}
-
-			if (Is.object(vertex.annotationObject)) {
-				const validationFailures: IValidationFailure[] = [];
-				await JsonLdHelper.validate(vertex.annotationObject, validationFailures);
+			try {
+				const schemaValidationFailures: IValidationFailure[] = [];
+				await DataTypeHelper.validate(
+					nameof(vertex),
+					`${AuditableItemGraphContexts.Namespace}${AuditableItemGraphTypes.Vertex}`,
+					vertex,
+					schemaValidationFailures
+				);
 				Validation.asValidationError(
 					AuditableItemGraphService.CLASS_NAME,
-					nameof(vertex.annotationObject),
-					validationFailures
+					nameof(vertex),
+					schemaValidationFailures
+				);
+
+				const vertexEntity = await this._vertexStorage.get(vertexId);
+
+				if (Is.empty(vertexEntity)) {
+					throw new NotFoundError(
+						AuditableItemGraphService.CLASS_NAME,
+						"vertexNotFound",
+						vertex.id
+					);
+				}
+
+				if (Is.object(vertex.annotationObject)) {
+					const validationFailures: IValidationFailure[] = [];
+					await JsonLdHelper.validate(vertex.annotationObject, validationFailures);
+					Validation.asValidationError(
+						AuditableItemGraphService.CLASS_NAME,
+						nameof(vertex.annotationObject),
+						validationFailures
+					);
+				}
+
+				const context: IAuditableItemGraphServiceContext = {
+					now: new Date(Date.now()).toISOString(),
+					contextIds
+				};
+
+				delete vertexEntity.aliasIndex;
+				const originalEntity = ObjectHelper.clone(vertexEntity);
+				const newEntity = ObjectHelper.clone(vertexEntity);
+
+				newEntity.annotationObject = vertex.annotationObject;
+				await this.updateAliasList(context, newEntity, vertex.aliases);
+				await this.updateResourceList(context, newEntity, vertex.resources);
+				await this.updateEdgeList(context, newEntity, vertex.edges);
+
+				await this.persistVertexChanges(context, vertexId, vertex.id, originalEntity, newEntity);
+			} catch (error) {
+				throw new GeneralError(
+					AuditableItemGraphService.CLASS_NAME,
+					"updatingFailed",
+					undefined,
+					error
 				);
 			}
+		} finally {
+			Mutex.unlock(vertexId);
+		}
+	}
 
-			const context: IAuditableItemGraphServiceContext = {
-				now: new Date(Date.now()).toISOString(),
-				contextIds
-			};
+	/**
+	 * Partially update a graph vertex (PATCH — explicit list patches; only defined properties applied).
+	 * Serialized with `update` via `Mutex` on the same vertex id within this instance.
+	 * @param partial The partial vertex update.
+	 * @returns Nothing.
+	 */
+	public async updatePartial(partial: IAuditableItemGraphPartialVertex): Promise<void> {
+		Guards.object<IAuditableItemGraphPartialVertex>(
+			AuditableItemGraphService.CLASS_NAME,
+			nameof(partial),
+			partial
+		);
+		Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(partial.id), partial.id);
 
-			delete vertexEntity.aliasIndex;
-			const originalEntity = ObjectHelper.clone(vertexEntity);
-			const newEntity = ObjectHelper.clone(vertexEntity);
+		const vertexId = this.parseVertexId(partial.id);
 
-			newEntity.annotationObject = vertex.annotationObject;
+		await Mutex.lock(vertexId, { throwOnTimeout: true });
 
-			await this.updateAliasList(context, newEntity, vertex.aliases);
-			await this.updateResourceList(context, newEntity, vertex.resources);
-			await this.updateEdgeList(context, newEntity, vertex.edges);
+		try {
+			const contextIds = await ContextIdStore.getContextIds();
 
-			const nextVersion = Is.empty(vertexEntity.version)
-				? (await this.internalGetChangesets(vertexId)).length
-				: vertexEntity.version + 1;
-			const patches = await this.addChangeset(
-				context,
-				originalEntity,
-				newEntity,
-				false,
-				nextVersion
-			);
-			if (patches.length > 0) {
-				newEntity.dateModified = context.now;
-				newEntity.version = nextVersion;
+			try {
+				const vertexEntity = await this._vertexStorage.get(vertexId);
 
-				const indexes = this.buildIndexes(newEntity);
+				if (Is.empty(vertexEntity)) {
+					throw new NotFoundError(
+						AuditableItemGraphService.CLASS_NAME,
+						"vertexNotFound",
+						partial.id
+					);
+				}
 
-				await this._vertexStorage.set({
-					...newEntity,
-					...indexes
-				});
+				if (partial.annotationObject !== undefined && Is.object(partial.annotationObject)) {
+					const validationFailures: IValidationFailure[] = [];
+					await JsonLdHelper.validate(partial.annotationObject, validationFailures);
+					Validation.asValidationError(
+						AuditableItemGraphService.CLASS_NAME,
+						nameof(partial.annotationObject),
+						validationFailures
+					);
+				}
 
-				await MetricHelper.metricIncrement(
-					this._telemetryComponent,
-					AuditableItemGraphMetricIds.VerticesUpdated,
-					{
-						patchCount: patches.length
-					}
-				);
+				const context: IAuditableItemGraphServiceContext = {
+					now: new Date(Date.now()).toISOString(),
+					contextIds
+				};
 
-				await this._eventBusComponent?.publish<IAuditableItemGraphEventBusVertexUpdated>(
-					AuditableItemGraphTopics.VertexUpdated,
-					{ id: vertex.id, patches }
+				delete vertexEntity.aliasIndex;
+				const originalEntity = ObjectHelper.clone(vertexEntity);
+				const newEntity = ObjectHelper.clone(vertexEntity);
+
+				if (partial.annotationObject !== undefined) {
+					newEntity.annotationObject = partial.annotationObject;
+				}
+				if (partial.aliasPatches !== undefined) {
+					const aliasPatch = this.validateListPatch<IAuditableItemGraphAlias>(
+						nameof(partial.aliasPatches),
+						partial.aliasPatches
+					);
+					await this.applyAliasPatch(context, newEntity, aliasPatch);
+				}
+				if (partial.resourcePatches !== undefined) {
+					const resourcePatch = this.validateListPatch<IAuditableItemGraphResource>(
+						nameof(partial.resourcePatches),
+						partial.resourcePatches
+					);
+					await this.applyResourcePatch(context, newEntity, resourcePatch);
+				}
+				if (partial.edgePatches !== undefined) {
+					const edgePatch = this.validateListPatch<IAuditableItemGraphEdge>(
+						nameof(partial.edgePatches),
+						partial.edgePatches
+					);
+					await this.applyEdgePatch(context, newEntity, edgePatch);
+				}
+
+				await this.persistVertexChanges(context, vertexId, partial.id, originalEntity, newEntity);
+			} catch (error) {
+				throw new GeneralError(
+					AuditableItemGraphService.CLASS_NAME,
+					"updatingFailed",
+					undefined,
+					error
 				);
 			}
-		} catch (error) {
-			throw new GeneralError(
-				AuditableItemGraphService.CLASS_NAME,
-				"updatingFailed",
-				undefined,
-				error
-			);
+		} finally {
+			Mutex.unlock(vertexId);
 		}
 	}
 
@@ -985,6 +1041,97 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	}
 
 	/**
+	 * Parse and validate a vertex URN; return the compact storage id.
+	 * @param id The vertex URN.
+	 * @returns The compact vertex id.
+	 * @internal
+	 */
+	private parseVertexId(id: string): string {
+		const urnParsed = Urn.fromValidString(id);
+
+		if (urnParsed.namespaceIdentifier() !== AuditableItemGraphService.NAMESPACE) {
+			throw new GeneralError(AuditableItemGraphService.CLASS_NAME, "namespaceMismatch", {
+				namespace: AuditableItemGraphService.NAMESPACE,
+				id
+			});
+		}
+
+		return urnParsed.namespaceSpecific(0);
+	}
+
+	/**
+	 * Validate that a PATCH sub-list value is a list patch object, not a bare array.
+	 * @param propertyName The property name for error reporting.
+	 * @param patch The patch value.
+	 * @returns The validated list patch.
+	 * @internal
+	 */
+	private validateListPatch<TItem>(
+		propertyName: string,
+		patch: unknown
+	): IAuditableItemGraphListPatch<TItem> {
+		if (Is.array(patch)) {
+			throw new GeneralError(AuditableItemGraphService.CLASS_NAME, "listPatchInvalidFormat", {
+				property: propertyName
+			});
+		}
+
+		Guards.object<IAuditableItemGraphListPatch<TItem>>(
+			AuditableItemGraphService.CLASS_NAME,
+			propertyName,
+			patch
+		);
+
+		return patch;
+	}
+
+	/**
+	 * Persist vertex changes after update or partial update.
+	 * @param context The context for the operation.
+	 * @param vertexId The compact vertex id.
+	 * @param vertexUrn The vertex URN for events.
+	 * @param originalEntity The entity before changes.
+	 * @param newEntity The entity after changes.
+	 * @internal
+	 */
+	private async persistVertexChanges(
+		context: IAuditableItemGraphServiceContext,
+		vertexId: string,
+		vertexUrn: string,
+		originalEntity: AuditableItemGraphVertex,
+		newEntity: AuditableItemGraphVertex
+	): Promise<void> {
+		const nextVersion = Is.empty(originalEntity.version)
+			? (await this.internalGetChangesets(vertexId)).length
+			: originalEntity.version + 1;
+		const patches = await this.addChangeset(context, originalEntity, newEntity, false, nextVersion);
+		if (patches.length > 0) {
+			newEntity.dateModified = context.now;
+			newEntity.version = nextVersion;
+
+			const indexes = this.buildIndexes(newEntity);
+
+			await this._vertexStorage.set({
+				...newEntity,
+				...indexes
+			});
+
+			await MetricHelper.metricIncrement(
+				this._telemetryComponent,
+				AuditableItemGraphMetricIds.VerticesUpdated,
+				{
+					patchCount: patches.length
+				}
+			);
+
+			await this._eventBusComponent?.publish<IAuditableItemGraphEventBusVertexUpdated>(
+				AuditableItemGraphTopics.VertexUpdated,
+				{ id: vertexUrn, patches }
+			);
+		}
+	}
+
+	/**
 	 * Map the vertex entity to JSON-LD.
 	 * @param vertexEntity The vertex entity.
 	 * @returns The model.
@@ -1164,10 +1311,10 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	}
 
 	/**
-	 * Update the aliases of a vertex model.
+	 * Replace the aliases of a vertex model (PUT).
 	 * @param context The context for the operation.
 	 * @param vertex The vertex.
-	 * @param aliases The aliases to update.
+	 * @param aliases The new active alias set.
 	 * @internal
 	 */
 	private async updateAliasList(
@@ -1177,7 +1324,6 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	): Promise<void> {
 		const active = vertex.aliases?.filter(a => Is.empty(a.dateDeleted)) ?? [];
 
-		// The active aliases that are not in the update list should be marked as deleted.
 		if (Is.arrayValue(active)) {
 			for (const alias of active) {
 				if (!aliases?.find(a => a.id === alias.id)) {
@@ -1192,6 +1338,39 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 		if (Is.arrayValue(aliases)) {
 			for (const alias of aliases) {
+				await this.updateAlias(context, vertex, alias);
+			}
+		}
+	}
+
+	/**
+	 * Apply alias patch operations (PATCH).
+	 * @param context The context for the operation.
+	 * @param vertex The vertex.
+	 * @param patch The alias patch.
+	 * @internal
+	 */
+	private async applyAliasPatch(
+		context: IAuditableItemGraphServiceContext,
+		vertex: AuditableItemGraphVertex,
+		patch: IAuditableItemGraphListPatch<IAuditableItemGraphAlias>
+	): Promise<void> {
+		if (Is.arrayValue(patch.remove)) {
+			for (const removeId of patch.remove) {
+				Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(removeId), removeId);
+				const alias = vertex.aliases?.find(a => a.id === removeId && Is.empty(a.dateDeleted));
+				if (!Is.empty(alias)) {
+					alias.dateDeleted = context.now;
+					await MetricHelper.metricIncrement(
+						this._telemetryComponent,
+						AuditableItemGraphMetricIds.AliasesDeleted
+					);
+				}
+			}
+		}
+
+		if (Is.arrayValue(patch.add)) {
+			for (const alias of patch.add) {
 				await this.updateAlias(context, vertex, alias);
 			}
 		}
@@ -1269,10 +1448,10 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	}
 
 	/**
-	 * Update the resources of a vertex.
+	 * Replace the resources of a vertex (PUT).
 	 * @param context The context for the operation.
 	 * @param vertex The vertex.
-	 * @param resources The resources to update.
+	 * @param resources The new active resource set.
 	 * @internal
 	 */
 	private async updateResourceList(
@@ -1293,7 +1472,6 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 		const active = vertex.resources?.filter(r => Is.empty(r.dateDeleted)) ?? [];
 
-		// The active resources that are not in the update list should be marked as deleted.
 		if (Is.arrayValue(active)) {
 			for (const resource of active) {
 				if (!resources?.find(a => this.getResourceId(a) === this.getResourceId(resource))) {
@@ -1308,6 +1486,41 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 		if (Is.arrayValue(resources)) {
 			for (const resource of resources) {
+				await this.updateResource(context, vertex, resource);
+			}
+		}
+	}
+
+	/**
+	 * Apply resource patch operations (PATCH).
+	 * @param context The context for the operation.
+	 * @param vertex The vertex.
+	 * @param patch The resource patch.
+	 * @internal
+	 */
+	private async applyResourcePatch(
+		context: IAuditableItemGraphServiceContext,
+		vertex: AuditableItemGraphVertex,
+		patch: IAuditableItemGraphListPatch<IAuditableItemGraphResource>
+	): Promise<void> {
+		if (Is.arrayValue(patch.remove)) {
+			for (const removeId of patch.remove) {
+				Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(removeId), removeId);
+				const resource = vertex.resources?.find(
+					r => this.getResourceId(r) === removeId && Is.empty(r.dateDeleted)
+				);
+				if (!Is.empty(resource)) {
+					resource.dateDeleted = context.now;
+					await MetricHelper.metricIncrement(
+						this._telemetryComponent,
+						AuditableItemGraphMetricIds.ResourcesDeleted
+					);
+				}
+			}
+		}
+
+		if (Is.arrayValue(patch.add)) {
+			for (const resource of patch.add) {
 				await this.updateResource(context, vertex, resource);
 			}
 		}
@@ -1369,10 +1582,10 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	}
 
 	/**
-	 * Update the edges of a vertex.
+	 * Replace the edges of a vertex (PUT).
 	 * @param context The context for the operation.
 	 * @param vertex The vertex.
-	 * @param edges The edges to update.
+	 * @param edges The new active edge set.
 	 * @internal
 	 */
 	private async updateEdgeList(
@@ -1380,12 +1593,18 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 		vertex: AuditableItemGraphVertex,
 		edges?: IAuditableItemGraphEdge[]
 	): Promise<void> {
+		// `active` shares element refs with `vertex.edges` (the cloned newEntity); mutating `edge` below is intended.
 		const active = vertex.edges?.filter(e => Is.empty(e.dateDeleted)) ?? [];
 
-		// The active edges that are not in the update list should be marked as deleted.
 		if (Is.arrayValue(active)) {
 			for (const edge of active) {
-				if (!edges?.find(e => Is.stringValue(e.id) && this.reduceEdgeId(e.id) === edge.id)) {
+				if (
+					!edges?.find(
+						e =>
+							this.edgeMatchesStoredEdge(e, edge.id) ||
+							this.edgeMatchesActiveEdgeByRelationship(e, edge)
+					)
+				) {
 					edge.dateDeleted = context.now;
 					await MetricHelper.metricIncrement(
 						this._telemetryComponent,
@@ -1397,6 +1616,41 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 		if (Is.arrayValue(edges)) {
 			for (const edge of edges) {
+				await this.updateEdge(context, vertex, edge);
+			}
+		}
+	}
+
+	/**
+	 * Apply edge patch operations (PATCH).
+	 * @param context The context for the operation.
+	 * @param vertex The vertex.
+	 * @param patch The edge patch.
+	 * @internal
+	 */
+	private async applyEdgePatch(
+		context: IAuditableItemGraphServiceContext,
+		vertex: AuditableItemGraphVertex,
+		patch: IAuditableItemGraphListPatch<IAuditableItemGraphEdge>
+	): Promise<void> {
+		if (Is.arrayValue(patch.remove)) {
+			for (const removeId of patch.remove) {
+				Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(removeId), removeId);
+				const edge = vertex.edges?.find(
+					e => Is.empty(e.dateDeleted) && this.edgeRemoveIdMatches(e.id, removeId)
+				);
+				if (!Is.empty(edge)) {
+					edge.dateDeleted = context.now;
+					await MetricHelper.metricIncrement(
+						this._telemetryComponent,
+						AuditableItemGraphMetricIds.EdgesDeleted
+					);
+				}
+			}
+		}
+
+		if (Is.arrayValue(patch.add)) {
+			for (const edge of patch.add) {
 				await this.updateEdge(context, vertex, edge);
 			}
 		}
@@ -1443,7 +1697,13 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 		let findId = Is.stringValue(edge.id) ? this.reduceEdgeId(edge.id) : undefined;
 		if (Is.empty(findId)) {
-			findId = RandomHelper.generateUuidV7("compact");
+			const existingActive = vertex.edges?.find(
+				e =>
+					Is.empty(e.dateDeleted) &&
+					e.targetId === edge.targetId &&
+					ArrayHelper.matches(e.edgeRelationships, edge.edgeRelationships)
+			);
+			findId = existingActive?.id ?? RandomHelper.generateUuidV7("compact");
 		}
 
 		// Try to find an existing edge with the same id.
@@ -1758,6 +2018,55 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 		});
 
 		return results.entities.length > 0;
+	}
+
+	/**
+	 * Whether an incoming edge matches a stored edge id.
+	 * @param incoming The incoming edge.
+	 * @param storedEdgeId The compact stored edge id.
+	 * @returns True if the incoming edge matches the stored edge id.
+	 * @internal
+	 */
+	private edgeMatchesStoredEdge(incoming: IAuditableItemGraphEdge, storedEdgeId: string): boolean {
+		return Is.stringValue(incoming.id) && this.reduceEdgeId(incoming.id) === storedEdgeId;
+	}
+
+	/**
+	 * Whether a PATCH remove id matches a stored compact edge id (full URN or compact).
+	 * @param storedEdgeId The compact stored edge id.
+	 * @param removeId The id from the patch remove list.
+	 * @returns True if the remove id identifies the stored edge.
+	 * @internal
+	 */
+	private edgeRemoveIdMatches(storedEdgeId: string, removeId: string): boolean {
+		if (storedEdgeId === removeId) {
+			return true;
+		}
+
+		try {
+			return this.reduceEdgeId(removeId) === storedEdgeId;
+		} catch {
+			return false;
+		}
+	}
+
+	/**
+	 * Whether an incoming id-less edge matches an active stored edge by target and relationships.
+	 * @param incoming The incoming edge.
+	 * @param stored The stored edge.
+	 * @returns True if they match.
+	 * @internal
+	 */
+	private edgeMatchesActiveEdgeByRelationship(
+		incoming: IAuditableItemGraphEdge,
+		stored: AuditableItemGraphEdge
+	): boolean {
+		return (
+			Is.empty(incoming.id) &&
+			Is.empty(stored.dateDeleted) &&
+			incoming.targetId === stored.targetId &&
+			ArrayHelper.matches(incoming.edgeRelationships, stored.edgeRelationships)
+		);
 	}
 
 	/**

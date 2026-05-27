@@ -709,7 +709,7 @@
 					}
 				],
 				"requestBody": {
-					"description": "Update an auditable item graph vertex.",
+					"description": "Update an auditable item graph vertex (PUT — full replacement of vertex state).",
 					"required": true,
 					"content": {
 						"application/json": {
@@ -797,6 +797,121 @@
 												}
 											}
 										]
+									}
+								}
+							}
+						}
+					}
+				},
+				"responses": {
+					"204": {
+						"description": "The rest request ended in success with no data."
+					},
+					"400": {
+						"description": "The server cannot process the request, see the content for more details.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								},
+								"examples": {
+									"exampleResponse": {
+										"value": {
+											"name": "GeneralError",
+											"message": "errorMessage",
+											"properties": {
+												"foo": "bar"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "You are not authorized to use the API or no credentials were supplied, see the content for more details.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								},
+								"examples": {
+									"exampleResponse": {
+										"value": {
+											"name": "UnauthorizedError",
+											"message": "errorMessage"
+										}
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "The server has encountered a situation it does not know how to handle, see the content for more details.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error"
+								},
+								"examples": {
+									"exampleResponse": {
+										"value": {
+											"name": "InternalServerError",
+											"message": "errorMessage"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"patch": {
+				"operationId": "auditableItemGraphUpdatePartial",
+				"summary": "Partially update a graph vertex",
+				"tags": [
+					"Auditable Item Graph"
+				],
+				"parameters": [
+					{
+						"name": "id",
+						"description": "The id of the vertex to update.",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						},
+						"style": "simple",
+						"example": "aig:1234567890"
+					}
+				],
+				"security": [
+					{
+						"jwtBearerAuthScheme": []
+					}
+				],
+				"requestBody": {
+					"description": "Partially update an auditable item graph vertex (PATCH — explicit list patches).",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/AuditableItemGraphUpdatePartialRequest"
+							},
+							"examples": {
+								"auditableItemGraphUpdatePartialRequestExample": {
+									"value": {
+										"edges": {
+											"add": [
+												{
+													"type": "AuditableItemGraphEdge",
+													"targetId": "aig:45678901234",
+													"edgeRelationships": [
+														"document"
+													]
+												}
+											]
+										}
 									}
 								}
 							}
@@ -1754,8 +1869,46 @@
 					"type"
 				]
 			},
+			"AuditableItemGraphUpdatePartialRequest": {
+				"description": "Partial vertex data; only defined properties are applied.\nSub-lists use `{ add, remove }` patch objects.",
+				"type": "object",
+				"properties": {
+					"@context": {
+						"type": "array",
+						"prefixItems": [
+							{
+								"const": "https://schema.twindev.org/aig/"
+							},
+							{
+								"const": "https://schema.twindev.org/common/"
+							}
+						],
+						"items": {
+							"$ref": "https://schema.twindev.org/json-ld/JsonLdContextDefinitionElement"
+						},
+						"minItems": 2,
+						"description": "JSON-LD Context."
+					},
+					"type": {
+						"const": "AuditableItemGraphVertex",
+						"description": "JSON-LD Type."
+					},
+					"annotationObject": {
+						"$ref": "https://schema.twindev.org/json-ld/JsonLdNodeObject"
+					},
+					"aliases": {
+						"$ref": "https://schema.twindev.org/aig/AuditableItemGraphListPatch"
+					},
+					"resources": {
+						"$ref": "https://schema.twindev.org/aig/AuditableItemGraphListPatch"
+					},
+					"edges": {
+						"$ref": "https://schema.twindev.org/aig/AuditableItemGraphListPatch"
+					}
+				}
+			},
 			"AuditableItemGraphUpdateRequest": {
-				"description": "The data to be used in the vertex.",
+				"description": "The full vertex payload. Replaces annotation and active sub-lists; omitted collections are cleared.",
 				"type": "object",
 				"properties": {
 					"dateCreated": {

@@ -6,6 +6,8 @@
 		"./src/models/IAuditableItemGraphChangeset.ts",
 		"./src/models/IAuditableItemGraphChangesetList.ts",
 		"./src/models/IAuditableItemGraphEdge.ts",
+		"./src/models/IAuditableItemGraphListPatch.ts",
+		"./src/models/IAuditableItemGraphPartialVertex.ts",
 		"./src/models/IAuditableItemGraphPatchOperation.ts",
 		"./src/models/IAuditableItemGraphResource.ts",
 		"./src/models/IAuditableItemGraphVertex.ts",

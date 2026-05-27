@@ -4,6 +4,7 @@ import type { IComponent } from "@twin.org/core";
 import type { IComparator, SortDirection } from "@twin.org/entity";
 import type { IAuditableItemGraphChangeset } from "./IAuditableItemGraphChangeset.js";
 import type { IAuditableItemGraphChangesetList } from "./IAuditableItemGraphChangesetList.js";
+import type { IAuditableItemGraphPartialVertex } from "./IAuditableItemGraphPartialVertex.js";
 import type { IAuditableItemGraphVertex } from "./IAuditableItemGraphVertex.js";
 import type { IAuditableItemGraphVertexList } from "./IAuditableItemGraphVertexList.js";
 import type { IAuditableItemGraphVertexVersionList } from "./IAuditableItemGraphVertexVersionList.js";
@@ -25,7 +26,9 @@ export interface IAuditableItemGraphComponent extends IComponent {
 	create(vertex: Omit<IAuditableItemGraphVertex, "id">): Promise<string>;
 
 	/**
-	 * Update a graph vertex.
+	 * Update a graph vertex (PUT — full replacement of vertex state).
+	 * Concurrent updates for the same vertex are serialized via `Mutex` on the vertex id.
+	 * Multi-replica deployments are not coordinated.
 	 * @param vertex The vertex to update.
 	 * @param vertex.id The id of the vertex to update.
 	 * @param vertex.annotationObject The annotation object for the vertex as JSON-LD.
@@ -35,6 +38,15 @@ export interface IAuditableItemGraphComponent extends IComponent {
 	 * @returns Nothing.
 	 */
 	update(vertex: IAuditableItemGraphVertex): Promise<void>;
+
+	/**
+	 * Partially update a graph vertex (PATCH); only properties that are not undefined are applied.
+	 * Sub-lists use explicit `{ add, remove }` patch objects. Serialized with `update()` via `Mutex`
+	 * on the same vertex id.
+	 * @param partial The partial vertex update (must include `id`).
+	 * @returns Nothing.
+	 */
+	updatePartial(partial: IAuditableItemGraphPartialVertex): Promise<void>;
 
 	/**
 	 * Get a graph vertex.

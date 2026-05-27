@@ -20,6 +20,8 @@ import type {
 	IAuditableItemGraphGetResponse,
 	IAuditableItemGraphListRequest,
 	IAuditableItemGraphListResponse,
+	IAuditableItemGraphPartialVertex,
+	IAuditableItemGraphUpdatePartialRequest,
 	IAuditableItemGraphUpdateRequest,
 	IAuditableItemGraphVertex,
 	IAuditableItemGraphVertexList,
@@ -278,7 +280,9 @@ export class AuditableItemGraphRestClient
 	}
 
 	/**
-	 * Update a graph vertex.
+	 * Update a graph vertex (PUT — full replacement of vertex state).
+	 * The server serializes concurrent updates for the same vertex via `Mutex` on the vertex id;
+	 * requests load-balanced across replicas can still race.
 	 * @param vertex The vertex to update.
 	 * @param vertex.id The id of the vertex to update.
 	 * @param vertex.annotationObject The annotation object for the vertex as JSON-LD.
@@ -298,6 +302,25 @@ export class AuditableItemGraphRestClient
 				id
 			},
 			body: rest
+		});
+	}
+
+	/**
+	 * Partially update a graph vertex (PATCH — optional scalars; list fields use `{ add, remove }`).
+	 * @param partial The partial vertex update (must include `id`).
+	 * @returns Nothing.
+	 */
+	public async updatePartial(partial: IAuditableItemGraphPartialVertex): Promise<void> {
+		Guards.object(AuditableItemGraphRestClient.CLASS_NAME, nameof(partial), partial);
+		Guards.stringValue(AuditableItemGraphRestClient.CLASS_NAME, nameof(partial.id), partial.id);
+
+		const { id, ...body } = partial;
+
+		await this.fetch<IAuditableItemGraphUpdatePartialRequest, INoContentResponse>("/:id", "PATCH", {
+			pathParams: {
+				id
+			},
+			body
 		});
 	}
 

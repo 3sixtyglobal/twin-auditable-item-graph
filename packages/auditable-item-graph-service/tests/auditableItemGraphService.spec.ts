@@ -68,6 +68,11 @@ const IMMUTABLE_PROOF_URN_PATTERN = /^immutable-proof:[\da-f]+$/;
 const MULTIBASE_Z_PATTERN = /^z[1-9A-HJ-NP-Za-km-z]+$/;
 
 /**
+ * Parallel attach count aligned with supply-chain concurrency repro (issue #69).
+ */
+const PARALLEL_EDGE_ATTACH_COUNT = 10;
+
+/**
  * Extract the vertex ID from the AIG URN.
  * @param aigUrn The AIG URN to extract the vertex ID from.
  * @returns The extracted vertex ID.
@@ -88,6 +93,31 @@ async function waitForProofGeneration(proofCount: number = 1): Promise<void> {
 	if (count >= proofCount * 40) {
 		throw new Error("Proof generation timed out");
 	}
+}
+
+/**
+ * Attach one reverse edge via `updatePartial`, matching document-management connected-vertex attach.
+ * @param service The AIG service.
+ * @param parentId The parent vertex URN.
+ * @param targetId The document (target) vertex URN.
+ */
+async function attachReverseEdgeViaUpdatePartial(
+	service: AuditableItemGraphService,
+	parentId: string,
+	targetId: string
+): Promise<void> {
+	const edge: IAuditableItemGraphEdge = {
+		"@context": AuditableItemGraphContexts.Context,
+		type: AuditableItemGraphTypes.Edge,
+		targetId,
+		edgeRelationships: ["document"]
+	};
+
+	await service.updatePartial({
+		"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+		id: parentId,
+		edgePatches: { add: [edge] }
+	});
 }
 
 describe("AuditableItemGraphService", () => {
@@ -3484,6 +3514,384 @@ describe("AuditableItemGraphService", () => {
 						})
 					])
 				}
+			}
+		});
+	});
+
+	/**
+	 * PATCH merge vs PUT full-replace semantics for edges (issue #69 implementation).
+	 */
+	describe("updatePartial", () => {
+		test("merges new edges without removing existing active edges", async () => {
+			const service = new AuditableItemGraphService();
+
+			const targetA = await service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex
+			});
+			const targetB = await service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex
+			});
+
+			const id = await service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex,
+				edges: [
+					{
+						type: AuditableItemGraphTypes.Edge,
+						targetId: targetA,
+						edgeRelationships: ["document"]
+					}
+				]
+			});
+
+			await service.updatePartial({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				id,
+				edgePatches: {
+					add: [
+						{
+							type: AuditableItemGraphTypes.Edge,
+							targetId: targetB,
+							edgeRelationships: ["document"]
+						}
+					]
+				}
+			});
+
+			const vertex = await service.get(id);
+			const activeTargetIds = new Set(vertex.edges?.map(e => e.targetId));
+
+			expect(vertex.edges).toHaveLength(2);
+			expect(activeTargetIds.has(targetA)).toBe(true);
+			expect(activeTargetIds.has(targetB)).toBe(true);
+		});
+
+		test("does not delete edges omitted from the partial payload", async () => {
+			const service = new AuditableItemGraphService();
+
+			const targetA = await service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex
+			});
+			const targetB = await service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex
+			});
+			const targetC = await service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex
+			});
+
+			const id = await service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex,
+				edges: [
+					{
+						type: AuditableItemGraphTypes.Edge,
+						targetId: targetA,
+						edgeRelationships: ["document"]
+					},
+					{
+						type: AuditableItemGraphTypes.Edge,
+						targetId: targetB,
+						edgeRelationships: ["document"]
+					}
+				]
+			});
+
+			await service.updatePartial({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				id,
+				edgePatches: {
+					add: [
+						{
+							type: AuditableItemGraphTypes.Edge,
+							targetId: targetC,
+							edgeRelationships: ["document"]
+						}
+					]
+				}
+			});
+
+			const vertex = await service.get(id);
+			const activeTargetIds = new Set(vertex.edges?.map(e => e.targetId));
+
+			expect(vertex.edges).toHaveLength(3);
+			expect(activeTargetIds.has(targetA)).toBe(true);
+			expect(activeTargetIds.has(targetB)).toBe(true);
+			expect(activeTargetIds.has(targetC)).toBe(true);
+		});
+
+		test("leaves edges unchanged when only other properties are provided", async () => {
+			const service = new AuditableItemGraphService();
+
+			const targetId = await service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex
+			});
+
+			const id = await service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex,
+				edges: [
+					{
+						type: AuditableItemGraphTypes.Edge,
+						targetId,
+						edgeRelationships: ["document"]
+					}
+				]
+			});
+
+			await service.updatePartial({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				id,
+				annotationObject: {
+					"@context": "https://schema.org",
+					"@type": "Note",
+					content: "Updated via PATCH"
+				}
+			});
+
+			const vertex = await service.get(id);
+
+			expect(vertex.edges).toHaveLength(1);
+			expect(vertex.edges?.[0].targetId).toBe(targetId);
+			expect(vertex.annotationObject).toEqual({
+				"@context": "https://schema.org",
+				"@type": "Note",
+				content: "Updated via PATCH"
+			});
+		});
+
+		test("update PUT replaces the active edge list when edges are provided", async () => {
+			const service = new AuditableItemGraphService();
+
+			const targetA = await service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex
+			});
+			const targetB = await service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex
+			});
+			const targetC = await service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex
+			});
+
+			const id = await service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex,
+				edges: [
+					{
+						type: AuditableItemGraphTypes.Edge,
+						targetId: targetA,
+						edgeRelationships: ["document"]
+					},
+					{
+						type: AuditableItemGraphTypes.Edge,
+						targetId: targetB,
+						edgeRelationships: ["document"]
+					}
+				]
+			});
+
+			await service.update({
+				id,
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex,
+				edges: [
+					{
+						type: AuditableItemGraphTypes.Edge,
+						targetId: targetC,
+						edgeRelationships: ["related"]
+					}
+				]
+			});
+
+			const vertex = await service.get(id);
+
+			expect(vertex.edges).toHaveLength(1);
+			expect(vertex.edges?.[0].targetId).toBe(targetC);
+		});
+
+		test("update PUT without edges clears the active edge list", async () => {
+			const service = new AuditableItemGraphService();
+
+			const targetId = await service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex
+			});
+
+			const id = await service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex,
+				edges: [
+					{
+						type: AuditableItemGraphTypes.Edge,
+						targetId,
+						edgeRelationships: ["document"]
+					}
+				]
+			});
+
+			await service.update({
+				id,
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex,
+				annotationObject: {
+					"@context": "https://schema.org",
+					"@type": "Note",
+					content: "Updated via PUT"
+				}
+			});
+
+			const vertex = await service.get(id);
+
+			expect(vertex.edges ?? []).toHaveLength(0);
+		});
+
+		test("rejects bare array for edges patch", async () => {
+			const service = new AuditableItemGraphService();
+
+			const targetId = await service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex
+			});
+
+			const id = await service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex,
+				edges: [
+					{
+						type: AuditableItemGraphTypes.Edge,
+						targetId,
+						edgeRelationships: ["document"]
+					}
+				]
+			});
+
+			await expect(
+				service.updatePartial({
+					"@context": [
+						AuditableItemGraphContexts.Context,
+						AuditableItemGraphContexts.ContextCommon
+					],
+					id,
+					edgePatches: [
+						{
+							type: AuditableItemGraphTypes.Edge,
+							targetId,
+							edgeRelationships: ["related"]
+						}
+					] as unknown as { add?: IAuditableItemGraphEdge[]; remove?: string[] }
+				})
+			).rejects.toMatchObject({
+				message: "auditableItemGraphService.updatingFailed",
+				cause: {
+					message: "auditableItemGraphService.listPatchInvalidFormat",
+					properties: {
+						property: "partial.edgePatches"
+					}
+				}
+			});
+		});
+
+		test("remove deletes edges by id; unknown ids are no-op", async () => {
+			const service = new AuditableItemGraphService();
+
+			const targetA = await service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex
+			});
+			const targetB = await service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex
+			});
+
+			const id = await service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex,
+				edges: [
+					{
+						type: AuditableItemGraphTypes.Edge,
+						targetId: targetA,
+						edgeRelationships: ["document"]
+					},
+					{
+						type: AuditableItemGraphTypes.Edge,
+						targetId: targetB,
+						edgeRelationships: ["document"]
+					}
+				]
+			});
+
+			const before = await service.get(id);
+			const edgeToRemoveId = before.edges?.find(e => e.targetId === targetA)?.id;
+			expect(edgeToRemoveId).toBeDefined();
+			if (!Is.stringValue(edgeToRemoveId)) {
+				throw new Error("Expected edge id for targetA");
+			}
+
+			await service.updatePartial({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				id,
+				edgePatches: {
+					remove: [edgeToRemoveId, "unknown-edge-id"]
+				}
+			});
+
+			const vertex = await service.get(id);
+			const activeTargetIds = new Set(vertex.edges?.map(e => e.targetId));
+
+			expect(vertex.edges).toHaveLength(1);
+			expect(activeTargetIds.has(targetA)).toBe(false);
+			expect(activeTargetIds.has(targetB)).toBe(true);
+		});
+	});
+
+	/**
+	 * Regression for issue #69 (parallel id-less edge attach on one vertex).
+	 * Uses a single service instance; `Mutex` on the vertex id serializes locally only.
+	 * Multi-replica deployments are not coordinated.
+	 */
+	describe("concurrent edge attach", () => {
+		test("parallel updatePartial attach with id-less edges retains all active edges", async () => {
+			const service = new AuditableItemGraphService();
+
+			const parentId = await service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex
+			});
+
+			const targetIds = await Promise.all(
+				Array.from({ length: PARALLEL_EDGE_ATTACH_COUNT }, async () =>
+					service.create({
+						"@context": [
+							AuditableItemGraphContexts.Context,
+							AuditableItemGraphContexts.ContextCommon
+						],
+						type: AuditableItemGraphTypes.Vertex
+					})
+				)
+			);
+
+			await Promise.all(
+				targetIds.map(async targetId =>
+					attachReverseEdgeViaUpdatePartial(service, parentId, targetId)
+				)
+			);
+
+			const parent = await service.get(parentId);
+			const activeEdges = parent.edges ?? [];
+
+			expect(activeEdges).toHaveLength(PARALLEL_EDGE_ATTACH_COUNT);
+
+			const activeTargetIds = new Set(activeEdges.map(e => e.targetId));
+			for (const targetId of targetIds) {
+				expect(activeTargetIds.has(targetId)).toBe(true);
 			}
 		});
 	});

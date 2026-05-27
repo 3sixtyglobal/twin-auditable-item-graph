@@ -34,7 +34,10 @@ The id of the new graph item.
 
 > **update**(`vertex`): `Promise`\<`void`\>
 
-Update a graph vertex.
+Update a graph vertex (PUT — full replacement for each provided sub-list).
+Omitted top-level fields are not modified. Concurrent updates for the same vertex are
+serialized within this component instance via per-vertex async queue + Mutex.
+Multi-replica deployments are not coordinated.
 
 #### Parameters
 
@@ -43,6 +46,30 @@ Update a graph vertex.
 [`IAuditableItemGraphVertex`](IAuditableItemGraphVertex.md)
 
 The vertex to update.
+
+#### Returns
+
+`Promise`\<`void`\>
+
+Nothing.
+
+***
+
+### updatePartial() {#updatepartial}
+
+> **updatePartial**(`partial`): `Promise`\<`void`\>
+
+Partially update a graph vertex (PATCH); only properties that are not undefined are applied.
+When a sub-list (`edges`, `aliases`, `resources`) is provided, incoming items are merged
+into the active set (not replaced). Serialized with `update()` via queue + Mutex on the same vertex id.
+
+#### Parameters
+
+##### partial
+
+[`IAuditableItemGraphPartialVertex`](../type-aliases/IAuditableItemGraphPartialVertex.md)
+
+The partial vertex update (must include `id`).
 
 #### Returns
 

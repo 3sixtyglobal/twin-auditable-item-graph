@@ -14,7 +14,8 @@
 			"changesetNotFound": "The changeset with the Id \"{notFoundId}\" was not found",
 			"resourceIdMissing": "You must provide either the id, or the resourceObject must contain an id property for index \"{index}\"",
 			"aliasNotUnique": "The alias id \"{aliasId}\" is already in use on another vertex and the unique flag was set",
-			"invalidEdgeId": "The edge id \"{edgeId}\" is not valid"
+			"invalidEdgeId": "The edge id \"{edgeId}\" is not valid",
+			"listPatchInvalidFormat": "The property \"{property}\" must be a list patch object with add and/or remove, not a bare array"
 		},
 		"validation": {
 			"auditableItemGraphService": {

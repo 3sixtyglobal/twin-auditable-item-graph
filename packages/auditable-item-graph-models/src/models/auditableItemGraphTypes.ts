@@ -49,7 +49,17 @@ export const AuditableItemGraphTypes = {
 	/**
 	 * Represents auditable item graph vertex version list.
 	 */
-	VertexVersionList: "AuditableItemGraphVertexVersionList"
+	VertexVersionList: "AuditableItemGraphVertexVersionList",
+
+	/**
+	 * Represents auditable item graph partial vertex.
+	 */
+	PartialVertex: "AuditableItemGraphPartialVertex",
+
+	/**
+	 * Represents auditable item graph list patch.
+	 */
+	ListPatch: "AuditableItemGraphListPatch"
 } as const;
 
 /**

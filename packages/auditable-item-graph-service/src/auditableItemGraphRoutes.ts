@@ -23,6 +23,7 @@ import {
 	type IAuditableItemGraphListRequest,
 	type IAuditableItemGraphListResponse,
 	type IAuditableItemGraphUpdateRequest,
+	type IAuditableItemGraphUpdatePartialRequest,
 	type IAuditableItemGraphVersionGetRequest,
 	type IAuditableItemGraphVersionGetResponse,
 	type IAuditableItemGraphVersionListRequest,
@@ -772,6 +773,52 @@ export function generateRestRoutesAuditableItemGraph(
 		]
 	};
 
+	const updatePartialRoute: IRestRoute<
+		IAuditableItemGraphUpdatePartialRequest,
+		INoContentResponse
+	> = {
+		operationId: "auditableItemGraphUpdatePartial",
+		summary: "Partially update a graph vertex",
+		tag: tagsAuditableItemGraph[0].name,
+		method: "PATCH",
+		path: `${baseRouteName}/:id`,
+		handler: async (httpRequestContext, request) =>
+			auditableItemGraphUpdatePartial(httpRequestContext, componentName, request),
+		requestType: {
+			type: nameof<IAuditableItemGraphUpdatePartialRequest>(),
+			examples: [
+				{
+					id: "auditableItemGraphUpdatePartialRequestExample",
+					request: {
+						pathParams: {
+							id: "aig:1234567890"
+						},
+						body: {
+							"@context": [
+								AuditableItemGraphContexts.Context,
+								AuditableItemGraphContexts.ContextCommon
+							],
+							edgePatches: {
+								add: [
+									{
+										type: AuditableItemGraphTypes.Edge,
+										targetId: "aig:45678901234",
+										edgeRelationships: ["document"]
+									}
+								]
+							}
+						}
+					}
+				}
+			]
+		},
+		responseType: [
+			{
+				type: nameof<INoContentResponse>()
+			}
+		]
+	};
+
 	const listRoute: IRestRoute<IAuditableItemGraphListRequest, IAuditableItemGraphListResponse> = {
 		operationId: "auditableItemGraphList",
 		summary: "Query graph vertices by id or alias",
@@ -897,6 +944,7 @@ export function generateRestRoutesAuditableItemGraph(
 		getChangesetRoute,
 		getChangesetListRoute,
 		updateRoute,
+		updatePartialRoute,
 		listRoute
 	];
 }
@@ -1058,7 +1106,7 @@ export async function auditableItemGraphChangesetGet(
 }
 
 /**
- * Update the graph vertex.
+ * Update the graph vertex (PUT — full replacement of vertex state).
  * @param httpRequestContext The request context for the API.
  * @param componentName The name of the component to use in the routes.
  * @param request The request.
@@ -1084,6 +1132,38 @@ export async function auditableItemGraphUpdate(
 
 	const component = ComponentFactory.get<IAuditableItemGraphComponent>(componentName);
 	await component.update({ ...request.body, id: request.pathParams.id });
+	return {
+		statusCode: HttpStatusCode.noContent
+	};
+}
+
+/**
+ * Partially update the graph vertex (PATCH — optional scalars; list fields use `{ add, remove }`).
+ * @param httpRequestContext The request context for the API.
+ * @param componentName The name of the component to use in the routes.
+ * @param request The request.
+ * @returns The response object with additional http response properties.
+ */
+export async function auditableItemGraphUpdatePartial(
+	httpRequestContext: IHttpRequestContext,
+	componentName: string,
+	request: IAuditableItemGraphUpdatePartialRequest
+): Promise<INoContentResponse> {
+	Guards.object<IAuditableItemGraphUpdatePartialRequest>(ROUTES_SOURCE, nameof(request), request);
+	Guards.object<IAuditableItemGraphUpdatePartialRequest["pathParams"]>(
+		ROUTES_SOURCE,
+		nameof(request.pathParams),
+		request.pathParams
+	);
+	Guards.stringValue(ROUTES_SOURCE, nameof(request.pathParams.id), request.pathParams.id);
+	Guards.object<IAuditableItemGraphUpdatePartialRequest["body"]>(
+		ROUTES_SOURCE,
+		nameof(request.body),
+		request.body
+	);
+
+	const component = ComponentFactory.get<IAuditableItemGraphComponent>(componentName);
+	await component.updatePartial({ ...request.body, id: request.pathParams.id });
 	return {
 		statusCode: HttpStatusCode.noContent
 	};
