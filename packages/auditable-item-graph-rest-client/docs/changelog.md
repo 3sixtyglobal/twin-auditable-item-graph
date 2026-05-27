@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.3-next.17](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-rest-client-v0.0.3-next.16...auditable-item-graph-rest-client-v0.0.3-next.17) (2026-05-27)
+
+
+### Bug Fixes
+
+* incremental edge merge and per-vertex update queue ([#70](https://github.com/iotaledger/twin-auditable-item-graph/issues/70)) ([91eb51d](https://github.com/iotaledger/twin-auditable-item-graph/commit/91eb51d135d2e609eebce90de099670f08eb20ca))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/auditable-item-graph-models bumped from 0.0.3-next.16 to 0.0.3-next.17
+
 ## [0.0.3-next.16](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-rest-client-v0.0.3-next.15...auditable-item-graph-rest-client-v0.0.3-next.16) (2026-05-22)
 
 
