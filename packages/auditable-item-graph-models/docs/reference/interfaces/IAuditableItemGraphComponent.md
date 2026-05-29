@@ -278,11 +278,11 @@ NotFoundError if the vertex is not found.
 
 ***
 
-### removeVerifiable() {#removeverifiable}
+### removeProof() {#removeproof}
 
-> **removeVerifiable**(`id`): `Promise`\<`void`\>
+> **removeProof**(`id`): `Promise`\<`void`\>
 
-Remove the verifiable storage for an item.
+Remove the proof for an item.
 
 #### Parameters
 
@@ -290,7 +290,7 @@ Remove the verifiable storage for an item.
 
 `string`
 
-The id of the vertex to remove the storage from.
+The id of the vertex to remove the proof from.
 
 #### Returns
 

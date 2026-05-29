@@ -8,7 +8,7 @@ Client for performing auditable item graph through to REST endpoints.
 
 ## Implements
 
-- `IAuditableItemGraphComponent`
+- `Omit`\<`IAuditableItemGraphComponent`, `"removeProof"`\>
 
 ## Constructors
 
@@ -58,7 +58,7 @@ The class name of the component.
 
 #### Implementation of
 
-`IAuditableItemGraphComponent.className`
+`Omit.className`
 
 ***
 
@@ -84,7 +84,7 @@ The id of the new graph item.
 
 #### Implementation of
 
-`IAuditableItemGraphComponent.create`
+`Omit.create`
 
 ***
 
@@ -130,7 +130,7 @@ NotFoundError if the vertex is not found.
 
 #### Implementation of
 
-`IAuditableItemGraphComponent.get`
+`Omit.get`
 
 ***
 
@@ -178,7 +178,7 @@ The changesets if found.
 
 #### Implementation of
 
-`IAuditableItemGraphComponent.getChangesets`
+`Omit.getChangesets`
 
 ***
 
@@ -218,7 +218,7 @@ NotFoundError if the vertex or changeset is not found.
 
 #### Implementation of
 
-`IAuditableItemGraphComponent.getChangeset`
+`Omit.getChangeset`
 
 ***
 
@@ -254,7 +254,7 @@ NotFoundError if the vertex or version is not found.
 
 #### Implementation of
 
-`IAuditableItemGraphComponent.getVersion`
+`Omit.getVersion`
 
 ***
 
@@ -300,7 +300,7 @@ NotFoundError if the vertex is not found.
 
 #### Implementation of
 
-`IAuditableItemGraphComponent.getVersions`
+`Omit.getVersions`
 
 ***
 
@@ -328,7 +328,7 @@ Nothing.
 
 #### Implementation of
 
-`IAuditableItemGraphComponent.update`
+`Omit.update`
 
 ***
 
@@ -354,37 +354,7 @@ Nothing.
 
 #### Implementation of
 
-`IAuditableItemGraphComponent.updatePartial`
-
-***
-
-### removeVerifiable() {#removeverifiable}
-
-> **removeVerifiable**(`id`): `Promise`\<`void`\>
-
-Remove the verifiable storage for an item, not supported on client.
-
-#### Parameters
-
-##### id
-
-`string`
-
-The id of the vertex to get.
-
-#### Returns
-
-`Promise`\<`void`\>
-
-Nothing.
-
-#### Throws
-
-NotFoundError if the vertex is not found.
-
-#### Implementation of
-
-`IAuditableItemGraphComponent.removeVerifiable`
+`Omit.updatePartial`
 
 ***
 
@@ -468,4 +438,4 @@ The entities, which can be partial if a limited keys list was provided.
 
 #### Implementation of
 
-`IAuditableItemGraphComponent.query`
+`Omit.query`
