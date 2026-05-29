@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.3-next.18](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-models-v0.0.3-next.17...auditable-item-graph-models-v0.0.3-next.18) (2026-05-29)
+
+
+### Features
+
+* update immutable proof usage ([#73](https://github.com/iotaledger/twin-auditable-item-graph/issues/73)) ([a5181d1](https://github.com/iotaledger/twin-auditable-item-graph/commit/a5181d172cbc492c7cc964d22724cc10c46fc52e))
+
 ## [0.0.3-next.17](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-models-v0.0.3-next.16...auditable-item-graph-models-v0.0.3-next.17) (2026-05-27)
 
 
