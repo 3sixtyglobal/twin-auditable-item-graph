@@ -21,12 +21,11 @@ import {
 	ContextIdStore,
 	type IContextIds
 } from "@twin.org/context";
-import { ComponentFactory, Converter, Is, ObjectHelper, RandomHelper } from "@twin.org/core";
+import { ComponentFactory, Is, RandomHelper } from "@twin.org/core";
 import { ComparisonOperator } from "@twin.org/entity";
 import { MemoryEntityStorageConnector } from "@twin.org/entity-storage-connector-memory";
 import { EntityStorageConnectorFactory } from "@twin.org/entity-storage-models";
 import { DidContextIdHandler } from "@twin.org/identity-models";
-import type { IImmutableProof } from "@twin.org/immutable-proof-models";
 import {
 	type ImmutableProof,
 	ImmutableProofService,
@@ -34,12 +33,7 @@ import {
 } from "@twin.org/immutable-proof-service";
 import { ModuleHelper } from "@twin.org/modules";
 import { nameof } from "@twin.org/nameof";
-import {
-	EntityStorageVerifiableStorageConnector,
-	initSchema as initSchemaVerifiableStorage,
-	type VerifiableItem
-} from "@twin.org/verifiable-storage-connector-entity-storage";
-import { VerifiableStorageConnectorFactory } from "@twin.org/verifiable-storage-models";
+import { NotarizationConnectorFactory, type INotarization } from "@twin.org/notarization-models";
 import {
 	cleanupTestEnv,
 	setupTestEnv,
@@ -56,7 +50,7 @@ import { initSchema } from "../src/schema.js";
 let vertexStorage: MemoryEntityStorageConnector<AuditableItemGraphVertex>;
 let changesetStorage: MemoryEntityStorageConnector<AuditableItemGraphChangeset>;
 let immutableProofStorage: MemoryEntityStorageConnector<ImmutableProof>;
-let verifiableStorage: MemoryEntityStorageConnector<VerifiableItem>;
+let notarizationStore: Map<string, INotarization>;
 let backgroundTaskStorage: MemoryEntityStorageConnector<BackgroundTask>;
 
 const FIRST_TICK = 1724327716271;
@@ -65,7 +59,6 @@ const SECOND_TICK = 1724327816272;
 const HEX_ID_PATTERN = /^[\da-f]+$/;
 const AIG_URN_PATTERN = /^aig:[\da-f]+$/;
 const IMMUTABLE_PROOF_URN_PATTERN = /^immutable-proof:[\da-f]+$/;
-const MULTIBASE_Z_PATTERN = /^z[1-9A-HJ-NP-Za-km-z]+$/;
 
 /**
  * Parallel attach count aligned with supply-chain concurrency repro (issue #69).
@@ -89,7 +82,10 @@ async function waitForProofGeneration(proofCount: number = 1): Promise<void> {
 	let count = 0;
 	do {
 		await new Promise(resolve => setTimeout(resolve, 200));
-	} while (verifiableStorage.getStore().length < proofCount && count++ < proofCount * 40);
+	} while (
+		immutableProofStorage.getStore().filter(p => p.notarizationId).length < proofCount &&
+		count++ < proofCount * 40
+	);
 	if (count >= proofCount * 40) {
 		throw new Error("Proof generation timed out");
 	}
@@ -125,7 +121,6 @@ describe("AuditableItemGraphService", () => {
 		await setupTestEnv();
 
 		initSchema();
-		initSchemaVerifiableStorage();
 		initSchemaImmutableProof();
 		initSchemaBackgroundTask();
 
@@ -173,16 +168,37 @@ describe("AuditableItemGraphService", () => {
 			() => changesetStorage
 		);
 
-		verifiableStorage = new MemoryEntityStorageConnector<VerifiableItem>({
-			entitySchema: nameof<VerifiableItem>(),
-			partitionContextIds: [ContextIdKeys.Tenant]
-		});
-		EntityStorageConnectorFactory.register("verifiable-item", () => verifiableStorage);
-
-		VerifiableStorageConnectorFactory.register(
-			"verifiable-storage",
-			() => new EntityStorageVerifiableStorageConnector()
-		);
+		notarizationStore = new Map<string, INotarization>();
+		let notarizationIdCounter = 0;
+		NotarizationConnectorFactory.register("notarization", () => ({
+			className: () => "MockNotarizationConnector",
+			create: async (
+				controllerIdentity: string,
+				notarization: Omit<INotarization, "id" | "dateCreated">
+			) => {
+				const id = (++notarizationIdCounter).toString(16).padStart(32, "0");
+				notarizationStore.set(id, {
+					...notarization,
+					id,
+					dateCreated: new Date(Date.now()).toISOString()
+				});
+				return id;
+			},
+			get: async (id: string) => {
+				const entry = notarizationStore.get(id);
+				if (!entry) {
+					throw new Error(`Notarization not found: ${id}`);
+				}
+				return entry;
+			},
+			remove: async (controllerIdentity: string, id: string) => {
+				notarizationStore.delete(id);
+			},
+			update: async (controllerIdentity: string, notarization: INotarization) => {
+				notarizationStore.set(notarization.id, notarization);
+			},
+			transfer: async () => {}
+		}));
 
 		immutableProofStorage = new MemoryEntityStorageConnector<ImmutableProof>({
 			entitySchema: nameof<ImmutableProof>(),
@@ -259,29 +275,14 @@ describe("AuditableItemGraphService", () => {
 			})
 		);
 
-		const immutableStore = verifiableStorage.getStore();
-		expect(immutableStore).toHaveLength(1);
-		expect(immutableStore[0]).toEqual(
+		const proofStore = immutableProofStorage.getStore();
+		expect(proofStore).toHaveLength(1);
+		expect(proofStore[0]).toEqual(
 			expect.objectContaining({
 				id: expect.stringMatching(HEX_ID_PATTERN),
-				data: expect.any(String),
-				creator: TEST_ORGANIZATION_IDENTITY,
-				allowList: [TEST_ORGANIZATION_IDENTITY],
-				maxAllowListSize: 100
-			})
-		);
-
-		const immutableProof = ObjectHelper.fromBytes<IImmutableProof>(
-			Converter.base64ToBytes(immutableStore[0].data)
-		);
-		expect(immutableProof).toEqual(
-			expect.objectContaining({
-				"@context": "https://w3id.org/security/data-integrity/v2",
-				created: "2024-08-22T11:56:56.272Z",
-				type: "DataIntegrityProof",
-				cryptosuite: "eddsa-jcs-2022",
-				proofPurpose: "assertionMethod",
-				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN)
+				organizationId: TEST_ORGANIZATION_IDENTITY,
+				dateCreated: expect.any(String),
+				notarizationId: expect.any(String)
 			})
 		);
 	});
@@ -352,29 +353,14 @@ describe("AuditableItemGraphService", () => {
 
 		await waitForProofGeneration();
 
-		const immutableStore = verifiableStorage.getStore();
-		expect(immutableStore).toHaveLength(1);
-		expect(immutableStore[0]).toEqual(
+		const proofStore = immutableProofStorage.getStore();
+		expect(proofStore).toHaveLength(1);
+		expect(proofStore[0]).toEqual(
 			expect.objectContaining({
 				id: expect.stringMatching(HEX_ID_PATTERN),
-				data: expect.any(String),
-				creator: TEST_ORGANIZATION_IDENTITY,
-				allowList: [TEST_ORGANIZATION_IDENTITY],
-				maxAllowListSize: 100
-			})
-		);
-
-		const immutableProof = ObjectHelper.fromBytes<IImmutableProof>(
-			Converter.base64ToBytes(immutableStore[0].data)
-		);
-		expect(immutableProof).toEqual(
-			expect.objectContaining({
-				"@context": "https://w3id.org/security/data-integrity/v2",
-				type: "DataIntegrityProof",
-				created: "2024-08-22T11:56:56.272Z",
-				cryptosuite: "eddsa-jcs-2022",
-				proofPurpose: "assertionMethod",
-				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN)
+				organizationId: TEST_ORGANIZATION_IDENTITY,
+				dateCreated: expect.any(String),
+				notarizationId: expect.any(String)
 			})
 		);
 	});
@@ -464,29 +450,14 @@ describe("AuditableItemGraphService", () => {
 
 		await waitForProofGeneration();
 
-		const immutableStore = verifiableStorage.getStore();
-		expect(immutableStore).toHaveLength(1);
-		expect(immutableStore[0]).toEqual(
+		const proofStore = immutableProofStorage.getStore();
+		expect(proofStore).toHaveLength(1);
+		expect(proofStore[0]).toEqual(
 			expect.objectContaining({
-				allowList: [TEST_ORGANIZATION_IDENTITY],
-				creator: TEST_ORGANIZATION_IDENTITY,
-				data: expect.any(String),
 				id: expect.stringMatching(HEX_ID_PATTERN),
-				maxAllowListSize: 100
-			})
-		);
-
-		const immutableProof = ObjectHelper.fromBytes<IImmutableProof>(
-			Converter.base64ToBytes(immutableStore[0].data)
-		);
-		expect(immutableProof).toEqual(
-			expect.objectContaining({
-				"@context": "https://w3id.org/security/data-integrity/v2",
-				type: "DataIntegrityProof",
-				created: "2024-08-22T11:56:56.272Z",
-				cryptosuite: "eddsa-jcs-2022",
-				proofPurpose: "assertionMethod",
-				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN)
+				organizationId: TEST_ORGANIZATION_IDENTITY,
+				dateCreated: expect.any(String),
+				notarizationId: expect.any(String)
 			})
 		);
 	});
@@ -1065,29 +1036,14 @@ describe("AuditableItemGraphService", () => {
 
 		await waitForProofGeneration();
 
-		const immutableStore = verifiableStorage.getStore();
-		expect(immutableStore).toHaveLength(1);
-		expect(immutableStore[0]).toEqual(
+		const proofStore = immutableProofStorage.getStore();
+		expect(proofStore).toHaveLength(1);
+		expect(proofStore[0]).toEqual(
 			expect.objectContaining({
-				allowList: [TEST_ORGANIZATION_IDENTITY],
-				creator: TEST_ORGANIZATION_IDENTITY,
-				data: expect.any(String),
 				id: expect.stringMatching(HEX_ID_PATTERN),
-				maxAllowListSize: 100
-			})
-		);
-
-		const immutableProof = ObjectHelper.fromBytes<IImmutableProof>(
-			Converter.base64ToBytes(immutableStore[0].data)
-		);
-		expect(immutableProof).toEqual(
-			expect.objectContaining({
-				"@context": "https://w3id.org/security/data-integrity/v2",
-				type: "DataIntegrityProof",
-				created: "2024-08-22T11:56:56.272Z",
-				cryptosuite: "eddsa-jcs-2022",
-				proofPurpose: "assertionMethod",
-				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN)
+				organizationId: TEST_ORGANIZATION_IDENTITY,
+				dateCreated: expect.any(String),
+				notarizationId: expect.any(String)
 			})
 		);
 	});
@@ -1347,52 +1303,22 @@ describe("AuditableItemGraphService", () => {
 			})
 		);
 
-		const immutableStore = verifiableStorage.getStore();
-		expect(immutableStore).toHaveLength(2);
-		expect(immutableStore[0]).toEqual(
+		const proofStore = immutableProofStorage.getStore();
+		expect(proofStore).toHaveLength(2);
+		expect(proofStore[0]).toEqual(
 			expect.objectContaining({
-				allowList: [TEST_ORGANIZATION_IDENTITY],
-				creator: TEST_ORGANIZATION_IDENTITY,
-				data: expect.any(String),
 				id: expect.stringMatching(HEX_ID_PATTERN),
-				maxAllowListSize: 100
+				organizationId: TEST_ORGANIZATION_IDENTITY,
+				dateCreated: expect.any(String),
+				notarizationId: expect.any(String)
 			})
 		);
-		expect(immutableStore[1]).toEqual(
+		expect(proofStore[1]).toEqual(
 			expect.objectContaining({
-				allowList: [TEST_ORGANIZATION_IDENTITY],
-				creator: TEST_ORGANIZATION_IDENTITY,
-				data: expect.any(String),
 				id: expect.stringMatching(HEX_ID_PATTERN),
-				maxAllowListSize: 100
-			})
-		);
-
-		let immutableProof = ObjectHelper.fromBytes<IImmutableProof>(
-			Converter.base64ToBytes(immutableStore[0].data)
-		);
-		expect(immutableProof).toEqual(
-			expect.objectContaining({
-				"@context": "https://w3id.org/security/data-integrity/v2",
-				type: "DataIntegrityProof",
-				created: "2024-08-22T11:56:56.272Z",
-				cryptosuite: "eddsa-jcs-2022",
-				proofPurpose: "assertionMethod",
-				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN)
-			})
-		);
-
-		immutableProof = ObjectHelper.fromBytes<IImmutableProof>(
-			Converter.base64ToBytes(immutableStore[1].data)
-		);
-		expect(immutableProof).toEqual(
-			expect.objectContaining({
-				"@context": "https://w3id.org/security/data-integrity/v2",
-				type: "DataIntegrityProof",
-				created: "2024-08-22T11:56:56.272Z",
-				cryptosuite: "eddsa-jcs-2022",
-				proofPurpose: "assertionMethod",
-				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN)
+				organizationId: TEST_ORGANIZATION_IDENTITY,
+				dateCreated: expect.any(String),
+				notarizationId: expect.any(String)
 			})
 		);
 	});
@@ -1528,52 +1454,22 @@ describe("AuditableItemGraphService", () => {
 			})
 		);
 
-		const immutableStore = verifiableStorage.getStore();
-		expect(immutableStore).toHaveLength(2);
-		expect(immutableStore[0]).toEqual(
+		const proofStore = immutableProofStorage.getStore();
+		expect(proofStore).toHaveLength(2);
+		expect(proofStore[0]).toEqual(
 			expect.objectContaining({
-				allowList: [TEST_ORGANIZATION_IDENTITY],
-				creator: TEST_ORGANIZATION_IDENTITY,
-				data: expect.any(String),
 				id: expect.stringMatching(HEX_ID_PATTERN),
-				maxAllowListSize: 100
+				organizationId: TEST_ORGANIZATION_IDENTITY,
+				dateCreated: expect.any(String),
+				notarizationId: expect.any(String)
 			})
 		);
-		expect(immutableStore[1]).toEqual(
+		expect(proofStore[1]).toEqual(
 			expect.objectContaining({
-				allowList: [TEST_ORGANIZATION_IDENTITY],
-				creator: TEST_ORGANIZATION_IDENTITY,
-				data: expect.any(String),
 				id: expect.stringMatching(HEX_ID_PATTERN),
-				maxAllowListSize: 100
-			})
-		);
-
-		let immutableProof = ObjectHelper.fromBytes<IImmutableProof>(
-			Converter.base64ToBytes(immutableStore[0].data)
-		);
-		expect(immutableProof).toEqual(
-			expect.objectContaining({
-				"@context": "https://w3id.org/security/data-integrity/v2",
-				type: "DataIntegrityProof",
-				created: "2024-08-22T11:56:56.272Z",
-				cryptosuite: "eddsa-jcs-2022",
-				proofPurpose: "assertionMethod",
-				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN)
-			})
-		);
-
-		immutableProof = ObjectHelper.fromBytes<IImmutableProof>(
-			Converter.base64ToBytes(immutableStore[1].data)
-		);
-		expect(immutableProof).toEqual(
-			expect.objectContaining({
-				"@context": "https://w3id.org/security/data-integrity/v2",
-				type: "DataIntegrityProof",
-				created: "2024-08-22T11:56:56.272Z",
-				cryptosuite: "eddsa-jcs-2022",
-				proofPurpose: "assertionMethod",
-				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN)
+				organizationId: TEST_ORGANIZATION_IDENTITY,
+				dateCreated: expect.any(String),
+				notarizationId: expect.any(String)
 			})
 		);
 	});
@@ -1853,52 +1749,22 @@ describe("AuditableItemGraphService", () => {
 			})
 		);
 
-		const immutableStore = verifiableStorage.getStore();
-		expect(immutableStore).toHaveLength(2);
-		expect(immutableStore[0]).toEqual(
+		const proofStore = immutableProofStorage.getStore();
+		expect(proofStore).toHaveLength(2);
+		expect(proofStore[0]).toEqual(
 			expect.objectContaining({
-				allowList: [TEST_ORGANIZATION_IDENTITY],
-				creator: TEST_ORGANIZATION_IDENTITY,
-				data: expect.any(String),
 				id: expect.stringMatching(HEX_ID_PATTERN),
-				maxAllowListSize: 100
+				organizationId: TEST_ORGANIZATION_IDENTITY,
+				dateCreated: expect.any(String),
+				notarizationId: expect.any(String)
 			})
 		);
-		expect(immutableStore[1]).toEqual(
+		expect(proofStore[1]).toEqual(
 			expect.objectContaining({
-				allowList: [TEST_ORGANIZATION_IDENTITY],
-				creator: TEST_ORGANIZATION_IDENTITY,
-				data: expect.any(String),
 				id: expect.stringMatching(HEX_ID_PATTERN),
-				maxAllowListSize: 100
-			})
-		);
-
-		let immutableProof = ObjectHelper.fromBytes<IImmutableProof>(
-			Converter.base64ToBytes(immutableStore[0].data)
-		);
-		expect(immutableProof).toEqual(
-			expect.objectContaining({
-				"@context": "https://w3id.org/security/data-integrity/v2",
-				type: "DataIntegrityProof",
-				created: "2024-08-22T11:56:56.272Z",
-				cryptosuite: "eddsa-jcs-2022",
-				proofPurpose: "assertionMethod",
-				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN)
-			})
-		);
-
-		immutableProof = ObjectHelper.fromBytes<IImmutableProof>(
-			Converter.base64ToBytes(immutableStore[1].data)
-		);
-		expect(immutableProof).toEqual(
-			expect.objectContaining({
-				"@context": "https://w3id.org/security/data-integrity/v2",
-				type: "DataIntegrityProof",
-				created: "2024-08-22T11:56:56.272Z",
-				cryptosuite: "eddsa-jcs-2022",
-				proofPurpose: "assertionMethod",
-				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN)
+				organizationId: TEST_ORGANIZATION_IDENTITY,
+				dateCreated: expect.any(String),
+				notarizationId: expect.any(String)
 			})
 		);
 	});
@@ -2604,57 +2470,27 @@ describe("AuditableItemGraphService", () => {
 			})
 		);
 
-		const immutableStore = verifiableStorage.getStore();
-		expect(immutableStore).toHaveLength(2);
-		expect(immutableStore[0]).toEqual(
+		const proofStore = immutableProofStorage.getStore();
+		expect(proofStore).toHaveLength(2);
+		expect(proofStore[0]).toEqual(
 			expect.objectContaining({
-				allowList: [TEST_ORGANIZATION_IDENTITY],
-				creator: TEST_ORGANIZATION_IDENTITY,
-				data: expect.any(String),
 				id: expect.stringMatching(HEX_ID_PATTERN),
-				maxAllowListSize: 100
+				organizationId: TEST_ORGANIZATION_IDENTITY,
+				dateCreated: expect.any(String),
+				notarizationId: expect.any(String)
 			})
 		);
-		expect(immutableStore[1]).toEqual(
+		expect(proofStore[1]).toEqual(
 			expect.objectContaining({
-				allowList: [TEST_ORGANIZATION_IDENTITY],
-				creator: TEST_ORGANIZATION_IDENTITY,
-				data: expect.any(String),
 				id: expect.stringMatching(HEX_ID_PATTERN),
-				maxAllowListSize: 100
-			})
-		);
-
-		let immutableProof = ObjectHelper.fromBytes<IImmutableProof>(
-			Converter.base64ToBytes(immutableStore[0].data)
-		);
-		expect(immutableProof).toEqual(
-			expect.objectContaining({
-				"@context": "https://w3id.org/security/data-integrity/v2",
-				type: "DataIntegrityProof",
-				created: "2024-08-22T11:56:56.272Z",
-				cryptosuite: "eddsa-jcs-2022",
-				proofPurpose: "assertionMethod",
-				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN)
-			})
-		);
-
-		immutableProof = ObjectHelper.fromBytes<IImmutableProof>(
-			Converter.base64ToBytes(immutableStore[1].data)
-		);
-		expect(immutableProof).toEqual(
-			expect.objectContaining({
-				"@context": "https://w3id.org/security/data-integrity/v2",
-				type: "DataIntegrityProof",
-				created: "2024-08-22T11:56:56.272Z",
-				cryptosuite: "eddsa-jcs-2022",
-				proofPurpose: "assertionMethod",
-				proofValue: expect.stringMatching(MULTIBASE_Z_PATTERN)
+				organizationId: TEST_ORGANIZATION_IDENTITY,
+				dateCreated: expect.any(String),
+				notarizationId: expect.any(String)
 			})
 		);
 	});
 
-	test("Can remove the verifiable storage for a vertex", async () => {
+	test("Can remove the notarization for a vertex", async () => {
 		const service = new AuditableItemGraphService();
 		const id = await service.create({
 			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
@@ -2667,9 +2503,9 @@ describe("AuditableItemGraphService", () => {
 
 		await waitForProofGeneration();
 
-		expect(verifiableStorage.getStore().length).toEqual(1);
+		expect(immutableProofStorage.getStore().filter(p => p.notarizationId).length).toEqual(1);
 
-		await service.removeVerifiable(id);
+		await service.removeProof(id);
 
 		const result = await service.get(id, {
 			verifySignatureDepth: VerifyDepth.All
@@ -2693,7 +2529,7 @@ describe("AuditableItemGraphService", () => {
 			verified: false
 		});
 
-		expect(verifiableStorage.getStore().length).toEqual(0);
+		expect(immutableProofStorage.getStore().filter(p => p.notarizationId).length).toEqual(0);
 	});
 
 	test("Can query for a vertex by id", async () => {

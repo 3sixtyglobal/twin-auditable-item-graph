@@ -127,12 +127,12 @@ export interface IAuditableItemGraphComponent extends IComponent {
 	): Promise<IAuditableItemGraphVertexVersionList>;
 
 	/**
-	 * Remove the verifiable storage for an item.
-	 * @param id The id of the vertex to remove the storage from.
+	 * Remove the proof for an item.
+	 * @param id The id of the vertex to remove the proof from.
 	 * @returns Nothing.
 	 * @throws NotFoundError if the vertex is not found.
 	 */
-	removeVerifiable(id: string): Promise<void>;
+	removeProof(id: string): Promise<void>;
 
 	/**
 	 * Query the graph for vertices.

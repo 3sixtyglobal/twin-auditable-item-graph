@@ -29,17 +29,12 @@ import {
 } from "@twin.org/immutable-proof-service";
 import { ModuleHelper } from "@twin.org/modules";
 import { nameof } from "@twin.org/nameof";
+import { NotarizationConnectorFactory, type INotarization } from "@twin.org/notarization-models";
 import {
 	MetricType,
 	type ITelemetryComponent,
 	type ITelemetryMetric
 } from "@twin.org/telemetry-models";
-import {
-	EntityStorageVerifiableStorageConnector,
-	initSchema as initSchemaVerifiableStorage,
-	type VerifiableItem
-} from "@twin.org/verifiable-storage-connector-entity-storage";
-import { VerifiableStorageConnectorFactory } from "@twin.org/verifiable-storage-models";
 import {
 	cleanupTestEnv,
 	setupTestEnv,
@@ -93,14 +88,17 @@ function makeMockTelemetry(): {
 let vertexStorage: MemoryEntityStorageConnector<AuditableItemGraphVertex>;
 let changesetStorage: MemoryEntityStorageConnector<AuditableItemGraphChangeset>;
 let immutableProofStorage: MemoryEntityStorageConnector<ImmutableProof>;
-let verifiableStorage: MemoryEntityStorageConnector<VerifiableItem>;
+let notarizationStore: Map<string, INotarization>;
 let backgroundTaskStorage: MemoryEntityStorageConnector<BackgroundTask>;
 
 async function waitForProofGeneration(proofCount: number = 1): Promise<void> {
 	let count = 0;
 	do {
 		await new Promise(resolve => setTimeout(resolve, 200));
-	} while (verifiableStorage.getStore().length < proofCount && count++ < proofCount * 40);
+	} while (
+		immutableProofStorage.getStore().filter(p => p.notarizationId).length < proofCount &&
+		count++ < proofCount * 40
+	);
 }
 
 describe("AuditableItemGraphService — metrics", () => {
@@ -108,7 +106,6 @@ describe("AuditableItemGraphService — metrics", () => {
 		await setupTestEnv();
 
 		initSchema();
-		initSchemaVerifiableStorage();
 		initSchemaImmutableProof();
 		initSchemaBackgroundTask();
 
@@ -153,15 +150,37 @@ describe("AuditableItemGraphService — metrics", () => {
 			() => changesetStorage
 		);
 
-		verifiableStorage = new MemoryEntityStorageConnector<VerifiableItem>({
-			entitySchema: nameof<VerifiableItem>(),
-			partitionContextIds: [ContextIdKeys.Tenant]
-		});
-		EntityStorageConnectorFactory.register("verifiable-item", () => verifiableStorage);
-		VerifiableStorageConnectorFactory.register(
-			"verifiable-storage",
-			() => new EntityStorageVerifiableStorageConnector()
-		);
+		notarizationStore = new Map<string, INotarization>();
+		let notarizationIdCounter = 0;
+		NotarizationConnectorFactory.register("notarization", () => ({
+			className: () => "MockNotarizationConnector",
+			create: async (
+				controllerIdentity: string,
+				notarization: Omit<INotarization, "id" | "dateCreated">
+			) => {
+				const id = (++notarizationIdCounter).toString(16).padStart(32, "0");
+				notarizationStore.set(id, {
+					...notarization,
+					id,
+					dateCreated: new Date(Date.now()).toISOString()
+				});
+				return id;
+			},
+			get: async (id: string) => {
+				const entry = notarizationStore.get(id);
+				if (!entry) {
+					throw new Error(`Notarization not found: ${id}`);
+				}
+				return entry;
+			},
+			remove: async (controllerIdentity: string, id: string) => {
+				notarizationStore.delete(id);
+			},
+			update: async (controllerIdentity: string, notarization: INotarization) => {
+				notarizationStore.set(notarization.id, notarization);
+			},
+			transfer: async () => {}
+		}));
 
 		immutableProofStorage = new MemoryEntityStorageConnector<ImmutableProof>({
 			entitySchema: nameof<ImmutableProof>(),

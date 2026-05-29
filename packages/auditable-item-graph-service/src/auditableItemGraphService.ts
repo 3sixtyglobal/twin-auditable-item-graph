@@ -844,12 +844,12 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	}
 
 	/**
-	 * Remove the verifiable storage for an item.
-	 * @param id The id of the vertex to get.
+	 * Remove the proof for an item.
+	 * @param id The id of the vertex to remove the proof from.
 	 * @returns Nothing.
 	 * @throws NotFoundError if the vertex is not found.
 	 */
-	public async removeVerifiable(id: string): Promise<void> {
+	public async removeProof(id: string): Promise<void> {
 		Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(id), id);
 
 		const urnParsed = Urn.fromValidString(id);
@@ -889,7 +889,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 				for (const changeset of changesetsResult.entities) {
 					if (Is.stringValue(changeset.proofId)) {
-						await this._immutableProofComponent.removeVerifiable(changeset.proofId);
+						await this._immutableProofComponent.removeNotarization(changeset.proofId);
 						delete changeset.proofId;
 						await this._changesetStorage.set(changeset as AuditableItemGraphChangeset);
 					}
@@ -898,7 +898,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 		} catch (error) {
 			throw new GeneralError(
 				AuditableItemGraphService.CLASS_NAME,
-				"removeVerifiableFailed",
+				"removeProofFailed",
 				undefined,
 				error
 			);
@@ -1785,7 +1785,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				JsonLdHelper.toNodeObject(reducedChangesetJsonLd)
 			);
 
-			// Link the verifiable storage id to the changeset
+			// Link the storage id to the changeset
 			await this._changesetStorage.set(changesetEntity);
 			await MetricHelper.metricIncrement(
 				this._telemetryComponent,

@@ -9,7 +9,7 @@
 			"versionNotFound": "The version with the Id \"{notFoundId}\" was not found",
 			"updatingFailed": "Updating the Auditable Item Graph vertex failed",
 			"queryingFailed": "Querying the Auditable Item Graph failed",
-			"removeVerifiableFailed": "Removing the verifiable data the Auditable Item Graph vertex failed",
+			"removeProofFailed": "Removing the proof from the Auditable Item Graph vertex failed",
 			"vertexNotFound": "The vertex with the Id \"{notFoundId}\" was not found",
 			"changesetNotFound": "The changeset with the Id \"{notFoundId}\" was not found",
 			"resourceIdMissing": "You must provide either the id, or the resourceObject must contain an id property for index \"{index}\"",

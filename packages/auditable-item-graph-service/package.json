@@ -43,7 +43,6 @@
 		"@twin.org/standards-schema-org": "next",
 		"@twin.org/standards-w3c-did": "next",
 		"@twin.org/telemetry-models": "next",
-		"@twin.org/verifiable-storage-models": "next",
 		"@twin.org/web": "next"
 	},
 	"devDependencies": {
@@ -59,8 +58,8 @@
 		"@twin.org/nameof-vitest-plugin": "next",
 		"@twin.org/validate-locales": "next",
 		"@twin.org/ts-to-openapi": "next",
+		"@twin.org/notarization-models": "next",
 		"@twin.org/vault-connector-entity-storage": "next",
-		"@twin.org/verifiable-storage-connector-entity-storage": "next",
 		"@types/node": "25.9.1",
 		"@vitest/coverage-v8": "4.1.6",
 		"copyfiles": "2.4.1",

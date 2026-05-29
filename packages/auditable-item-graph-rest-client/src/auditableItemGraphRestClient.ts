@@ -23,16 +23,16 @@ import type {
 	IAuditableItemGraphPartialVertex,
 	IAuditableItemGraphUpdatePartialRequest,
 	IAuditableItemGraphUpdateRequest,
-	IAuditableItemGraphVertex,
-	IAuditableItemGraphVertexList,
-	IAuditableItemGraphVertexVersionList,
 	IAuditableItemGraphVersionGetRequest,
 	IAuditableItemGraphVersionGetResponse,
 	IAuditableItemGraphVersionListRequest,
 	IAuditableItemGraphVersionListResponse,
+	IAuditableItemGraphVertex,
+	IAuditableItemGraphVertexList,
+	IAuditableItemGraphVertexVersionList,
 	VerifyDepth
 } from "@twin.org/auditable-item-graph-models";
-import { Coerce, Guards, NotSupportedError, Urn } from "@twin.org/core";
+import { Coerce, Guards, Urn } from "@twin.org/core";
 import type { IComparator, SortDirection } from "@twin.org/entity";
 import { nameof } from "@twin.org/nameof";
 import { HeaderHelper, HeaderTypes, MimeTypes } from "@twin.org/web";
@@ -42,7 +42,7 @@ import { HeaderHelper, HeaderTypes, MimeTypes } from "@twin.org/web";
  */
 export class AuditableItemGraphRestClient
 	extends BaseRestClient
-	implements IAuditableItemGraphComponent
+	implements Omit<IAuditableItemGraphComponent, "removeProof">
 {
 	/**
 	 * Runtime name for the class.
@@ -321,18 +321,6 @@ export class AuditableItemGraphRestClient
 				id
 			},
 			body
-		});
-	}
-
-	/**
-	 * Remove the verifiable storage for an item, not supported on client.
-	 * @param id The id of the vertex to get.
-	 * @returns Nothing.
-	 * @throws NotFoundError if the vertex is not found.
-	 */
-	public async removeVerifiable(id: string): Promise<void> {
-		throw new NotSupportedError(AuditableItemGraphRestClient.CLASS_NAME, "notSupportedOnClient", {
-			methodName: "removeVerifiable"
 		});
 	}
 
