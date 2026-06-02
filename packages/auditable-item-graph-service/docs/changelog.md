@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.3-next.19](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.18...auditable-item-graph-service-v0.0.3-next.19) (2026-06-02)
+
+
+### Bug Fixes
+
+* aig concurrent resource regression tests ([#77](https://github.com/iotaledger/twin-auditable-item-graph/issues/77)) ([82b8725](https://github.com/iotaledger/twin-auditable-item-graph/commit/82b872585686e070dde0a0c8493ded6e40a7a1d9))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/auditable-item-graph-models bumped from 0.0.3-next.18 to 0.0.3-next.19
+
 ## [0.0.3-next.18](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.17...auditable-item-graph-service-v0.0.3-next.18) (2026-05-29)
 
 
