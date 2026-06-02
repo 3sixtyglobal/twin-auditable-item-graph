@@ -21,7 +21,7 @@ import {
 	ContextIdStore,
 	type IContextIds
 } from "@twin.org/context";
-import { ComponentFactory, Is, RandomHelper } from "@twin.org/core";
+import { ComponentFactory, Is, RandomHelper, SharedStore } from "@twin.org/core";
 import { ComparisonOperator } from "@twin.org/entity";
 import { MemoryEntityStorageConnector } from "@twin.org/entity-storage-connector-memory";
 import { EntityStorageConnectorFactory } from "@twin.org/entity-storage-models";
@@ -3694,6 +3694,12 @@ describe("AuditableItemGraphService", () => {
 	 * Multi-replica deployments are not coordinated.
 	 */
 	describe("concurrent edge attach", () => {
+		beforeEach(() => {
+			// Same reasoning as concurrent resource attach: clear the Mutex registry so
+			// the vertex key is fresh and the TOCTOU window in getOrFetchLock is exercised.
+			SharedStore.set("mutexLocks", {});
+		});
+
 		test("parallel updatePartial attach with id-less edges retains all active edges", async () => {
 			const service = new AuditableItemGraphService();
 
@@ -3729,6 +3735,122 @@ describe("AuditableItemGraphService", () => {
 			for (const targetId of targetIds) {
 				expect(activeTargetIds.has(targetId)).toBe(true);
 			}
+		});
+	});
+
+	/**
+	 * Regression for issue #76 (parallel updatePartial resourcePatches.add on one vertex).
+	 * Mirrors the supply-chain scenario: N concurrent consignmentAddEvent calls each create
+	 * an AIS stream and then PATCH that stream as a resource onto the same consignment vertex.
+	 * The per-vertex Mutex must serialise each read-modify-write so no resource is lost.
+	 */
+	describe("concurrent resource attach", () => {
+		beforeEach(() => {
+			// RandomHelper is deterministic across tests so vertex IDs repeat, which means the
+			// Mutex registry already holds a key for the vertex from a previous test run.
+			// Clear the registry so every test in this suite starts with a brand-new key,
+			// ensuring the getOrFetchLock TOCTOU window actually opens and proves the fix.
+			SharedStore.set("mutexLocks", {});
+		});
+
+		test("parallel updatePartial resourcePatches.add retains all added resources", async () => {
+			const service = new AuditableItemGraphService();
+
+			const vertexId = await service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex
+			});
+
+			// Each resource simulates a distinct AIS stream URN attached by a parallel consignmentAddEvent.
+			const resourceIds = Array.from(
+				{ length: PARALLEL_EDGE_ATTACH_COUNT },
+				(unused, i) => `ais:stream-${i + 1}`
+			);
+
+			await Promise.all(
+				resourceIds.map(async streamId => {
+					const resource: IAuditableItemGraphResource = {
+						"@context": [
+							AuditableItemGraphContexts.Context,
+							AuditableItemGraphContexts.ContextCommon
+						],
+						type: AuditableItemGraphTypes.Resource,
+						id: streamId,
+						resourceObject: {
+							"@context": "https://www.w3.org/ns/activitystreams",
+							type: "Link",
+							href: streamId
+						}
+					};
+
+					await service.updatePartial({
+						"@context": [
+							AuditableItemGraphContexts.Context,
+							AuditableItemGraphContexts.ContextCommon
+						],
+						id: vertexId,
+						resourcePatches: { add: [resource] }
+					});
+				})
+			);
+
+			const vertex = await service.get(vertexId);
+			const activeResources = vertex.resources ?? [];
+
+			expect(activeResources).toHaveLength(PARALLEL_EDGE_ATTACH_COUNT);
+
+			const activeResourceIds = new Set(activeResources.map(r => r.id));
+			for (const streamId of resourceIds) {
+				expect(activeResourceIds.has(streamId)).toBe(true);
+			}
+		});
+
+		test("parallel updatePartial resourcePatches.add produces one changeset per add", async () => {
+			const service = new AuditableItemGraphService();
+
+			const vertexId = await service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex
+			});
+
+			const resourceIds = Array.from(
+				{ length: PARALLEL_EDGE_ATTACH_COUNT },
+				(unused, i) => `ais:stream-${i + 1}`
+			);
+
+			await Promise.all(
+				resourceIds.map(async streamId =>
+					service.updatePartial({
+						"@context": [
+							AuditableItemGraphContexts.Context,
+							AuditableItemGraphContexts.ContextCommon
+						],
+						id: vertexId,
+						resourcePatches: {
+							add: [
+								{
+									"@context": [
+										AuditableItemGraphContexts.Context,
+										AuditableItemGraphContexts.ContextCommon
+									],
+									type: AuditableItemGraphTypes.Resource,
+									id: streamId,
+									resourceObject: {
+										"@context": "https://www.w3.org/ns/activitystreams",
+										type: "Link",
+										href: streamId
+									}
+								}
+							]
+						}
+					})
+				)
+			);
+
+			// The creation changeset (version 0) plus one changeset per resource add.
+			const { changesets } = await service.getChangesets(vertexId);
+
+			expect(changesets.itemListElement).toHaveLength(PARALLEL_EDGE_ATTACH_COUNT + 1);
 		});
 	});
 });
