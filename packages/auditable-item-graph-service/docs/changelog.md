@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.3-next.20](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.19...auditable-item-graph-service-v0.0.3-next.20) (2026-06-03)
+
+
+### Features
+
+* mutex on remove proof operation ([d3697a0](https://github.com/iotaledger/twin-auditable-item-graph/commit/d3697a010997c2f9da1d13922a321be002ee27d3))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/auditable-item-graph-models bumped from 0.0.3-next.19 to 0.0.3-next.20
+
 ## [0.0.3-next.19](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.18...auditable-item-graph-service-v0.0.3-next.19) (2026-06-02)
 
 
