@@ -351,6 +351,14 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				const originalEntity = ObjectHelper.clone(vertexEntity);
 				const newEntity = ObjectHelper.clone(vertexEntity);
 
+				// Capture org from context if vertex doesn't have one yet.
+				// Enables ownership transition: when an authenticated user first
+				// interacts with a vertex that was received without an org, the org
+				// is set here and recorded as a patch in the changeset proof.
+				if (!Is.stringValue(newEntity.organizationIdentity)) {
+					newEntity.organizationIdentity = context.contextIds?.[ContextIdKeys.Organization];
+				}
+
 				newEntity.annotationObject = vertex.annotationObject;
 				await this.updateAliasList(context, newEntity, vertex.aliases);
 				await this.updateResourceList(context, newEntity, vertex.resources);
@@ -420,6 +428,11 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				delete vertexEntity.aliasIndex;
 				const originalEntity = ObjectHelper.clone(vertexEntity);
 				const newEntity = ObjectHelper.clone(vertexEntity);
+
+				// Capture org from context if vertex doesn't have one yet.
+				if (!Is.stringValue(newEntity.organizationIdentity)) {
+					newEntity.organizationIdentity = context.contextIds?.[ContextIdKeys.Organization];
+				}
 
 				if (partial.annotationObject !== undefined) {
 					newEntity.annotationObject = partial.annotationObject;
@@ -1776,10 +1789,16 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				ObjectHelper.pick(changesetEntity, AuditableItemGraphService._PROOF_KEYS_CHANGESET)
 			);
 
-			// Create the proof for the changeset object
-			changesetEntity.proofId = await this._immutableProofComponent.create(
-				JsonLdHelper.toNodeObject(reducedChangesetJsonLd)
-			);
+			// Create the proof for the changeset object only when the vertex has
+			// an owning organisation. Vertices created by inbound unauthenticated
+			// activities (e.g. DSP push via skipAuth inbox) have no org context at
+			// creation time and must not require a proof until a local org claims
+			// ownership through an authenticated interaction.
+			if (Is.stringValue(updated.organizationIdentity)) {
+				changesetEntity.proofId = await this._immutableProofComponent.create(
+					JsonLdHelper.toNodeObject(reducedChangesetJsonLd)
+				);
+			}
 
 			// Link the storage id to the changeset
 			await this._changesetStorage.set(changesetEntity);
