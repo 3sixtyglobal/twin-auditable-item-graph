@@ -852,17 +852,11 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	public async removeProof(id: string): Promise<void> {
 		Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(id), id);
 
-		const urnParsed = Urn.fromValidString(id);
+		const vertexId = this.parseVertexId(id);
 
-		if (urnParsed.namespaceIdentifier() !== AuditableItemGraphService.NAMESPACE) {
-			throw new GeneralError(AuditableItemGraphService.CLASS_NAME, "namespaceMismatch", {
-				namespace: AuditableItemGraphService.NAMESPACE,
-				id
-			});
-		}
+		await Mutex.lock(vertexId, { throwOnTimeout: true });
 
 		try {
-			const vertexId = urnParsed.namespaceSpecific(0);
 			const vertexEntity = await this._vertexStorage.get(vertexId);
 
 			if (Is.empty(vertexEntity)) {
@@ -902,6 +896,8 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				undefined,
 				error
 			);
+		} finally {
+			Mutex.unlock(vertexId);
 		}
 	}
 
