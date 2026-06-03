@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.3-next.21](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.20...auditable-item-graph-service-v0.0.3-next.21) (2026-06-03)
+
+
+### Bug Fixes
+
+* gate immutable proof on vertex organizationIdentity in AIG ([#81](https://github.com/iotaledger/twin-auditable-item-graph/issues/81)) ([0e67b6f](https://github.com/iotaledger/twin-auditable-item-graph/commit/0e67b6fb3511ca903667e11da3bdbcecdad7b21d))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/auditable-item-graph-models bumped from 0.0.3-next.20 to 0.0.3-next.21
+
 ## [0.0.3-next.20](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.19...auditable-item-graph-service-v0.0.3-next.20) (2026-06-03)
 
 
