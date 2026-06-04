@@ -1053,6 +1053,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	 * Parse and validate a vertex URN; return the compact storage id.
 	 * @param id The vertex URN.
 	 * @returns The compact vertex id.
+	 * @throws {GeneralError} If the namespace does not match the expected namespace.
 	 * @internal
 	 */
 	private parseVertexId(id: string): string {
@@ -1073,6 +1074,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	 * @param propertyName The property name for error reporting.
 	 * @param patch The patch value.
 	 * @returns The validated list patch.
+	 * @throws {GeneralError} If the patch value is a bare array instead of a list patch object.
 	 * @internal
 	 */
 	private validateListPatch<TItem>(
@@ -1817,6 +1819,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	 * Verify the changesets of a vertex.
 	 * @param vertex The vertex to verify.
 	 * @param verifySignatureDepth How many signatures to verify.
+	 * @returns The verified flag and list of changesets.
 	 * @internal
 	 */
 	private async verifyChangesets(
@@ -1932,6 +1935,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	 * Verify the signature of a changeset and add the verification result to the changeset JSON-LD.
 	 * @param storedChangeset The changeset to verify.
 	 * @returns Whether the changeset is verified.
+	 * @internal
 	 */
 	private async verifyChangesetSignature(
 		storedChangeset: IAuditableItemGraphChangeset
@@ -1957,6 +1961,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	 * @param resource.id The id of the resource.
 	 * @param resource.resourceObject The resource object.
 	 * @returns The resource id if it can find one.
+	 * @internal
 	 */
 	private getResourceId(resource: {
 		id?: string;
@@ -2009,7 +2014,6 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 	/**
 	 * Find vertices with matching aliases.
-	 * @param context The context for the operation.
 	 * @param vertexId The id of the vertex to exclude from the search.
 	 * @param aliasId The alias id to try and find.
 	 * @returns True if any other vertices have matching aliases.
