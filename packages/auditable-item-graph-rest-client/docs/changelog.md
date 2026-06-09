@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.3-next.22](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-rest-client-v0.0.3-next.21...auditable-item-graph-rest-client-v0.0.3-next.22) (2026-06-09)
+
+
+### Bug Fixes
+
+* implement removeProof on AuditableItemGraphRestClient and expose DELETE /:id/proof route ([#85](https://github.com/iotaledger/twin-auditable-item-graph/issues/85)) ([ed74458](https://github.com/iotaledger/twin-auditable-item-graph/commit/ed74458aff9bc8606b75657a7bff15af4884189e))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/auditable-item-graph-models bumped from 0.0.3-next.21 to 0.0.3-next.22
+
 ## [0.0.3-next.21](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-rest-client-v0.0.3-next.20...auditable-item-graph-rest-client-v0.0.3-next.21) (2026-06-03)
 
 
