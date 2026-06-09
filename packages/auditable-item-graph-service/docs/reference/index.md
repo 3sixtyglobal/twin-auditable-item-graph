@@ -31,5 +31,6 @@
 - [auditableItemGraphUpdatePartial](functions/auditableItemGraphUpdatePartial.md)
 - [auditableItemGraphList](functions/auditableItemGraphList.md)
 - [auditableItemGraphVersionGet](functions/auditableItemGraphVersionGet.md)
+- [auditableItemGraphRemoveProof](functions/auditableItemGraphRemoveProof.md)
 - [auditableItemGraphVersionList](functions/auditableItemGraphVersionList.md)
 - [initSchema](functions/initSchema.md)

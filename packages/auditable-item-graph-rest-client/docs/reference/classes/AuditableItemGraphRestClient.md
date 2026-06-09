@@ -8,7 +8,7 @@ Client for performing auditable item graph through to REST endpoints.
 
 ## Implements
 
-- `Omit`\<`IAuditableItemGraphComponent`, `"removeProof"`\>
+- `IAuditableItemGraphComponent`
 
 ## Constructors
 
@@ -58,7 +58,7 @@ The class name of the component.
 
 #### Implementation of
 
-`Omit.className`
+`IAuditableItemGraphComponent.className`
 
 ***
 
@@ -84,7 +84,7 @@ The id of the new graph item.
 
 #### Implementation of
 
-`Omit.create`
+`IAuditableItemGraphComponent.create`
 
 ***
 
@@ -130,7 +130,7 @@ NotFoundError if the vertex is not found.
 
 #### Implementation of
 
-`Omit.get`
+`IAuditableItemGraphComponent.get`
 
 ***
 
@@ -178,7 +178,7 @@ The changesets if found.
 
 #### Implementation of
 
-`Omit.getChangesets`
+`IAuditableItemGraphComponent.getChangesets`
 
 ***
 
@@ -218,7 +218,7 @@ NotFoundError if the vertex or changeset is not found.
 
 #### Implementation of
 
-`Omit.getChangeset`
+`IAuditableItemGraphComponent.getChangeset`
 
 ***
 
@@ -254,7 +254,7 @@ NotFoundError if the vertex or version is not found.
 
 #### Implementation of
 
-`Omit.getVersion`
+`IAuditableItemGraphComponent.getVersion`
 
 ***
 
@@ -300,7 +300,7 @@ NotFoundError if the vertex is not found.
 
 #### Implementation of
 
-`Omit.getVersions`
+`IAuditableItemGraphComponent.getVersions`
 
 ***
 
@@ -328,7 +328,7 @@ Nothing.
 
 #### Implementation of
 
-`Omit.update`
+`IAuditableItemGraphComponent.update`
 
 ***
 
@@ -354,7 +354,33 @@ Nothing.
 
 #### Implementation of
 
-`Omit.updatePartial`
+`IAuditableItemGraphComponent.updatePartial`
+
+***
+
+### removeProof() {#removeproof}
+
+> **removeProof**(`id`): `Promise`\<`void`\>
+
+Remove the notarization proof from all changesets of a graph vertex.
+
+#### Parameters
+
+##### id
+
+`string`
+
+The id of the vertex.
+
+#### Returns
+
+`Promise`\<`void`\>
+
+Nothing.
+
+#### Implementation of
+
+`IAuditableItemGraphComponent.removeProof`
 
 ***
 
@@ -438,4 +464,4 @@ The entities, which can be partial if a limited keys list was provided.
 
 #### Implementation of
 
-`Omit.query`
+`IAuditableItemGraphComponent.query`

@@ -28,6 +28,7 @@
 - [IAuditableItemGraphGetResponse](interfaces/IAuditableItemGraphGetResponse.md)
 - [IAuditableItemGraphListRequest](interfaces/IAuditableItemGraphListRequest.md)
 - [IAuditableItemGraphListResponse](interfaces/IAuditableItemGraphListResponse.md)
+- [IAuditableItemGraphRemoveProofRequest](interfaces/IAuditableItemGraphRemoveProofRequest.md)
 - [IAuditableItemGraphUpdatePartialRequest](interfaces/IAuditableItemGraphUpdatePartialRequest.md)
 - [IAuditableItemGraphUpdateRequest](interfaces/IAuditableItemGraphUpdateRequest.md)
 - [IAuditableItemGraphVersionGetRequest](interfaces/IAuditableItemGraphVersionGetRequest.md)
