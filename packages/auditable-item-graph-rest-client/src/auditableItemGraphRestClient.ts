@@ -21,6 +21,7 @@ import type {
 	IAuditableItemGraphListRequest,
 	IAuditableItemGraphListResponse,
 	IAuditableItemGraphPartialVertex,
+	IAuditableItemGraphRemoveProofRequest,
 	IAuditableItemGraphUpdatePartialRequest,
 	IAuditableItemGraphUpdateRequest,
 	IAuditableItemGraphVersionGetRequest,
@@ -42,7 +43,7 @@ import { HeaderHelper, HeaderTypes, MimeTypes } from "@twin.org/web";
  */
 export class AuditableItemGraphRestClient
 	extends BaseRestClient
-	implements Omit<IAuditableItemGraphComponent, "removeProof">
+	implements IAuditableItemGraphComponent
 {
 	/**
 	 * Runtime name for the class.
@@ -322,6 +323,23 @@ export class AuditableItemGraphRestClient
 			},
 			body
 		});
+	}
+
+	/**
+	 * Remove the notarization proof from all changesets of a graph vertex.
+	 * @param id The id of the vertex.
+	 * @returns Nothing.
+	 */
+	public async removeProof(id: string): Promise<void> {
+		Guards.stringValue(AuditableItemGraphRestClient.CLASS_NAME, nameof(id), id);
+
+		await this.fetch<IAuditableItemGraphRemoveProofRequest, INoContentResponse>(
+			"/:id/proof",
+			"DELETE",
+			{
+				pathParams: { id }
+			}
+		);
 	}
 
 	/**

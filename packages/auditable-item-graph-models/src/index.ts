@@ -10,6 +10,7 @@ export * from "./models/api/IAuditableItemGraphGetRequest.js";
 export * from "./models/api/IAuditableItemGraphGetResponse.js";
 export * from "./models/api/IAuditableItemGraphListRequest.js";
 export * from "./models/api/IAuditableItemGraphListResponse.js";
+export * from "./models/api/IAuditableItemGraphRemoveProofRequest.js";
 export * from "./models/api/IAuditableItemGraphUpdateRequest.js";
 export * from "./models/api/IAuditableItemGraphUpdatePartialRequest.js";
 export * from "./models/api/IAuditableItemGraphVersionGetRequest.js";

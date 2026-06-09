@@ -22,6 +22,7 @@ import {
 	type IAuditableItemGraphGetResponse,
 	type IAuditableItemGraphListRequest,
 	type IAuditableItemGraphListResponse,
+	type IAuditableItemGraphRemoveProofRequest,
 	type IAuditableItemGraphUpdateRequest,
 	type IAuditableItemGraphUpdatePartialRequest,
 	type IAuditableItemGraphVersionGetRequest,
@@ -936,6 +937,42 @@ export function generateRestRoutesAuditableItemGraph(
 		]
 	};
 
+	const removeProofRoute: IRestRoute<IAuditableItemGraphRemoveProofRequest, INoContentResponse> = {
+		operationId: "auditableItemGraphRemoveProof",
+		summary: "Remove the notarization proof from all changesets of a graph vertex",
+		tag: tagsAuditableItemGraph[0].name,
+		method: "DELETE",
+		path: `${baseRouteName}/:id/proof`,
+		handler: async (httpRequestContext, request) =>
+			auditableItemGraphRemoveProof(httpRequestContext, componentName, request),
+		requestType: {
+			type: nameof<IAuditableItemGraphRemoveProofRequest>(),
+			examples: [
+				{
+					id: "auditableItemGraphRemoveProofRequestExample",
+					request: {
+						pathParams: {
+							id: "0101010101010101010101010101010101010101010101010101010101010101"
+						}
+					}
+				}
+			]
+		},
+		responseType: [
+			{
+				type: nameof<INoContentResponse>(),
+				examples: [
+					{
+						id: "auditableItemGraphRemoveProofResponseExample",
+						response: {
+							statusCode: HttpStatusCode.noContent
+						}
+					}
+				]
+			}
+		]
+	};
+
 	return [
 		createRoute,
 		getRoute,
@@ -945,7 +982,8 @@ export function generateRestRoutesAuditableItemGraph(
 		getChangesetListRoute,
 		updateRoute,
 		updatePartialRoute,
-		listRoute
+		listRoute,
+		removeProofRoute
 	];
 }
 
@@ -1262,6 +1300,34 @@ export async function auditableItemGraphVersionGet(
 					: MimeTypes.Json
 		},
 		body: result
+	};
+}
+
+/**
+ * Remove the notarization proof from all changesets of a graph vertex.
+ * @param httpRequestContext The request context for the API.
+ * @param componentName The name of the component to use in the routes.
+ * @param request The request.
+ * @returns The response object with additional http response properties.
+ */
+export async function auditableItemGraphRemoveProof(
+	httpRequestContext: IHttpRequestContext,
+	componentName: string,
+	request: IAuditableItemGraphRemoveProofRequest
+): Promise<INoContentResponse> {
+	Guards.object<IAuditableItemGraphRemoveProofRequest>(ROUTES_SOURCE, nameof(request), request);
+	Guards.object<IAuditableItemGraphRemoveProofRequest["pathParams"]>(
+		ROUTES_SOURCE,
+		nameof(request.pathParams),
+		request.pathParams
+	);
+	Guards.stringValue(ROUTES_SOURCE, nameof(request.pathParams.id), request.pathParams.id);
+
+	const component = ComponentFactory.get<IAuditableItemGraphComponent>(componentName);
+	await component.removeProof(request.pathParams.id);
+
+	return {
+		statusCode: HttpStatusCode.noContent
 	};
 }
 
