@@ -3854,17 +3854,8 @@ describe("AuditableItemGraphService", () => {
 		});
 	});
 
-	describe("No organization context (inbound / skipAuth routes)", () => {
+	describe("Organization context requirements", () => {
 		beforeEach(() => {
-			// Simulate a skipAuth route: no Organization or User in context.
-			ContextIdStore.getContextIds = vi.fn().mockReturnValue({
-				[ContextIdKeys.Node]: TEST_NODE_IDENTITY,
-				[ContextIdKeys.Tenant]: TEST_TENANT_IDENTITY
-			});
-		});
-
-		afterEach(() => {
-			// Restore full context for all other tests.
 			ContextIdStore.getContextIds = vi.fn().mockReturnValue({
 				[ContextIdKeys.Node]: TEST_NODE_IDENTITY,
 				[ContextIdKeys.Tenant]: TEST_TENANT_IDENTITY,
@@ -3873,32 +3864,27 @@ describe("AuditableItemGraphService", () => {
 			});
 		});
 
-		test("create() succeeds without org — vertex written, changeset has no proofId", async () => {
-			const service = new AuditableItemGraphService();
-
-			const id = await service.create({
-				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
-				type: AuditableItemGraphTypes.Vertex,
-				annotationObject: {
-					"@context": "https://schema.org/",
-					type: "Thing",
-					name: "inbound-received"
-				}
+		test("create() throws contextIdMissing when org is absent from context", async () => {
+			ContextIdStore.getContextIds = vi.fn().mockReturnValue({
+				[ContextIdKeys.Node]: TEST_NODE_IDENTITY,
+				[ContextIdKeys.Tenant]: TEST_TENANT_IDENTITY
 			});
 
-			expect(id).toMatch(AIG_URN_PATTERN);
-
-			const vertex = vertexStorage.getStore()[0];
-			expect(vertex.organizationIdentity).toBeUndefined();
-
-			const changesets = changesetStorage.getStore();
-			expect(changesets).toHaveLength(1);
-			expect(changesets[0].proofId).toBeUndefined();
-
-			expect(immutableProofStorage.getStore()).toHaveLength(0);
+			const service = new AuditableItemGraphService();
+			await expect(
+				service.create({
+					"@context": [
+						AuditableItemGraphContexts.Context,
+						AuditableItemGraphContexts.ContextCommon
+					],
+					type: AuditableItemGraphTypes.Vertex
+				})
+			).rejects.toMatchObject({
+				message: "contextIdHelper.contextIdMissing"
+			});
 		});
 
-		test("update() without org keeps vertex unowned and changeset unproofed", async () => {
+		test("update() with changes and no org in context throws — proof service also requires org", async () => {
 			const service = new AuditableItemGraphService();
 
 			const id = await service.create({
@@ -3906,77 +3892,52 @@ describe("AuditableItemGraphService", () => {
 				type: AuditableItemGraphTypes.Vertex
 			});
 
-			await service.update({
-				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
-				id,
-				type: AuditableItemGraphTypes.Vertex,
-				annotationObject: {
-					"@context": "https://schema.org/",
-					type: "Thing",
-					name: "updated-still-no-org"
-				}
-			});
-
-			const vertex = vertexStorage.getStore()[0];
-			expect(vertex.organizationIdentity).toBeUndefined();
-
-			const changesets = changesetStorage.getStore();
-			expect(changesets).toHaveLength(2);
-			expect(changesets.every(c => c.proofId === undefined)).toBe(true);
-			expect(immutableProofStorage.getStore()).toHaveLength(0);
-		});
-
-		test("update() with org on unowned vertex — captures org, proves that changeset and not prior ones", async () => {
-			const service = new AuditableItemGraphService();
-
-			// Phase 1: inbound create, no org
-			const id = await service.create({
-				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
-				type: AuditableItemGraphTypes.Vertex,
-				annotationObject: {
-					"@context": "https://schema.org/",
-					type: "Thing",
-					name: "received"
-				}
-			});
-
-			// Phase 2: authenticated update — restore org in context
 			ContextIdStore.getContextIds = vi.fn().mockReturnValue({
 				[ContextIdKeys.Node]: TEST_NODE_IDENTITY,
-				[ContextIdKeys.Tenant]: TEST_TENANT_IDENTITY,
-				[ContextIdKeys.Organization]: TEST_ORGANIZATION_IDENTITY,
-				[ContextIdKeys.User]: TEST_USER_IDENTITY
+				[ContextIdKeys.Tenant]: TEST_TENANT_IDENTITY
 			});
 
-			await service.update({
+			await expect(
+				service.update({
+					"@context": [
+						AuditableItemGraphContexts.Context,
+						AuditableItemGraphContexts.ContextCommon
+					],
+					id,
+					type: AuditableItemGraphTypes.Vertex,
+					annotationObject: {
+						"@context": "https://schema.org/",
+						type: "Thing",
+						name: "updated-without-org-in-context"
+					}
+				})
+			).rejects.toMatchObject({
+				message: "auditableItemGraphService.updatingFailed"
+			});
+		});
+
+		test("update() with no changes and no org in context succeeds — no proof created", async () => {
+			const service = new AuditableItemGraphService();
+
+			const id = await service.create({
 				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
-				id,
-				type: AuditableItemGraphTypes.Vertex,
-				annotationObject: {
-					"@context": "https://schema.org/",
-					type: "Thing",
-					name: "claimed"
-				}
+				type: AuditableItemGraphTypes.Vertex
 			});
 
 			await waitForProofGeneration(1);
 
-			// Vertex now has org
-			const vertex = vertexStorage.getStore()[0];
-			expect(vertex.organizationIdentity).toBe(TEST_ORGANIZATION_IDENTITY);
+			ContextIdStore.getContextIds = vi.fn().mockReturnValue({
+				[ContextIdKeys.Node]: TEST_NODE_IDENTITY,
+				[ContextIdKeys.Tenant]: TEST_TENANT_IDENTITY
+			});
 
-			const changesets = changesetStorage.getStore();
-			expect(changesets).toHaveLength(2);
+			await service.update({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				id,
+				type: AuditableItemGraphTypes.Vertex
+			});
 
-			// version 0 (inbound create): no proof
-			const first = changesets.find(c => c.version === 0);
-			expect(first?.proofId).toBeUndefined();
-
-			// version 1 (authenticated update claiming ownership): has proof
-			const second = changesets.find(c => c.version === 1);
-			expect(second?.proofId).toMatch(IMMUTABLE_PROOF_URN_PATTERN);
-
-			// Exactly one proof in the store
+			expect(changesetStorage.getStore()).toHaveLength(1);
 			expect(immutableProofStorage.getStore()).toHaveLength(1);
 		});
 	});

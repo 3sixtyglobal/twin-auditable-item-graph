@@ -20,8 +20,8 @@ export class AuditableItemGraphVertex {
 	/**
 	 * The identity of the organization which controls the vertex.
 	 */
-	@property({ type: "string", optional: true })
-	public organizationIdentity?: string;
+	@property({ type: "string" })
+	public organizationIdentity!: string;
 
 	/**
 	 * The date/time of when the vertex was created.

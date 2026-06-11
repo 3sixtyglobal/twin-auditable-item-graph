@@ -1,6 +1,5 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import type { IContextIds } from "@twin.org/context";
 
 /**
  * Context for the auditable item graph service.
@@ -12,7 +11,12 @@ export interface IAuditableItemGraphServiceContext {
 	now: string;
 
 	/**
-	 * The context ids for the operation.
+	 * The organization identity for the operation.
 	 */
-	contextIds?: IContextIds;
+	organizationIdentity: string;
+
+	/**
+	 * The user identity for the operation.
+	 */
+	userIdentity?: string;
 }

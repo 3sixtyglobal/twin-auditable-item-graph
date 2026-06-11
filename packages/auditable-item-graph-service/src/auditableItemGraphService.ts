@@ -22,7 +22,7 @@ import {
 	type IAuditableItemGraphVertexList,
 	type IAuditableItemGraphVertexVersionList
 } from "@twin.org/auditable-item-graph-models";
-import { ContextIdKeys, ContextIdStore } from "@twin.org/context";
+import { ContextIdHelper, ContextIdKeys, ContextIdStore } from "@twin.org/context";
 import {
 	ArrayHelper,
 	Coerce,
@@ -210,6 +210,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 		Guards.object(AuditableItemGraphService.CLASS_NAME, nameof(vertex), vertex);
 
 		const contextIds = await ContextIdStore.getContextIds();
+		ContextIdHelper.guard(contextIds, ContextIdKeys.Organization);
 
 		try {
 			const id = RandomHelper.generateUuidV7("compact");
@@ -240,14 +241,18 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				);
 			}
 
+			const ownerOrganizationId =
+				contextIds?.[ContextIdKeys.UserOrganization] ?? contextIds?.[ContextIdKeys.Organization];
+
 			const context: IAuditableItemGraphServiceContext = {
 				now: new Date(Date.now()).toISOString(),
-				contextIds
+				organizationIdentity: ownerOrganizationId,
+				userIdentity: contextIds?.[ContextIdKeys.User]
 			};
 
 			const vertexModel: AuditableItemGraphVertex = {
 				id,
-				organizationIdentity: contextIds?.[ContextIdKeys.Organization],
+				organizationIdentity: contextIds[ContextIdKeys.Organization],
 				dateCreated: context.now
 			};
 			const originalEntity = ObjectHelper.clone(vertexModel);
@@ -306,8 +311,6 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 		await Mutex.lock(vertexId, { throwOnTimeout: true });
 		try {
-			const contextIds = await ContextIdStore.getContextIds();
-
 			try {
 				const schemaValidationFailures: IValidationFailure[] = [];
 				await DataTypeHelper.validate(
@@ -342,22 +345,21 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 					);
 				}
 
+				const contextIds = await ContextIdStore.getContextIds();
+				const ownerOrganizationId =
+					vertexEntity.organizationIdentity ??
+					contextIds?.[ContextIdKeys.UserOrganization] ??
+					contextIds?.[ContextIdKeys.Organization];
+
 				const context: IAuditableItemGraphServiceContext = {
 					now: new Date(Date.now()).toISOString(),
-					contextIds
+					organizationIdentity: ownerOrganizationId,
+					userIdentity: contextIds?.[ContextIdKeys.User]
 				};
 
 				delete vertexEntity.aliasIndex;
 				const originalEntity = ObjectHelper.clone(vertexEntity);
 				const newEntity = ObjectHelper.clone(vertexEntity);
-
-				// Capture org from context if vertex doesn't have one yet.
-				// Enables ownership transition: when an authenticated user first
-				// interacts with a vertex that was received without an org, the org
-				// is set here and recorded as a patch in the changeset proof.
-				if (!Is.stringValue(newEntity.organizationIdentity)) {
-					newEntity.organizationIdentity = context.contextIds?.[ContextIdKeys.Organization];
-				}
 
 				newEntity.annotationObject = vertex.annotationObject;
 				await this.updateAliasList(context, newEntity, vertex.aliases);
@@ -397,8 +399,6 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 		await Mutex.lock(vertexId, { throwOnTimeout: true });
 
 		try {
-			const contextIds = await ContextIdStore.getContextIds();
-
 			try {
 				const vertexEntity = await this._vertexStorage.get(vertexId);
 
@@ -420,19 +420,22 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 					);
 				}
 
+				const contextIds = await ContextIdStore.getContextIds();
+
+				const ownerOrganizationId =
+					vertexEntity.organizationIdentity ??
+					contextIds?.[ContextIdKeys.UserOrganization] ??
+					contextIds?.[ContextIdKeys.Organization];
+
 				const context: IAuditableItemGraphServiceContext = {
 					now: new Date(Date.now()).toISOString(),
-					contextIds
+					organizationIdentity: ownerOrganizationId,
+					userIdentity: contextIds?.[ContextIdKeys.User]
 				};
 
 				delete vertexEntity.aliasIndex;
 				const originalEntity = ObjectHelper.clone(vertexEntity);
 				const newEntity = ObjectHelper.clone(vertexEntity);
-
-				// Capture org from context if vertex doesn't have one yet.
-				if (!Is.stringValue(newEntity.organizationIdentity)) {
-					newEntity.organizationIdentity = context.contextIds?.[ContextIdKeys.Organization];
-				}
 
 				if (partial.annotationObject !== undefined) {
 					newEntity.annotationObject = partial.annotationObject;
@@ -1779,7 +1782,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				id: RandomHelper.generateUuidV7("compact"),
 				vertexId: updated.id,
 				dateCreated: context.now,
-				userIdentity: context.contextIds?.[ContextIdKeys.User],
+				userIdentity: context.userIdentity,
 				patches,
 				version
 			};
