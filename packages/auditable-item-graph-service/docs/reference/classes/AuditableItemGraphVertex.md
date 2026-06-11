@@ -22,9 +22,9 @@ The id of the vertex.
 
 ***
 
-### organizationIdentity? {#organizationidentity}
+### organizationIdentity {#organizationidentity}
 
-> `optional` **organizationIdentity?**: `string`
+> **organizationIdentity**: `string`
 
 The identity of the organization which controls the vertex.
 
