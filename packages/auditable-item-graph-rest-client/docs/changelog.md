@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.3-next.23](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-rest-client-v0.0.3-next.22...auditable-item-graph-rest-client-v0.0.3-next.23) (2026-06-11)
+
+
+### Miscellaneous Chores
+
+* **auditable-item-graph-rest-client:** Synchronize repo versions
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/auditable-item-graph-models bumped from 0.0.3-next.22 to 0.0.3-next.23
+
 ## [0.0.3-next.22](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-rest-client-v0.0.3-next.21...auditable-item-graph-rest-client-v0.0.3-next.22) (2026-06-09)
 
 
