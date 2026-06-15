@@ -188,6 +188,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 	/**
 	 * Register all AIG metrics with the telemetry component.
+	 * @returns A promise that resolves when all metrics have been registered.
 	 */
 	public async start(): Promise<void> {
 		if (Is.undefined(this._telemetryComponent)) {
@@ -301,7 +302,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	 * Update a graph vertex (PUT — full replacement of vertex state).
 	 * Concurrent updates for the same vertex are serialized via `Mutex` on the vertex id.
 	 * @param vertex The vertex to update.
-	 * @returns Nothing.
+	 * @returns A promise that resolves when the vertex has been updated.
 	 */
 	public async update(vertex: IAuditableItemGraphVertex): Promise<void> {
 		Guards.object(AuditableItemGraphService.CLASS_NAME, nameof(vertex), vertex);
@@ -384,7 +385,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	 * Partially update a graph vertex (PATCH — explicit list patches; only defined properties applied).
 	 * Serialized with `update` via `Mutex` on the same vertex id within this instance.
 	 * @param partial The partial vertex update.
-	 * @returns Nothing.
+	 * @returns A promise that resolves when the partial update has been applied.
 	 */
 	public async updatePartial(partial: IAuditableItemGraphPartialVertex): Promise<void> {
 		Guards.object<IAuditableItemGraphPartialVertex>(
@@ -862,7 +863,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	/**
 	 * Remove the proof for an item.
 	 * @param id The id of the vertex to remove the proof from.
-	 * @returns Nothing.
+	 * @returns A promise that resolves when the proof has been removed from all changesets.
 	 * @throws NotFoundError if the vertex is not found.
 	 */
 	public async removeProof(id: string): Promise<void> {
@@ -1106,6 +1107,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	 * @param vertexUrn The vertex URN for events.
 	 * @param originalEntity The entity before changes.
 	 * @param newEntity The entity after changes.
+	 * @returns A promise that resolves when the changes have been persisted and events published.
 	 * @internal
 	 */
 	private async persistVertexChanges(
@@ -1329,6 +1331,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	 * @param context The context for the operation.
 	 * @param vertex The vertex.
 	 * @param aliases The new active alias set.
+	 * @returns A promise that resolves when the alias list has been replaced.
 	 * @internal
 	 */
 	private async updateAliasList(
@@ -1362,6 +1365,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	 * @param context The context for the operation.
 	 * @param vertex The vertex.
 	 * @param patch The alias patch.
+	 * @returns A promise that resolves when the alias patch has been applied.
 	 * @internal
 	 */
 	private async applyAliasPatch(
@@ -1395,6 +1399,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	 * @param context The context for the operation.
 	 * @param vertex The vertex.
 	 * @param alias The alias.
+	 * @returns A promise that resolves when the alias has been added or updated.
 	 * @internal
 	 */
 	private async updateAlias(
@@ -1466,6 +1471,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	 * @param context The context for the operation.
 	 * @param vertex The vertex.
 	 * @param resources The new active resource set.
+	 * @returns A promise that resolves when the resource list has been replaced.
 	 * @internal
 	 */
 	private async updateResourceList(
@@ -1510,6 +1516,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	 * @param context The context for the operation.
 	 * @param vertex The vertex.
 	 * @param patch The resource patch.
+	 * @returns A promise that resolves when the resource patch has been applied.
 	 * @internal
 	 */
 	private async applyResourcePatch(
@@ -1545,6 +1552,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	 * @param context The context for the operation.
 	 * @param vertex The vertex.
 	 * @param resource The resource.
+	 * @returns A promise that resolves when the resource has been added or updated.
 	 * @internal
 	 */
 	private async updateResource(
@@ -1600,6 +1608,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	 * @param context The context for the operation.
 	 * @param vertex The vertex.
 	 * @param edges The new active edge set.
+	 * @returns A promise that resolves when the edge list has been replaced.
 	 * @internal
 	 */
 	private async updateEdgeList(
@@ -1640,6 +1649,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	 * @param context The context for the operation.
 	 * @param vertex The vertex.
 	 * @param patch The edge patch.
+	 * @returns A promise that resolves when the edge patch has been applied.
 	 * @internal
 	 */
 	private async applyEdgePatch(
@@ -1675,6 +1685,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	 * @param context The context for the operation.
 	 * @param vertex The vertex.
 	 * @param edge The edge.
+	 * @returns A promise that resolves when the edge has been added or updated.
 	 * @internal
 	 */
 	private async updateEdge(

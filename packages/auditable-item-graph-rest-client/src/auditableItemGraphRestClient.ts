@@ -290,7 +290,7 @@ export class AuditableItemGraphRestClient
 	 * @param vertex.aliases Alternative aliases that can be used to identify the vertex.
 	 * @param vertex.resources The resources attached to the vertex.
 	 * @param vertex.edges The edges connected to the vertex.
-	 * @returns Nothing.
+	 * @returns A promise that resolves when the vertex has been updated.
 	 */
 	public async update(vertex: IAuditableItemGraphVertex): Promise<void> {
 		Guards.object(AuditableItemGraphRestClient.CLASS_NAME, nameof(vertex), vertex);
@@ -309,7 +309,7 @@ export class AuditableItemGraphRestClient
 	/**
 	 * Partially update a graph vertex (PATCH — optional scalars; list fields use `{ add, remove }`).
 	 * @param partial The partial vertex update (must include `id`).
-	 * @returns Nothing.
+	 * @returns A promise that resolves when the partial update has been applied.
 	 */
 	public async updatePartial(partial: IAuditableItemGraphPartialVertex): Promise<void> {
 		Guards.object(AuditableItemGraphRestClient.CLASS_NAME, nameof(partial), partial);
@@ -328,7 +328,7 @@ export class AuditableItemGraphRestClient
 	/**
 	 * Remove the notarization proof from all changesets of a graph vertex.
 	 * @param id The id of the vertex.
-	 * @returns Nothing.
+	 * @returns A promise that resolves when the proof has been removed.
 	 */
 	public async removeProof(id: string): Promise<void> {
 		Guards.stringValue(AuditableItemGraphRestClient.CLASS_NAME, nameof(id), id);

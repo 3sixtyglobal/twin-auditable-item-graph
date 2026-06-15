@@ -35,7 +35,7 @@ export interface IAuditableItemGraphComponent extends IComponent {
 	 * @param vertex.aliases Alternative aliases that can be used to identify the vertex.
 	 * @param vertex.resources The resources attached to the vertex.
 	 * @param vertex.edges The edges connected to the vertex.
-	 * @returns Nothing.
+	 * @returns A promise that resolves when the vertex has been updated.
 	 */
 	update(vertex: IAuditableItemGraphVertex): Promise<void>;
 
@@ -44,7 +44,7 @@ export interface IAuditableItemGraphComponent extends IComponent {
 	 * Sub-lists use explicit `{ add, remove }` patch objects. Serialized with `update()` via `Mutex`
 	 * on the same vertex id.
 	 * @param partial The partial vertex update (must include `id`).
-	 * @returns Nothing.
+	 * @returns A promise that resolves when the partial update has been applied.
 	 */
 	updatePartial(partial: IAuditableItemGraphPartialVertex): Promise<void>;
 
@@ -129,7 +129,7 @@ export interface IAuditableItemGraphComponent extends IComponent {
 	/**
 	 * Remove the proof for an item.
 	 * @param id The id of the vertex to remove the proof from.
-	 * @returns Nothing.
+	 * @returns A promise that resolves when the proof has been removed from all changesets.
 	 * @throws NotFoundError if the vertex is not found.
 	 */
 	removeProof(id: string): Promise<void>;

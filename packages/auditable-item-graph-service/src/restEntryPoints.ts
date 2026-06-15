@@ -6,6 +6,9 @@ import {
 	tagsAuditableItemGraph
 } from "./auditableItemGraphRoutes.js";
 
+/**
+ * The REST entry points for the auditable item graph service.
+ */
 export const restEntryPoints: IRestRouteEntryPoint[] = [
 	{
 		name: "auditable-item-graph",
