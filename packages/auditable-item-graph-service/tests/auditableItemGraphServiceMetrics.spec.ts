@@ -96,7 +96,7 @@ async function waitForProofGeneration(proofCount: number = 1): Promise<void> {
 	do {
 		await new Promise(resolve => setTimeout(resolve, 200));
 	} while (
-		immutableProofStorage.getStore().filter(p => p.notarizationId).length < proofCount &&
+		(await immutableProofStorage.getStore()).filter(p => p.notarizationId).length < proofCount &&
 		count++ < proofCount * 40
 	);
 }
@@ -133,6 +133,12 @@ describe("AuditableItemGraphService — metrics", () => {
 
 	afterAll(async () => {
 		await cleanupTestEnv();
+	});
+
+	afterEach(async () => {
+		await vertexStorage.teardown();
+		await changesetStorage.teardown();
+		await immutableProofStorage.teardown();
 	});
 
 	beforeEach(async () => {
@@ -650,14 +656,13 @@ describe("AuditableItemGraphService — metrics", () => {
 
 		// Strip proofId to trigger ProofMissing failure.
 		// Also strip partitionId (internal storage field not in the entity schema).
-		const rawCs = changesetStorage.getStore()[0] as unknown as { [key: string]: unknown };
+		const rawCs = (await changesetStorage.getStore())[0] as unknown as { [key: string]: unknown };
 		const cs = { ...rawCs } as unknown as AuditableItemGraphChangeset;
 		delete (cs as unknown as { [key: string]: unknown }).proofId;
 		delete (cs as unknown as { [key: string]: unknown }).partitionId;
 		await changesetStorage.set(cs);
 
-		const vertexId = (vertexStorage.getStore()[0] as unknown as { [key: string]: unknown })
-			.id as string;
+		const vertexId = (await vertexStorage.getStore())[0].id;
 		const csId = cs.id;
 		const changesetFullId = `aig:${vertexId}:changeset:${csId}`;
 

@@ -83,7 +83,7 @@ async function waitForProofGeneration(proofCount: number = 1): Promise<void> {
 	do {
 		await new Promise(resolve => setTimeout(resolve, 200));
 	} while (
-		immutableProofStorage.getStore().filter(p => p.notarizationId).length < proofCount &&
+		(await immutableProofStorage.getStore()).filter(p => p.notarizationId).length < proofCount &&
 		count++ < proofCount * 40
 	);
 	if (count >= proofCount * 40) {
@@ -231,6 +231,14 @@ describe("AuditableItemGraphService", () => {
 			.mockImplementation(length => new Uint8Array(length).fill(counter++));
 	});
 
+	afterEach(async () => {
+		await vertexStorage.teardown();
+		await changesetStorage.teardown();
+		await immutableProofStorage.teardown();
+		await changesetStorage.teardown();
+		await backgroundTaskStorage.teardown();
+	});
+
 	test("Can create an instance", async () => {
 		const service = new AuditableItemGraphService();
 		expect(service).toBeDefined();
@@ -246,7 +254,7 @@ describe("AuditableItemGraphService", () => {
 
 		await waitForProofGeneration();
 
-		const vertexStore = vertexStorage.getStore();
+		const vertexStore = await vertexStorage.getStore();
 		const vertex = vertexStore[0];
 		const storedVertexId = extractAigId(id);
 
@@ -262,7 +270,7 @@ describe("AuditableItemGraphService", () => {
 		expect(vertex.annotationObject).toBeUndefined();
 		expect(vertex.resourceTypeIndex).toBeUndefined();
 
-		const changesetStore = changesetStorage.getStore();
+		const changesetStore = await changesetStorage.getStore();
 		expect(changesetStore).toHaveLength(1);
 		expect(changesetStore[0]).toEqual(
 			expect.objectContaining({
@@ -275,7 +283,7 @@ describe("AuditableItemGraphService", () => {
 			})
 		);
 
-		const proofStore = immutableProofStorage.getStore();
+		const proofStore = await immutableProofStorage.getStore();
 		expect(proofStore).toHaveLength(1);
 		expect(proofStore[0]).toEqual(
 			expect.objectContaining({
@@ -300,7 +308,7 @@ describe("AuditableItemGraphService", () => {
 		expect(id).toMatch(AIG_URN_PATTERN);
 		const storedVertexId = extractAigId(id);
 
-		const vertexStore = vertexStorage.getStore();
+		const vertexStore = await vertexStorage.getStore();
 		const vertex = vertexStore[0];
 
 		expect(vertex).toEqual(
@@ -322,7 +330,7 @@ describe("AuditableItemGraphService", () => {
 			})
 		);
 
-		const changesetStore = changesetStorage.getStore();
+		const changesetStore = await changesetStorage.getStore();
 
 		expect(changesetStore).toHaveLength(1);
 		expect(changesetStore[0]).toEqual(
@@ -353,7 +361,7 @@ describe("AuditableItemGraphService", () => {
 
 		await waitForProofGeneration();
 
-		const proofStore = immutableProofStorage.getStore();
+		const proofStore = await immutableProofStorage.getStore();
 		expect(proofStore).toHaveLength(1);
 		expect(proofStore[0]).toEqual(
 			expect.objectContaining({
@@ -388,7 +396,7 @@ describe("AuditableItemGraphService", () => {
 		expect(id).toMatch(AIG_URN_PATTERN);
 		const storedVertexId = extractAigId(id);
 
-		const vertexStore = vertexStorage.getStore();
+		const vertexStore = await vertexStorage.getStore();
 		const vertex = vertexStore[0];
 
 		expect(vertex).toEqual(
@@ -415,7 +423,7 @@ describe("AuditableItemGraphService", () => {
 		expect(vertex.aliasIndex).toBeUndefined();
 		expect(vertex.resourceTypeIndex).toBeUndefined();
 
-		const changesetStore = changesetStorage.getStore();
+		const changesetStore = await changesetStorage.getStore();
 
 		expect(changesetStore).toHaveLength(1);
 		expect(changesetStore[0]).toEqual(
@@ -450,7 +458,7 @@ describe("AuditableItemGraphService", () => {
 
 		await waitForProofGeneration();
 
-		const proofStore = immutableProofStorage.getStore();
+		const proofStore = await immutableProofStorage.getStore();
 		expect(proofStore).toHaveLength(1);
 		expect(proofStore[0]).toEqual(
 			expect.objectContaining({
@@ -557,7 +565,8 @@ describe("AuditableItemGraphService", () => {
 		const storedVertexId = extractAigId(id);
 
 		const result = await service.getChangesets(id);
-		const storedChangesetId = changesetStorage.getStore()[0].id;
+		const changesetStore1 = await changesetStorage.getStore();
+		const storedChangesetId = changesetStore1[0].id;
 		const changesetUrn = `aig:${storedVertexId}:changeset:${storedChangesetId}`;
 
 		expect(result.changesets).toEqual({
@@ -617,7 +626,7 @@ describe("AuditableItemGraphService", () => {
 			]
 		});
 
-		const changesetStore = changesetStorage.getStore();
+		const changesetStore = await changesetStorage.getStore();
 
 		expect(changesetStore).toHaveLength(1);
 		expect(changesetStore[0]).toEqual(
@@ -681,8 +690,10 @@ describe("AuditableItemGraphService", () => {
 
 		await waitForProofGeneration();
 
-		const storedVertexId = vertexStorage.getStore()[0].id;
-		const storedChangesetId = changesetStorage.getStore()[0].id;
+		const vertexStore = await vertexStorage.getStore();
+		const changesetStore = await changesetStorage.getStore();
+		const storedVertexId = vertexStore[0].id;
+		const storedChangesetId = changesetStore[0].id;
 		const changesetUrn = `aig:${storedVertexId}:changeset:${storedChangesetId}`;
 
 		const result = await service.getChangeset(changesetUrn, {
@@ -987,7 +998,7 @@ describe("AuditableItemGraphService", () => {
 			verified: true
 		});
 
-		const changesetStore = changesetStorage.getStore();
+		const changesetStore = await changesetStorage.getStore();
 
 		expect(changesetStore).toHaveLength(1);
 		expect(changesetStore[0]).toEqual(
@@ -1036,7 +1047,7 @@ describe("AuditableItemGraphService", () => {
 
 		await waitForProofGeneration();
 
-		const proofStore = immutableProofStorage.getStore();
+		const proofStore = await immutableProofStorage.getStore();
 		expect(proofStore).toHaveLength(1);
 		expect(proofStore[0]).toEqual(
 			expect.objectContaining({
@@ -1128,9 +1139,9 @@ describe("AuditableItemGraphService", () => {
 			verified: true
 		});
 
-		const changesetStore = changesetStorage.getStore();
+		const changesetStore = await changesetStorage.getStore();
 
-		const storedVertexId = vertexStorage.getStore()[0].id;
+		const storedVertexId = (await vertexStorage.getStore())[0].id;
 		expect(changesetStore).toHaveLength(1);
 		expect(changesetStore[0]).toEqual(
 			expect.objectContaining({
@@ -1252,8 +1263,8 @@ describe("AuditableItemGraphService", () => {
 			}
 		});
 
-		const changesetStore = changesetStorage.getStore();
-		const storedVertexId = vertexStorage.getStore()[0].id;
+		const changesetStore = await changesetStorage.getStore();
+		const storedVertexId = (await vertexStorage.getStore())[0].id;
 		expect(changesetStore).toHaveLength(2);
 		expect(changesetStore[0]).toEqual(
 			expect.objectContaining({
@@ -1303,7 +1314,7 @@ describe("AuditableItemGraphService", () => {
 			})
 		);
 
-		const proofStore = immutableProofStorage.getStore();
+		const proofStore = await immutableProofStorage.getStore();
 		expect(proofStore).toHaveLength(2);
 		expect(proofStore[0]).toEqual(
 			expect.objectContaining({
@@ -1404,8 +1415,8 @@ describe("AuditableItemGraphService", () => {
 			verified: true
 		});
 
-		const changesetStore = changesetStorage.getStore();
-		const storedVertexId = vertexStorage.getStore()[0].id;
+		const changesetStore = await changesetStorage.getStore();
+		const storedVertexId = (await vertexStorage.getStore())[0].id;
 		expect(changesetStore).toHaveLength(2);
 		expect(changesetStore[0]).toEqual(
 			expect.objectContaining({
@@ -1454,7 +1465,7 @@ describe("AuditableItemGraphService", () => {
 			})
 		);
 
-		const proofStore = immutableProofStorage.getStore();
+		const proofStore = await immutableProofStorage.getStore();
 		expect(proofStore).toHaveLength(2);
 		expect(proofStore[0]).toEqual(
 			expect.objectContaining({
@@ -1659,8 +1670,8 @@ describe("AuditableItemGraphService", () => {
 			verified: true
 		});
 
-		const changesetStore = changesetStorage.getStore();
-		const storedVertexId = vertexStorage.getStore()[0].id;
+		const changesetStore = await changesetStorage.getStore();
+		const storedVertexId = (await vertexStorage.getStore())[0].id;
 		expect(changesetStore).toHaveLength(2);
 		expect(changesetStore[0]).toEqual(
 			expect.objectContaining({
@@ -1749,7 +1760,7 @@ describe("AuditableItemGraphService", () => {
 			})
 		);
 
-		const proofStore = immutableProofStorage.getStore();
+		const proofStore = await immutableProofStorage.getStore();
 		expect(proofStore).toHaveLength(2);
 		expect(proofStore[0]).toEqual(
 			expect.objectContaining({
@@ -1859,9 +1870,9 @@ describe("AuditableItemGraphService", () => {
 			})
 		);
 
-		const changesetStore = changesetStorage.getStore();
+		const changesetStore = await changesetStorage.getStore();
 
-		const storedVertexId = vertexStorage.getStore()[0].id;
+		const storedVertexId = (await vertexStorage.getStore())[0].id;
 		expect(changesetStore).toHaveLength(2);
 		expect(changesetStore[0]).toEqual(
 			expect.objectContaining({
@@ -2304,8 +2315,8 @@ describe("AuditableItemGraphService", () => {
 			])
 		);
 
-		const changesetStore = changesetStorage.getStore();
-		const storedVertexId = vertexStorage.getStore()[0].id;
+		const changesetStore = await changesetStorage.getStore();
+		const storedVertexId = (await vertexStorage.getStore())[0].id;
 		expect(changesetStore).toHaveLength(2);
 		expect(changesetStore[0]).toEqual(
 			expect.objectContaining({
@@ -2470,7 +2481,7 @@ describe("AuditableItemGraphService", () => {
 			})
 		);
 
-		const proofStore = immutableProofStorage.getStore();
+		const proofStore = await immutableProofStorage.getStore();
 		expect(proofStore).toHaveLength(2);
 		expect(proofStore[0]).toEqual(
 			expect.objectContaining({
@@ -2503,7 +2514,9 @@ describe("AuditableItemGraphService", () => {
 
 		await waitForProofGeneration();
 
-		expect(immutableProofStorage.getStore().filter(p => p.notarizationId).length).toEqual(1);
+		expect((await immutableProofStorage.getStore()).filter(p => p.notarizationId).length).toEqual(
+			1
+		);
 
 		await service.removeProof(id);
 
@@ -2529,7 +2542,9 @@ describe("AuditableItemGraphService", () => {
 			verified: false
 		});
 
-		expect(immutableProofStorage.getStore().filter(p => p.notarizationId).length).toEqual(0);
+		expect((await immutableProofStorage.getStore()).filter(p => p.notarizationId).length).toEqual(
+			0
+		);
 	});
 
 	test("Can query for a vertex by id", async () => {
@@ -3203,7 +3218,7 @@ describe("AuditableItemGraphService", () => {
 			aliases: [{ type: AuditableItemGraphTypes.Alias, id: "bar456" }]
 		});
 
-		const changesets = changesetStorage.getStore();
+		const changesets = await changesetStorage.getStore();
 		expect(changesets).toHaveLength(2);
 
 		const v1 = await service.getVersion(id, 0);
@@ -3937,8 +3952,8 @@ describe("AuditableItemGraphService", () => {
 				type: AuditableItemGraphTypes.Vertex
 			});
 
-			expect(changesetStorage.getStore()).toHaveLength(1);
-			expect(immutableProofStorage.getStore()).toHaveLength(1);
+			expect(await changesetStorage.getStore()).toHaveLength(1);
+			expect(await immutableProofStorage.getStore()).toHaveLength(1);
 		});
 	});
 });
