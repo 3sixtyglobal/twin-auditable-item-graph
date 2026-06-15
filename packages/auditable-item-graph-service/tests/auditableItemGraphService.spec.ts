@@ -154,12 +154,14 @@ describe("AuditableItemGraphService", () => {
 	beforeEach(async () => {
 		vertexStorage = new MemoryEntityStorageConnector<AuditableItemGraphVertex>({
 			entitySchema: nameof<AuditableItemGraphVertex>(),
-			partitionContextIds: [ContextIdKeys.Tenant]
+			partitionContextIds: [ContextIdKeys.Tenant],
+			config: { storageKey: "auditable-item-graph-vertex" }
 		});
 
 		changesetStorage = new MemoryEntityStorageConnector<AuditableItemGraphChangeset>({
 			entitySchema: nameof<AuditableItemGraphChangeset>(),
-			partitionContextIds: [ContextIdKeys.Tenant]
+			partitionContextIds: [ContextIdKeys.Tenant],
+			config: { storageKey: "auditable-item-graph-changeset" }
 		});
 
 		EntityStorageConnectorFactory.register("auditable-item-graph-vertex", () => vertexStorage);
@@ -202,12 +204,14 @@ describe("AuditableItemGraphService", () => {
 
 		immutableProofStorage = new MemoryEntityStorageConnector<ImmutableProof>({
 			entitySchema: nameof<ImmutableProof>(),
-			partitionContextIds: [ContextIdKeys.Tenant]
+			partitionContextIds: [ContextIdKeys.Tenant],
+			config: { storageKey: "immutable-proof" }
 		});
 		EntityStorageConnectorFactory.register("immutable-proof", () => immutableProofStorage);
 
 		backgroundTaskStorage = new MemoryEntityStorageConnector<BackgroundTask>({
-			entitySchema: nameof<BackgroundTask>()
+			entitySchema: nameof<BackgroundTask>(),
+			config: { storageKey: "background-task" }
 		});
 		EntityStorageConnectorFactory.register("background-task", () => backgroundTaskStorage);
 
