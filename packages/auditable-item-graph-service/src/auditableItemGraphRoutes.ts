@@ -1,9 +1,10 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
 import {
+	HttpContextIdKeys,
 	HttpParameterHelper,
+	HttpUrlHelper,
 	type ICreatedResponse,
-	type IHostingComponent,
 	type IHttpRequestContext,
 	type INoContentResponse,
 	type IRestRoute,
@@ -23,13 +24,14 @@ import {
 	type IAuditableItemGraphListRequest,
 	type IAuditableItemGraphListResponse,
 	type IAuditableItemGraphRemoveProofRequest,
-	type IAuditableItemGraphUpdateRequest,
 	type IAuditableItemGraphUpdatePartialRequest,
+	type IAuditableItemGraphUpdateRequest,
 	type IAuditableItemGraphVersionGetRequest,
 	type IAuditableItemGraphVersionGetResponse,
 	type IAuditableItemGraphVersionListRequest,
 	type IAuditableItemGraphVersionListResponse
 } from "@twin.org/auditable-item-graph-models";
+import { ContextIdStore } from "@twin.org/context";
 import { Coerce, ComponentFactory, Guards, Is } from "@twin.org/core";
 import { nameof } from "@twin.org/nameof";
 import { SchemaOrgContexts, SchemaOrgTypes } from "@twin.org/standards-schema-org";
@@ -1088,13 +1090,13 @@ export async function auditableItemGraphChangesetList(
 			request.headers?.[HeaderTypes.Accept] === MimeTypes.JsonLd ? MimeTypes.JsonLd : MimeTypes.Json
 	};
 
-	const hostingComponent = ComponentFactory.get<IHostingComponent>(
-		httpRequestContext.hostingComponentType ?? "hosting"
-	);
-
 	if (Is.stringValue(result.cursor)) {
+		const contextIds = await ContextIdStore.getContextIds();
 		headers[HeaderTypes.Link] = HeaderHelper.createLinkHeader(
-			await hostingComponent.buildPublicUrl(httpRequestContext.serverRequest.url),
+			HttpUrlHelper.replaceOrigin(
+				httpRequestContext.serverRequest.url,
+				contextIds?.[HttpContextIdKeys.PublicOrigin]
+			),
 			{ cursor: result.cursor },
 			"next"
 		);
@@ -1226,10 +1228,6 @@ export async function auditableItemGraphList(
 		request.query
 	);
 
-	const hostingComponent = ComponentFactory.get<IHostingComponent>(
-		httpRequestContext.hostingComponentType ?? "hosting"
-	);
-
 	const component = ComponentFactory.get<IAuditableItemGraphComponent>(componentName);
 
 	const result = await component.query(
@@ -1253,8 +1251,12 @@ export async function auditableItemGraphList(
 	};
 
 	if (Is.stringValue(result.cursor)) {
+		const contextIds = await ContextIdStore.getContextIds();
 		headers[HeaderTypes.Link] = HeaderHelper.createLinkHeader(
-			await hostingComponent.buildPublicUrl(httpRequestContext.serverRequest.url),
+			HttpUrlHelper.replaceOrigin(
+				httpRequestContext.serverRequest.url,
+				contextIds?.[HttpContextIdKeys.PublicOrigin]
+			),
 			{ cursor: result.cursor },
 			"next"
 		);
