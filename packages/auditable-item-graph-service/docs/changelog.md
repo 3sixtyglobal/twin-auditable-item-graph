@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.0.3-next.24](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.23...auditable-item-graph-service-v0.0.3-next.24) (2026-06-18)
+
+
+### Features
+
+* remove hosting component ([#91](https://github.com/iotaledger/twin-auditable-item-graph/issues/91)) ([d6180a8](https://github.com/iotaledger/twin-auditable-item-graph/commit/d6180a89a741314d81b44a9664aaff708c2d0ffa))
+
+
+### Bug Fixes
+
+* use async getStore in tests ([0a911c0](https://github.com/iotaledger/twin-auditable-item-graph/commit/0a911c0c2c8a92e89d284e8651c0ef44736dc396))
+* use async getStore in tests ([8d2969b](https://github.com/iotaledger/twin-auditable-item-graph/commit/8d2969b45fdeef849456cfbf898c580b23ce676c))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/auditable-item-graph-models bumped from 0.0.3-next.23 to 0.0.3-next.24
+
 ## [0.0.3-next.23](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.0.3-next.22...auditable-item-graph-service-v0.0.3-next.23) (2026-06-11)
 
 

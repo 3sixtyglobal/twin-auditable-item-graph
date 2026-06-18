@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.3-next.24](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-models-v0.0.3-next.23...auditable-item-graph-models-v0.0.3-next.24) (2026-06-18)
+
+
+### Miscellaneous Chores
+
+* **auditable-item-graph-models:** Synchronize repo versions
+
 ## [0.0.3-next.23](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-models-v0.0.3-next.22...auditable-item-graph-models-v0.0.3-next.23) (2026-06-11)
 
 
