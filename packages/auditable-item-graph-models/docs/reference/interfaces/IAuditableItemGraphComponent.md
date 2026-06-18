@@ -50,7 +50,7 @@ The vertex to update.
 
 `Promise`\<`void`\>
 
-Nothing.
+A promise that resolves when the vertex has been updated.
 
 ***
 
@@ -74,7 +74,7 @@ The partial vertex update (must include `id`).
 
 `Promise`\<`void`\>
 
-Nothing.
+A promise that resolves when the partial update has been applied.
 
 ***
 
@@ -296,7 +296,7 @@ The id of the vertex to remove the proof from.
 
 `Promise`\<`void`\>
 
-Nothing.
+A promise that resolves when the proof has been removed from all changesets.
 
 #### Throws
 

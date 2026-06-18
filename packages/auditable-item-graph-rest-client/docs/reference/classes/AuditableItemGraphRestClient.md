@@ -324,7 +324,7 @@ The vertex to update.
 
 `Promise`\<`void`\>
 
-Nothing.
+A promise that resolves when the vertex has been updated.
 
 #### Implementation of
 
@@ -350,7 +350,7 @@ The partial vertex update (must include `id`).
 
 `Promise`\<`void`\>
 
-Nothing.
+A promise that resolves when the partial update has been applied.
 
 #### Implementation of
 
@@ -376,7 +376,7 @@ The id of the vertex.
 
 `Promise`\<`void`\>
 
-Nothing.
+A promise that resolves when the proof has been removed.
 
 #### Implementation of
 

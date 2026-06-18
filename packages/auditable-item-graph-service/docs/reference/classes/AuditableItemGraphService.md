@@ -80,6 +80,8 @@ Register all AIG metrics with the telemetry component.
 
 `Promise`\<`void`\>
 
+A promise that resolves when all metrics have been registered.
+
 #### Implementation of
 
 `IAuditableItemGraphComponent.start`
@@ -131,7 +133,7 @@ The vertex to update.
 
 `Promise`\<`void`\>
 
-Nothing.
+A promise that resolves when the vertex has been updated.
 
 #### Implementation of
 
@@ -158,7 +160,7 @@ The partial vertex update.
 
 `Promise`\<`void`\>
 
-Nothing.
+A promise that resolves when the partial update has been applied.
 
 #### Implementation of
 
@@ -404,7 +406,7 @@ The id of the vertex to remove the proof from.
 
 `Promise`\<`void`\>
 
-Nothing.
+A promise that resolves when the proof has been removed from all changesets.
 
 #### Throws
 
