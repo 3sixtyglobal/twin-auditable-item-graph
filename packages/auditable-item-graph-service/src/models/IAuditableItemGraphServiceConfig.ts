@@ -4,5 +4,9 @@
 /**
  * Configuration for the auditable item graph service.
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface IAuditableItemGraphServiceConfig {}
+export interface IAuditableItemGraphServiceConfig {
+	/**
+	 * Timeout in milliseconds for acquiring a mutex lock.
+	 */
+	mutexTimeoutMs?: number;
+}

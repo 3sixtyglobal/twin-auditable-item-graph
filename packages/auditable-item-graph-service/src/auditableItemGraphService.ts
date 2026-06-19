@@ -149,6 +149,12 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	private readonly _telemetryComponent?: ITelemetryComponent;
 
 	/**
+	 * The timeout in milliseconds when acquiring a mutex lock.
+	 * @internal
+	 */
+	private readonly _mutexTimeoutMs?: number;
+
+	/**
 	 * Create a new instance of AuditableItemGraphService.
 	 * @param options The dependencies for the auditable item graph connector.
 	 */
@@ -172,6 +178,8 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 		this._telemetryComponent = ComponentFactory.getIfExists<ITelemetryComponent>(
 			options?.telemetryComponentType
 		);
+
+		this._mutexTimeoutMs = Coerce.integer(options?.config?.mutexTimeoutMs);
 
 		SchemaOrgDataTypes.registerRedirects();
 		AuditableItemGraphDataTypes.registerTypes();
@@ -310,7 +318,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 		const vertexId = this.parseVertexId(vertex.id);
 
-		await Mutex.lock(vertexId, { throwOnTimeout: true });
+		await Mutex.lock(vertexId, { throwOnTimeout: true, timeoutMs: this._mutexTimeoutMs });
 		try {
 			try {
 				const schemaValidationFailures: IValidationFailure[] = [];
@@ -397,7 +405,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 		const vertexId = this.parseVertexId(partial.id);
 
-		await Mutex.lock(vertexId, { throwOnTimeout: true });
+		await Mutex.lock(vertexId, { throwOnTimeout: true, timeoutMs: this._mutexTimeoutMs });
 
 		try {
 			try {
@@ -871,7 +879,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 
 		const vertexId = this.parseVertexId(id);
 
-		await Mutex.lock(vertexId, { throwOnTimeout: true });
+		await Mutex.lock(vertexId, { throwOnTimeout: true, timeoutMs: this._mutexTimeoutMs });
 
 		try {
 			const vertexEntity = await this._vertexStorage.get(vertexId);
