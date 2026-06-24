@@ -1,6 +1,6 @@
 {
 	"name": "@twin.org/auditable-item-graph-rest-client",
-	"version": "0.9.0-next.0",
+	"version": "0.9.0-next.1",
 	"description": "Provides a client for interacting with auditable graph endpoints over HTTP.",
 	"repository": {
 		"type": "git",
@@ -30,7 +30,7 @@
 	"dependencies": {
 		"@twin.org/api-core": "0.9.0-next.1",
 		"@twin.org/api-models": "0.9.0-next.1",
-		"@twin.org/auditable-item-graph-models": "0.9.0-next.0",
+		"@twin.org/auditable-item-graph-models": "0.9.0-next.1",
 		"@twin.org/core": "0.9.0-next.1",
 		"@twin.org/data-json-ld": "0.9.0-next.1",
 		"@twin.org/entity": "0.9.0-next.1",
