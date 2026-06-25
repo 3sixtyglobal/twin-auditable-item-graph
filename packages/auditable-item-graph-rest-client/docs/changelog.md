@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.9.0](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-rest-client-v0.9.0...auditable-item-graph-rest-client-v0.9.0) (2026-06-25)
+
+
+### Features
+
+* release to production ([0ce06f7](https://github.com/iotaledger/twin-auditable-item-graph/commit/0ce06f7825aa72d04b7a2ffd8c98cb56290b9d16))
+* release to production ([#110](https://github.com/iotaledger/twin-auditable-item-graph/issues/110)) ([3117da3](https://github.com/iotaledger/twin-auditable-item-graph/commit/3117da373b462d1c8dcb7e1416bcb223f2a28664))
+* release to production ([#113](https://github.com/iotaledger/twin-auditable-item-graph/issues/113)) ([4efe407](https://github.com/iotaledger/twin-auditable-item-graph/commit/4efe40774803f01eb70043b8cfd607e8c050bc64))
+
 ## [0.9.0-next.2](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-rest-client-v0.9.0-next.1...auditable-item-graph-rest-client-v0.9.0-next.2) (2026-06-25)
 
 
