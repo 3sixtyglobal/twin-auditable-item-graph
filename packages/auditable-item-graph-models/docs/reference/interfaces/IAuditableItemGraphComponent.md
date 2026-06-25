@@ -342,7 +342,7 @@ Include vertices with specific resource types.
 
 ##### conditions?
 
-`IComparator`[]
+`EntityCondition`\<[`IAuditableItemGraphVertex`](IAuditableItemGraphVertex.md)\>
 
 Conditions to use in the query.
 
