@@ -32,14 +32,34 @@ export const AuditableItemGraphTypes = {
 	Edge: "AuditableItemGraphEdge",
 
 	/**
-	 * Represents auditable item graph  changeset.
+	 * Represents auditable item graph changeset.
 	 */
 	Changeset: "AuditableItemGraphChangeset",
 
 	/**
+	 * Represents auditable item graph changeset list.
+	 */
+	ChangesetList: "AuditableItemGraphChangesetList",
+
+	/**
 	 * Represents patch operation.
 	 */
-	PatchOperation: "AuditableItemGraphPatchOperation"
+	PatchOperation: "AuditableItemGraphPatchOperation",
+
+	/**
+	 * Represents auditable item graph vertex version list.
+	 */
+	VertexVersionList: "AuditableItemGraphVertexVersionList",
+
+	/**
+	 * Represents auditable item graph partial vertex.
+	 */
+	PartialVertex: "AuditableItemGraphPartialVertex",
+
+	/**
+	 * Represents auditable item graph list patch.
+	 */
+	ListPatch: "AuditableItemGraphListPatch"
 } as const;
 
 /**

@@ -2,15 +2,20 @@
 	"baseUrl": "https://schema.twindev.org/aig/",
 	"types": [
 		"./src/models/IAuditableItemGraphAlias.ts",
+		"./src/models/IAuditableItemGraphAuditedElement.ts",
 		"./src/models/IAuditableItemGraphChangeset.ts",
+		"./src/models/IAuditableItemGraphChangesetList.ts",
 		"./src/models/IAuditableItemGraphEdge.ts",
+		"./src/models/IAuditableItemGraphListPatch.ts",
+		"./src/models/IAuditableItemGraphPartialVertex.ts",
 		"./src/models/IAuditableItemGraphPatchOperation.ts",
 		"./src/models/IAuditableItemGraphResource.ts",
 		"./src/models/IAuditableItemGraphVertex.ts",
-		"./src/models/IAuditableItemGraphVertexList.ts"
+		"./src/models/IAuditableItemGraphVertexList.ts",
+		"./src/models/IAuditableItemGraphVertexVersionList.ts"
 	],
 	"externalReferences": {
-		"IJsonLd(.*)": "https://schema.twindev.org/json-ld/JsonLd$1",
-		"IImmutableProof(.*)": "https://schema.twindev.org/immutable-proof/ImmutableProof$1"
+		"JsonLd(.*)": "https://schema.twindev.org/json-ld/JsonLd$1",
+		"ImmutableProof(.*)": "https://schema.twindev.org/immutable-proof/ImmutableProof$1"
 	}
 }

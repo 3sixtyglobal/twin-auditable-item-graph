@@ -43,4 +43,10 @@ export class AuditableItemGraphAlias {
 	 */
 	@property({ type: "object", itemTypeRef: JsonLdTypes.NodeObject, optional: true })
 	public annotationObject?: IJsonLdNodeObject;
+
+	/**
+	 * Whether the alias should be unique across the graph, meaning that no other vertex can have the same alias. Defaults to false.
+	 */
+	@property({ type: "boolean", optional: true })
+	public unique?: boolean;
 }

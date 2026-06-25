@@ -8,9 +8,9 @@ Interface describing an auditable item graph contract.
 
 ## Methods
 
-### create()
+### create() {#create}
 
-> **create**(`vertex`, `userIdentity?`, `nodeIdentity?`): `Promise`\<`string`\>
+> **create**(`vertex`): `Promise`\<`string`\>
 
 Create a new graph vertex.
 
@@ -18,43 +18,9 @@ Create a new graph vertex.
 
 ##### vertex
 
+`Omit`\<[`IAuditableItemGraphVertex`](IAuditableItemGraphVertex.md), `"id"`\>
+
 The vertex to create.
-
-###### annotationObject?
-
-`IJsonLdNodeObject`
-
-The annotation object for the vertex as JSON-LD.
-
-###### aliases?
-
-`object`[]
-
-Alternative aliases that can be used to identify the vertex.
-
-###### resources?
-
-`object`[]
-
-The resources attached to the vertex.
-
-###### edges?
-
-`object`[]
-
-The edges connected to the vertex.
-
-##### userIdentity?
-
-`string`
-
-The identity to create the auditable item graph operation with.
-
-##### nodeIdentity?
-
-`string`
-
-The node identity to use for vault operations.
 
 #### Returns
 
@@ -64,69 +30,55 @@ The id of the new graph item.
 
 ***
 
-### update()
+### update() {#update}
 
-> **update**(`vertex`, `userIdentity?`, `nodeIdentity?`): `Promise`\<`void`\>
+> **update**(`vertex`): `Promise`\<`void`\>
 
-Update a graph vertex.
+Update a graph vertex (PUT — full replacement of vertex state).
+Concurrent updates for the same vertex are serialized via `Mutex` on the vertex id.
+Multi-replica deployments are not coordinated.
 
 #### Parameters
 
 ##### vertex
 
+[`IAuditableItemGraphVertex`](IAuditableItemGraphVertex.md)
+
 The vertex to update.
-
-###### id
-
-`string`
-
-The id of the vertex to update.
-
-###### annotationObject?
-
-`IJsonLdNodeObject`
-
-The annotation object for the vertex as JSON-LD.
-
-###### aliases?
-
-`object`[]
-
-Alternative aliases that can be used to identify the vertex.
-
-###### resources?
-
-`object`[]
-
-The resources attached to the vertex.
-
-###### edges?
-
-`object`[]
-
-The edges connected to the vertex.
-
-##### userIdentity?
-
-`string`
-
-The identity to create the auditable item graph operation with.
-
-##### nodeIdentity?
-
-`string`
-
-The node identity to use for vault operations.
 
 #### Returns
 
 `Promise`\<`void`\>
 
-Nothing.
+A promise that resolves when the vertex has been updated.
 
 ***
 
-### get()
+### updatePartial() {#updatepartial}
+
+> **updatePartial**(`partial`): `Promise`\<`void`\>
+
+Partially update a graph vertex (PATCH); only properties that are not undefined are applied.
+Sub-lists use explicit `{ add, remove }` patch objects. Serialized with `update()` via `Mutex`
+on the same vertex id.
+
+#### Parameters
+
+##### partial
+
+[`IAuditableItemGraphPartialVertex`](IAuditableItemGraphPartialVertex.md)
+
+The partial vertex update (must include `id`).
+
+#### Returns
+
+`Promise`\<`void`\>
+
+A promise that resolves when the partial update has been applied.
+
+***
+
+### get() {#get}
 
 > **get**(`id`, `options?`): `Promise`\<[`IAuditableItemGraphVertex`](IAuditableItemGraphVertex.md)\>
 
@@ -150,12 +102,6 @@ Additional options for the get operation.
 
 Whether to include deleted aliases, resource, edges, defaults to false.
 
-###### includeChangesets?
-
-`boolean`
-
-Whether to include the changesets of the vertex, defaults to false.
-
 ###### verifySignatureDepth?
 
 [`VerifyDepth`](../type-aliases/VerifyDepth.md)
@@ -174,11 +120,11 @@ NotFoundError if the vertex is not found.
 
 ***
 
-### removeVerifiable()
+### getChangesets() {#getchangesets}
 
-> **removeVerifiable**(`id`, `nodeIdentity?`): `Promise`\<`void`\>
+> **getChangesets**(`id`, `cursor?`, `limit?`, `options?`): `Promise`\<\{ `changesets`: [`IAuditableItemGraphChangesetList`](IAuditableItemGraphChangesetList.md); `cursor?`: `string`; \}\>
 
-Remove the verifiable storage for an item.
+Get a graph vertex changeset list.
 
 #### Parameters
 
@@ -186,19 +132,35 @@ Remove the verifiable storage for an item.
 
 `string`
 
-The id of the vertex to remove the storage from.
+The id of the vertex to get.
 
-##### nodeIdentity?
+##### cursor?
 
 `string`
 
-The node identity to use for vault operations.
+The optional cursor to get next chunk.
+
+##### limit?
+
+`number`
+
+Limit the number of entities to return.
+
+##### options?
+
+Additional options for the get operation.
+
+###### verifySignatureDepth?
+
+[`VerifyDepth`](../type-aliases/VerifyDepth.md)
+
+How many signatures to verify, defaults to "none".
 
 #### Returns
 
-`Promise`\<`void`\>
+`Promise`\<\{ `changesets`: [`IAuditableItemGraphChangesetList`](IAuditableItemGraphChangesetList.md); `cursor?`: `string`; \}\>
 
-Nothing.
+The changeset if found.
 
 #### Throws
 
@@ -206,9 +168,145 @@ NotFoundError if the vertex is not found.
 
 ***
 
-### query()
+### getChangeset() {#getchangeset}
 
-> **query**(`options?`, `conditions?`, `orderBy?`, `orderByDirection?`, `properties?`, `cursor?`, `pageSize?`): `Promise`\<[`IAuditableItemGraphVertexList`](IAuditableItemGraphVertexList.md)\>
+> **getChangeset**(`id`, `options?`): `Promise`\<[`IAuditableItemGraphChangeset`](IAuditableItemGraphChangeset.md)\>
+
+Get a graph vertex changeset.
+
+#### Parameters
+
+##### id
+
+`string`
+
+The id of the vertex to get.
+
+##### options?
+
+Additional options for the get operation.
+
+###### verifySignatureDepth?
+
+[`VerifyDepth`](../type-aliases/VerifyDepth.md)
+
+How many signatures to verify, defaults to "none".
+
+#### Returns
+
+`Promise`\<[`IAuditableItemGraphChangeset`](IAuditableItemGraphChangeset.md)\>
+
+The changeset if found.
+
+#### Throws
+
+NotFoundError if the vertex or changeset is not found.
+
+***
+
+### getVersion() {#getversion}
+
+> **getVersion**(`id`, `version`): `Promise`\<[`IAuditableItemGraphVertex`](IAuditableItemGraphVertex.md)\>
+
+Get a graph vertex at a specific version.
+
+#### Parameters
+
+##### id
+
+`string`
+
+The id of the vertex.
+
+##### version
+
+`number`
+
+The version number to retrieve.
+
+#### Returns
+
+`Promise`\<[`IAuditableItemGraphVertex`](IAuditableItemGraphVertex.md)\>
+
+The vertex reconstructed at that version.
+
+#### Throws
+
+NotFoundError if the vertex or version is not found.
+
+***
+
+### getVersions() {#getversions}
+
+> **getVersions**(`id`, `options?`): `Promise`\<[`IAuditableItemGraphVertexVersionList`](IAuditableItemGraphVertexVersionList.md)\>
+
+Get all versions of a graph vertex.
+
+#### Parameters
+
+##### id
+
+`string`
+
+The id of the vertex.
+
+##### options?
+
+Additional options for the operation.
+
+###### after?
+
+`string`
+
+Only return versions created after this ISO 8601 timestamp (exclusive).
+
+###### before?
+
+`string`
+
+Only return versions created before this ISO 8601 timestamp (exclusive).
+
+#### Returns
+
+`Promise`\<[`IAuditableItemGraphVertexVersionList`](IAuditableItemGraphVertexVersionList.md)\>
+
+The list of vertex versions.
+
+#### Throws
+
+NotFoundError if the vertex is not found.
+
+***
+
+### removeProof() {#removeproof}
+
+> **removeProof**(`id`): `Promise`\<`void`\>
+
+Remove the proof for an item.
+
+#### Parameters
+
+##### id
+
+`string`
+
+The id of the vertex to remove the proof from.
+
+#### Returns
+
+`Promise`\<`void`\>
+
+A promise that resolves when the proof has been removed from all changesets.
+
+#### Throws
+
+NotFoundError if the vertex is not found.
+
+***
+
+### query() {#query}
+
+> **query**(`options?`, `conditions?`, `orderBy?`, `orderByDirection?`, `properties?`, `cursor?`, `limit?`): `Promise`\<\{ `entries`: [`IAuditableItemGraphVertexList`](IAuditableItemGraphVertexList.md); `cursor?`: `string`; \}\>
 
 Query the graph for vertices.
 
@@ -230,6 +328,12 @@ The optional id to look for.
 
 Look in id, alias or both, defaults to both.
 
+###### idExact?
+
+`boolean`
+
+Find only exact matches, default to false meaning partial matching.
+
 ###### resourceTypes?
 
 `string`[]
@@ -238,15 +342,15 @@ Include vertices with specific resource types.
 
 ##### conditions?
 
-`IComparator`[]
+`EntityCondition`\<[`IAuditableItemGraphVertex`](IAuditableItemGraphVertex.md)\>
 
 Conditions to use in the query.
 
 ##### orderBy?
 
-The order for the results, defaults to dateCreated.
+`"dateCreated"` \| `"dateModified"`
 
-`"dateCreated"` | `"dateModified"`
+The order for the results, defaults to dateCreated.
 
 ##### orderByDirection?
 
@@ -264,16 +368,16 @@ The properties to return, if not provided defaults to id, dateCreated, aliases a
 
 `string`
 
-The cursor to request the next page of entities.
+The cursor to request the next chunk of entities.
 
-##### pageSize?
+##### limit?
 
 `number`
 
-The maximum number of entities in a page.
+Limit the number of entities to return.
 
 #### Returns
 
-`Promise`\<[`IAuditableItemGraphVertexList`](IAuditableItemGraphVertexList.md)\>
+`Promise`\<\{ `entries`: [`IAuditableItemGraphVertexList`](IAuditableItemGraphVertexList.md); `cursor?`: `string`; \}\>
 
 The entities, which can be partial if a limited keys list was provided.

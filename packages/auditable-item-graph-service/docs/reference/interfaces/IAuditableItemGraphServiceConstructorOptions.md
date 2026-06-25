@@ -4,9 +4,9 @@ Options for the constructor of the auditable item graph service.
 
 ## Properties
 
-### immutableProofComponentType?
+### immutableProofComponentType? {#immutableproofcomponenttype}
 
-> `optional` **immutableProofComponentType**: `string`
+> `optional` **immutableProofComponentType?**: `string`
 
 The immutable proof component type.
 
@@ -18,9 +18,9 @@ immutable-proof
 
 ***
 
-### vertexEntityStorageType?
+### vertexEntityStorageType? {#vertexentitystoragetype}
 
-> `optional` **vertexEntityStorageType**: `string`
+> `optional` **vertexEntityStorageType?**: `string`
 
 The entity storage for vertices.
 
@@ -32,9 +32,9 @@ auditable-item-graph-vertex
 
 ***
 
-### changesetEntityStorageType?
+### changesetEntityStorageType? {#changesetentitystoragetype}
 
-> `optional` **changesetEntityStorageType**: `string`
+> `optional` **changesetEntityStorageType?**: `string`
 
 The entity storage for changesets.
 
@@ -46,16 +46,24 @@ auditable-item-graph-changeset
 
 ***
 
-### eventBusComponentType?
+### eventBusComponentType? {#eventbuscomponenttype}
 
-> `optional` **eventBusComponentType**: `string`
+> `optional` **eventBusComponentType?**: `string`
 
 The event bus component type, defaults to no event bus.
 
 ***
 
-### config?
+### telemetryComponentType? {#telemetrycomponenttype}
 
-> `optional` **config**: [`IAuditableItemGraphServiceConfig`](IAuditableItemGraphServiceConfig.md)
+> `optional` **telemetryComponentType?**: `string`
+
+The component type for the optional telemetry component used for event metrics, defaults to no telemetry.
+
+***
+
+### config? {#config}
+
+> `optional` **config?**: [`IAuditableItemGraphServiceConfig`](IAuditableItemGraphServiceConfig.md)
 
 The configuration for the service.

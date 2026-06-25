@@ -1,25 +1,26 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
 import type { IJsonLdContextDefinitionElement, IJsonLdNodeObject } from "@twin.org/data-json-ld";
-import type { AuditableItemGraphContexts } from "./auditableItemGraphContexts";
-import type { AuditableItemGraphTypes } from "./auditableItemGraphTypes";
-import type { IAuditableItemGraphAlias } from "./IAuditableItemGraphAlias";
-import type { IAuditableItemGraphAuditedElement } from "./IAuditableItemGraphAuditedElement";
-import type { IAuditableItemGraphChangeset } from "./IAuditableItemGraphChangeset";
-import type { IAuditableItemGraphEdge } from "./IAuditableItemGraphEdge";
-import type { IAuditableItemGraphResource } from "./IAuditableItemGraphResource";
+import type { AuditableItemGraphContexts } from "./auditableItemGraphContexts.js";
+import type { AuditableItemGraphTypes } from "./auditableItemGraphTypes.js";
+import type { IAuditableItemGraphAlias } from "./IAuditableItemGraphAlias.js";
+import type { IAuditableItemGraphAuditedElement } from "./IAuditableItemGraphAuditedElement.js";
+import type { IAuditableItemGraphEdge } from "./IAuditableItemGraphEdge.js";
+import type { IAuditableItemGraphResource } from "./IAuditableItemGraphResource.js";
 
 /**
  * Interface describing an auditable item graph vertex.
  */
-export interface IAuditableItemGraphVertex
-	extends Omit<IAuditableItemGraphAuditedElement, "deleted"> {
+export interface IAuditableItemGraphVertex extends Omit<
+	IAuditableItemGraphAuditedElement,
+	"deleted"
+> {
 	/**
 	 * JSON-LD Context.
 	 */
 	"@context": [
-		typeof AuditableItemGraphContexts.ContextRoot,
-		typeof AuditableItemGraphContexts.ContextRootCommon,
+		typeof AuditableItemGraphContexts.Context,
+		typeof AuditableItemGraphContexts.ContextCommon,
 		...IJsonLdContextDefinitionElement[]
 	];
 
@@ -34,37 +35,45 @@ export interface IAuditableItemGraphVertex
 	type: typeof AuditableItemGraphTypes.Vertex;
 
 	/**
-	 * The identity of the node which controls the vertex.
+	 * The identity of the organization which controls the vertex.
+	 * @json-ld namespace:twin-common
 	 */
-	nodeIdentity?: string;
+	organizationIdentity?: string;
 
 	/**
 	 * The JSON-LD annotation object for the vertex.
+	 * @json-ld namespace:twin-common
 	 */
 	annotationObject?: IJsonLdNodeObject;
 
 	/**
 	 * Alternative aliases that can be used to identify the vertex.
+	 * @json-ld container:set
 	 */
 	aliases?: IAuditableItemGraphAlias[];
 
 	/**
 	 * The resources attached to the vertex.
+	 * @json-ld container:set
 	 */
 	resources?: IAuditableItemGraphResource[];
 
 	/**
 	 * Edges connected to the vertex.
+	 * @json-ld container:set
 	 */
 	edges?: IAuditableItemGraphEdge[];
 
 	/**
-	 * Changesets for the vertex.
-	 */
-	changesets?: IAuditableItemGraphChangeset[];
-
-	/**
 	 * Is the vertex verified, will only be populated when verification is requested.
+	 * @json-ld namespace:twin-common
 	 */
 	verified?: boolean;
+
+	/**
+	 * The version of the vertex, populated only when getting a specific version.
+	 * Maps to https://schema.org/version.
+	 * @json-ld namespace:sch
+	 */
+	version?: number;
 }

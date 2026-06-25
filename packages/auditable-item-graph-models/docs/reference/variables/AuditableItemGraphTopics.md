@@ -4,15 +4,15 @@
 
 The topics for auditable item graph event bus notifications.
 
-## Type declaration
+## Type Declaration
 
-### VertexCreated
+### VertexCreated {#vertexcreated}
 
 > `readonly` **VertexCreated**: `"auditable-item-graph:vertex-created"` = `"auditable-item-graph:vertex-created"`
 
 A vertex was created.
 
-### VertexUpdated
+### VertexUpdated {#vertexupdated}
 
 > `readonly` **VertexUpdated**: `"auditable-item-graph:vertex-updated"` = `"auditable-item-graph:vertex-updated"`
 

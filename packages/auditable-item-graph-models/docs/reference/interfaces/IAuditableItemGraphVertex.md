@@ -8,43 +8,43 @@ Interface describing an auditable item graph vertex.
 
 ## Properties
 
-### dateCreated?
+### dateCreated? {#datecreated}
 
-> `optional` **dateCreated**: `string`
+> `optional` **dateCreated?**: `string`
 
 The date/time of when the element was created.
 
 #### Inherited from
 
-`Omit.dateCreated`
+[`IAuditableItemGraphAuditedElement`](IAuditableItemGraphAuditedElement.md).[`dateCreated`](IAuditableItemGraphAuditedElement.md#datecreated)
 
 ***
 
-### dateModified?
+### dateModified? {#datemodified}
 
-> `optional` **dateModified**: `string`
+> `optional` **dateModified?**: `string`
 
 The date/time of when the element was modified.
 
 #### Inherited from
 
-`Omit.dateModified`
+[`IAuditableItemGraphAuditedElement`](IAuditableItemGraphAuditedElement.md).[`dateModified`](IAuditableItemGraphAuditedElement.md#datemodified)
 
 ***
 
-### dateDeleted?
+### dateDeleted? {#datedeleted}
 
-> `optional` **dateDeleted**: `string`
+> `optional` **dateDeleted?**: `string`
 
 The date/time of when the element was deleted, as we never actually remove items.
 
 #### Inherited from
 
-`Omit.dateDeleted`
+[`IAuditableItemGraphAuditedElement`](IAuditableItemGraphAuditedElement.md).[`dateDeleted`](IAuditableItemGraphAuditedElement.md#datedeleted)
 
 ***
 
-### @context
+### @context {#context}
 
 > **@context**: \[`"https://schema.twindev.org/aig/"`, `"https://schema.twindev.org/common/"`, `...IJsonLdContextDefinitionElement[]`\]
 
@@ -52,7 +52,7 @@ JSON-LD Context.
 
 ***
 
-### id
+### id {#id}
 
 > **id**: `string`
 
@@ -60,11 +60,11 @@ The id of the element.
 
 #### Overrides
 
-`Omit.id`
+[`IAuditableItemGraphAuditedElement`](IAuditableItemGraphAuditedElement.md).[`id`](IAuditableItemGraphAuditedElement.md#id)
 
 ***
 
-### type
+### type {#type}
 
 > **type**: `"AuditableItemGraphVertex"`
 
@@ -72,56 +72,57 @@ JSON-LD Type.
 
 ***
 
-### nodeIdentity?
+### organizationIdentity? {#organizationidentity}
 
-> `optional` **nodeIdentity**: `string`
+> `optional` **organizationIdentity?**: `string`
 
-The identity of the node which controls the vertex.
+The identity of the organization which controls the vertex.
 
 ***
 
-### annotationObject?
+### annotationObject? {#annotationobject}
 
-> `optional` **annotationObject**: `IJsonLdNodeObject`
+> `optional` **annotationObject?**: `IJsonLdNodeObject`
 
 The JSON-LD annotation object for the vertex.
 
 ***
 
-### aliases?
+### aliases? {#aliases}
 
-> `optional` **aliases**: [`IAuditableItemGraphAlias`](IAuditableItemGraphAlias.md)[]
+> `optional` **aliases?**: [`IAuditableItemGraphAlias`](IAuditableItemGraphAlias.md)[]
 
 Alternative aliases that can be used to identify the vertex.
 
 ***
 
-### resources?
+### resources? {#resources}
 
-> `optional` **resources**: [`IAuditableItemGraphResource`](IAuditableItemGraphResource.md)[]
+> `optional` **resources?**: [`IAuditableItemGraphResource`](IAuditableItemGraphResource.md)[]
 
 The resources attached to the vertex.
 
 ***
 
-### edges?
+### edges? {#edges}
 
-> `optional` **edges**: [`IAuditableItemGraphEdge`](IAuditableItemGraphEdge.md)[]
+> `optional` **edges?**: [`IAuditableItemGraphEdge`](IAuditableItemGraphEdge.md)[]
 
 Edges connected to the vertex.
 
 ***
 
-### changesets?
+### verified? {#verified}
 
-> `optional` **changesets**: [`IAuditableItemGraphChangeset`](IAuditableItemGraphChangeset.md)[]
+> `optional` **verified?**: `boolean`
 
-Changesets for the vertex.
+Is the vertex verified, will only be populated when verification is requested.
 
 ***
 
-### verified?
+### version? {#version}
 
-> `optional` **verified**: `boolean`
+> `optional` **version?**: `number`
 
-Is the vertex verified, will only be populated when verification is requested.
+The version of the vertex, populated only when getting a specific version.
+Maps to https://schema.org/version.

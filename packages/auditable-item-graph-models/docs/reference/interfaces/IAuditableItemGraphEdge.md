@@ -8,9 +8,9 @@ Interface describing an edge between two vertices in an auditable item graph.
 
 ## Properties
 
-### dateCreated?
+### dateCreated? {#datecreated}
 
-> `optional` **dateCreated**: `string`
+> `optional` **dateCreated?**: `string`
 
 The date/time of when the element was created.
 
@@ -20,9 +20,9 @@ The date/time of when the element was created.
 
 ***
 
-### dateModified?
+### dateModified? {#datemodified}
 
-> `optional` **dateModified**: `string`
+> `optional` **dateModified?**: `string`
 
 The date/time of when the element was modified.
 
@@ -32,9 +32,9 @@ The date/time of when the element was modified.
 
 ***
 
-### dateDeleted?
+### dateDeleted? {#datedeleted}
 
-> `optional` **dateDeleted**: `string`
+> `optional` **dateDeleted?**: `string`
 
 The date/time of when the element was deleted, as we never actually remove items.
 
@@ -44,17 +44,17 @@ The date/time of when the element was deleted, as we never actually remove items
 
 ***
 
-### @context
+### @context? {#context}
 
-> **@context**: `"https://schema.twindev.org/aig/"` \| \[`"https://schema.twindev.org/aig/"`, `...IJsonLdContextDefinitionElement[]`\]
+> `optional` **@context?**: `"https://schema.twindev.org/aig/"` \| \[`"https://schema.twindev.org/aig/"`, `...IJsonLdContextDefinitionElement[]`\]
 
 JSON-LD Context.
 
 ***
 
-### id
+### id? {#id}
 
-> **id**: `string`
+> `optional` **id?**: `string`
 
 The id of the element.
 
@@ -64,7 +64,15 @@ The id of the element.
 
 ***
 
-### type
+### targetId {#targetid}
+
+> **targetId**: `string`
+
+The target vertex id the edge connects to.
+
+***
+
+### type {#type}
 
 > **type**: `"AuditableItemGraphEdge"`
 
@@ -72,15 +80,15 @@ JSON-LD Type.
 
 ***
 
-### annotationObject?
+### annotationObject? {#annotationobject}
 
-> `optional` **annotationObject**: `IJsonLdNodeObject`
+> `optional` **annotationObject?**: `IJsonLdNodeObject`
 
 The JSON-LD annotation object for the edge.
 
 ***
 
-### edgeRelationships
+### edgeRelationships {#edgerelationships}
 
 > **edgeRelationships**: `string`[]
 

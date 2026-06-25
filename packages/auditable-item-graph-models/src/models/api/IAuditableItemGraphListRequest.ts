@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0.
 import type { SortDirection } from "@twin.org/entity";
 import type { HeaderTypes, MimeTypes } from "@twin.org/web";
-import type { IAuditableItemGraphVertex } from "../IAuditableItemGraphVertex";
+import type { IAuditableItemGraphVertex } from "../IAuditableItemGraphVertex.js";
 
 /**
  * Get the a list of the vertices with matching ids or aliases.
@@ -30,12 +30,17 @@ export interface IAuditableItemGraphListRequest {
 		idMode?: "id" | "alias" | "both";
 
 		/**
+		 * Find only exact matches, default to false meaning partial matching.
+		 */
+		idExact?: string;
+
+		/**
 		 * Include vertices with specific resource types, comma separated.
 		 */
 		resourceTypes?: string;
 
 		/**
-		 * The conditions to filter the streams, JSON stringified IComparator[].
+		 * The conditions to filter the streams, JSON stringified EntityCondition<IAuditableItemGraphVertex>.
 		 */
 		conditions?: string;
 
@@ -60,8 +65,8 @@ export interface IAuditableItemGraphListRequest {
 		cursor?: string;
 
 		/**
-		 * The maximum number of entities in a page.
+		 * Limit the number of entities to return.
 		 */
-		pageSize?: number | string;
+		limit?: string;
 	};
 }

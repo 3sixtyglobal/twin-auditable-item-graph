@@ -4,15 +4,15 @@ The patch operation for JSON diffs.
 
 ## Properties
 
-### @context
+### @context? {#context}
 
-> **@context**: `"https://schema.twindev.org/aig/"` \| \[`"https://schema.twindev.org/aig/"`, `...IJsonLdContextDefinitionElement[]`\]
+> `optional` **@context?**: `"https://schema.twindev.org/aig/"` \| \[`"https://schema.twindev.org/aig/"`, `...IJsonLdContextDefinitionElement[]`\]
 
 JSON-LD Context.
 
 ***
 
-### type
+### type {#type}
 
 > **type**: `"AuditableItemGraphPatchOperation"`
 
@@ -20,7 +20,7 @@ JSON-LD Type.
 
 ***
 
-### patchOperation
+### patchOperation {#patchoperation}
 
 > **patchOperation**: `"add"` \| `"remove"` \| `"replace"` \| `"move"` \| `"copy"` \| `"test"`
 
@@ -28,7 +28,7 @@ The operation that was performed on the item.
 
 ***
 
-### patchPath
+### patchPath {#patchpath}
 
 > **patchPath**: `string`
 
@@ -36,16 +36,16 @@ The path to the object that was changed.
 
 ***
 
-### patchFrom?
+### patchFrom? {#patchfrom}
 
-> `optional` **patchFrom**: `string`
+> `optional` **patchFrom?**: `string`
 
 The path the value was copied or moved from.
 
 ***
 
-### patchValue?
+### patchValue? {#patchvalue}
 
-> `optional` **patchValue**: `unknown`
+> `optional` **patchValue?**: `unknown`
 
 The value to add.

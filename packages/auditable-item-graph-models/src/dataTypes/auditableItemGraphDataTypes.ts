@@ -1,15 +1,18 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import { DataTypeHandlerFactory, type IJsonSchema } from "@twin.org/data-core";
-import { AuditableItemGraphContexts } from "../models/auditableItemGraphContexts";
-import { AuditableItemGraphTypes } from "../models/auditableItemGraphTypes";
-import AuditableItemGraphAliasSchema from "../schemas/AuditableItemGraphAlias.json";
-import AuditableItemGraphChangesetSchema from "../schemas/AuditableItemGraphChangeset.json";
-import AuditableItemGraphEdgeSchema from "../schemas/AuditableItemGraphEdge.json";
-import AuditableItemGraphPatchOperationSchema from "../schemas/AuditableItemGraphPatchOperation.json";
-import AuditableItemGraphResourceSchema from "../schemas/AuditableItemGraphResource.json";
-import AuditableItemGraphVertexSchema from "../schemas/AuditableItemGraphVertex.json";
-import AuditableItemGraphVertexListSchema from "../schemas/AuditableItemGraphVertexList.json";
+import { DataTypeHelper } from "@twin.org/data-core";
+import { AuditableItemGraphContexts } from "../models/auditableItemGraphContexts.js";
+import { AuditableItemGraphTypes } from "../models/auditableItemGraphTypes.js";
+import AuditableItemGraphAliasSchema from "../schemas/AuditableItemGraphAlias.json" with { type: "json" };
+import AuditableItemGraphAuditedElementSchema from "../schemas/AuditableItemGraphAuditedElement.json" with { type: "json" };
+import AuditableItemGraphChangesetSchema from "../schemas/AuditableItemGraphChangeset.json" with { type: "json" };
+import AuditableItemGraphEdgeSchema from "../schemas/AuditableItemGraphEdge.json" with { type: "json" };
+import AuditableItemGraphListPatchSchema from "../schemas/AuditableItemGraphListPatch.json" with { type: "json" };
+import AuditableItemGraphPartialVertexSchema from "../schemas/AuditableItemGraphPartialVertex.json" with { type: "json" };
+import AuditableItemGraphPatchOperationSchema from "../schemas/AuditableItemGraphPatchOperation.json" with { type: "json" };
+import AuditableItemGraphResourceSchema from "../schemas/AuditableItemGraphResource.json" with { type: "json" };
+import AuditableItemGraphVertexSchema from "../schemas/AuditableItemGraphVertex.json" with { type: "json" };
+import AuditableItemGraphVertexListSchema from "../schemas/AuditableItemGraphVertexList.json" with { type: "json" };
 
 /**
  * Handle all the data types for auditable item graph.
@@ -19,68 +22,53 @@ export class AuditableItemGraphDataTypes {
 	 * Register all the data types.
 	 */
 	public static registerTypes(): void {
-		DataTypeHandlerFactory.register(
-			`${AuditableItemGraphContexts.ContextRoot}${AuditableItemGraphTypes.Vertex}`,
-			() => ({
-				context: AuditableItemGraphContexts.ContextRoot,
+		const types = [
+			{
 				type: AuditableItemGraphTypes.Vertex,
-				defaultValue: {},
-				jsonSchema: async () => AuditableItemGraphVertexSchema as IJsonSchema
-			})
-		);
-		DataTypeHandlerFactory.register(
-			`${AuditableItemGraphContexts.ContextRoot}${AuditableItemGraphTypes.VertexList}`,
-			() => ({
-				context: AuditableItemGraphContexts.ContextRoot,
+				schema: AuditableItemGraphVertexSchema
+			},
+			{
 				type: AuditableItemGraphTypes.VertexList,
-				defaultValue: {},
-				jsonSchema: async () => AuditableItemGraphVertexListSchema as IJsonSchema
-			})
-		);
-		DataTypeHandlerFactory.register(
-			`${AuditableItemGraphContexts.ContextRoot}${AuditableItemGraphTypes.Alias}`,
-			() => ({
-				context: AuditableItemGraphContexts.ContextRoot,
+				schema: AuditableItemGraphVertexListSchema
+			},
+			{
 				type: AuditableItemGraphTypes.Alias,
-				defaultValue: {},
-				jsonSchema: async () => AuditableItemGraphAliasSchema as IJsonSchema
-			})
-		);
-		DataTypeHandlerFactory.register(
-			`${AuditableItemGraphContexts.ContextRoot}${AuditableItemGraphTypes.Resource}`,
-			() => ({
-				context: AuditableItemGraphContexts.ContextRoot,
+				schema: AuditableItemGraphAliasSchema
+			},
+			{
 				type: AuditableItemGraphTypes.Resource,
-				defaultValue: {},
-				jsonSchema: async () => AuditableItemGraphResourceSchema as IJsonSchema
-			})
-		);
-		DataTypeHandlerFactory.register(
-			`${AuditableItemGraphContexts.ContextRoot}${AuditableItemGraphTypes.Edge}`,
-			() => ({
-				context: AuditableItemGraphContexts.ContextRoot,
+				schema: AuditableItemGraphResourceSchema
+			},
+			{
 				type: AuditableItemGraphTypes.Edge,
-				defaultValue: {},
-				jsonSchema: async () => AuditableItemGraphEdgeSchema as IJsonSchema
-			})
-		);
-		DataTypeHandlerFactory.register(
-			`${AuditableItemGraphContexts.ContextRoot}${AuditableItemGraphTypes.Changeset}`,
-			() => ({
-				context: AuditableItemGraphContexts.ContextRoot,
+				schema: AuditableItemGraphEdgeSchema
+			},
+			{
 				type: AuditableItemGraphTypes.Changeset,
-				defaultValue: {},
-				jsonSchema: async () => AuditableItemGraphChangesetSchema as IJsonSchema
-			})
-		);
-		DataTypeHandlerFactory.register(
-			`${AuditableItemGraphContexts.ContextRoot}${AuditableItemGraphTypes.PatchOperation}`,
-			() => ({
-				context: AuditableItemGraphContexts.ContextRoot,
+				schema: AuditableItemGraphChangesetSchema
+			},
+			{
 				type: AuditableItemGraphTypes.PatchOperation,
-				defaultValue: {},
-				jsonSchema: async () => AuditableItemGraphPatchOperationSchema as IJsonSchema
-			})
+				schema: AuditableItemGraphPatchOperationSchema
+			},
+			{
+				type: "AuditableItemGraphAuditedElement",
+				schema: AuditableItemGraphAuditedElementSchema
+			},
+			{
+				type: AuditableItemGraphTypes.ListPatch,
+				schema: AuditableItemGraphListPatchSchema
+			},
+			{
+				type: AuditableItemGraphTypes.PartialVertex,
+				schema: AuditableItemGraphPartialVertexSchema
+			}
+		];
+
+		DataTypeHelper.registerTypes(
+			AuditableItemGraphContexts.Namespace,
+			AuditableItemGraphContexts.JsonLdContext,
+			types.map(t => ({ type: t.type, schema: t.schema }))
 		);
 	}
 }

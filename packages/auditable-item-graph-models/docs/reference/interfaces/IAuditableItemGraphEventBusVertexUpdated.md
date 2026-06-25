@@ -4,7 +4,7 @@ Event bus payload for vertex updated.
 
 ## Properties
 
-### id
+### id {#id}
 
 > **id**: `string`
 
@@ -12,7 +12,7 @@ The id of the vertex updated.
 
 ***
 
-### patches
+### patches {#patches}
 
 > **patches**: `IPatchOperation`[]
 

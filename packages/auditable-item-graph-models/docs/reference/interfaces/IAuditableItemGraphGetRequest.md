@@ -4,9 +4,9 @@ Get an auditable item graph vertex.
 
 ## Properties
 
-### headers?
+### headers? {#headers}
 
-> `optional` **headers**: `object`
+> `optional` **headers?**: `object`
 
 The headers which can be used to determine the response data type.
 
@@ -16,7 +16,7 @@ The headers which can be used to determine the response data type.
 
 ***
 
-### pathParams
+### pathParams {#pathparams}
 
 > **pathParams**: `object`
 
@@ -30,26 +30,20 @@ The id of the vertex to get.
 
 ***
 
-### query?
+### query? {#query}
 
-> `optional` **query**: `object`
+> `optional` **query?**: `object`
 
 The query parameters.
 
 #### includeDeleted?
 
-> `optional` **includeDeleted**: `string` \| `boolean`
+> `optional` **includeDeleted?**: `string`
 
 Whether to include deleted aliases, resource, edges, defaults to false.
 
-#### includeChangesets?
-
-> `optional` **includeChangesets**: `string` \| `boolean`
-
-Whether to include the changesets of the vertex, defaults to false.
-
 #### verifySignatureDepth?
 
-> `optional` **verifySignatureDepth**: [`VerifyDepth`](../type-aliases/VerifyDepth.md)
+> `optional` **verifySignatureDepth?**: [`VerifyDepth`](../type-aliases/VerifyDepth.md)
 
 How many signatures to verify, none, current or all, defaults to "none".

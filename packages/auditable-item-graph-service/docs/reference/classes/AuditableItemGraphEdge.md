@@ -14,7 +14,7 @@ Class describing the auditable item graph edge.
 
 ## Properties
 
-### id
+### id {#id}
 
 > **id**: `string`
 
@@ -22,7 +22,7 @@ The id of the edge.
 
 ***
 
-### dateCreated
+### dateCreated {#datecreated}
 
 > **dateCreated**: `string`
 
@@ -30,23 +30,31 @@ The date/time of when the edge was created.
 
 ***
 
-### dateModified?
+### dateModified? {#datemodified}
 
-> `optional` **dateModified**: `string`
+> `optional` **dateModified?**: `string`
 
 The date/time of when the edge was last modified.
 
 ***
 
-### dateDeleted?
+### dateDeleted? {#datedeleted}
 
-> `optional` **dateDeleted**: `string`
+> `optional` **dateDeleted?**: `string`
 
 The timestamp of when the edge was deleted, as we never actually remove items.
 
 ***
 
-### edgeRelationships
+### targetId {#targetid}
+
+> **targetId**: `string`
+
+The target id of the edge.
+
+***
+
+### edgeRelationships {#edgerelationships}
 
 > **edgeRelationships**: `string`[]
 
@@ -54,8 +62,8 @@ The relationships between the two vertices.
 
 ***
 
-### annotationObject?
+### annotationObject? {#annotationobject}
 
-> `optional` **annotationObject**: `IJsonLdNodeObject`
+> `optional` **annotationObject?**: `IJsonLdNodeObject`
 
 Object to associate with the edge as JSON-LD.

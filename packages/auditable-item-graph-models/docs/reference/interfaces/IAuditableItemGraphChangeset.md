@@ -4,15 +4,15 @@ Interface describing a set of changes to the vertex.
 
 ## Properties
 
-### @context
+### @context? {#context}
 
-> **@context**: \[`"https://schema.twindev.org/aig/"`, `"https://schema.twindev.org/common/"`, `...IJsonLdContextDefinitionElement[]`\]
+> `optional` **@context?**: \[`"https://schema.twindev.org/aig/"`, `"https://schema.twindev.org/common/"`, `...IJsonLdContextDefinitionElement[]`\]
 
 JSON-LD Context.
 
 ***
 
-### type
+### type {#type}
 
 > **type**: `"AuditableItemGraphChangeset"`
 
@@ -20,7 +20,7 @@ JSON-LD Type.
 
 ***
 
-### id
+### id {#id}
 
 > **id**: `string`
 
@@ -28,7 +28,7 @@ The id of the changeset.
 
 ***
 
-### dateCreated
+### dateCreated {#datecreated}
 
 > **dateCreated**: `string`
 
@@ -36,15 +36,15 @@ The date/time of when the changeset was created.
 
 ***
 
-### userIdentity
+### userIdentity? {#useridentity}
 
-> **userIdentity**: `string`
+> `optional` **userIdentity?**: `string`
 
 The user identity that created the changes.
 
 ***
 
-### patches
+### patches {#patches}
 
 > **patches**: [`IAuditableItemGraphPatchOperation`](IAuditableItemGraphPatchOperation.md)[]
 
@@ -52,16 +52,25 @@ The patches in the changeset.
 
 ***
 
-### proofId?
+### proofId? {#proofid}
 
-> `optional` **proofId**: `string`
+> `optional` **proofId?**: `string`
 
 The immutable proof id which contains the signature for this changeset.
 
 ***
 
-### verification?
+### verification? {#verification}
 
-> `optional` **verification**: `IImmutableProofVerification`
+> `optional` **verification?**: `IImmutableProofVerification`
 
 The verification for the changeset.
+
+***
+
+### version? {#version}
+
+> `optional` **version?**: `number`
+
+The version number of the vertex after this changeset was applied.
+Maps to https://schema.org/version.

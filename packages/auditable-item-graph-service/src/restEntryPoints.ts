@@ -4,8 +4,11 @@ import type { IRestRouteEntryPoint } from "@twin.org/api-models";
 import {
 	generateRestRoutesAuditableItemGraph,
 	tagsAuditableItemGraph
-} from "./auditableItemGraphRoutes";
+} from "./auditableItemGraphRoutes.js";
 
+/**
+ * The REST entry points for the auditable item graph service.
+ */
 export const restEntryPoints: IRestRouteEntryPoint[] = [
 	{
 		name: "auditable-item-graph",

@@ -14,7 +14,7 @@ Class describing the auditable item graph alias.
 
 ## Properties
 
-### id
+### id {#id}
 
 > **id**: `string`
 
@@ -22,15 +22,15 @@ The alternative alias for the vertex.
 
 ***
 
-### aliasFormat?
+### aliasFormat? {#aliasformat}
 
-> `optional` **aliasFormat**: `string`
+> `optional` **aliasFormat?**: `string`
 
 The format of the alias for the vertex.
 
 ***
 
-### dateCreated
+### dateCreated {#datecreated}
 
 > **dateCreated**: `string`
 
@@ -38,24 +38,32 @@ The date/time of when the alias was created.
 
 ***
 
-### dateModified?
+### dateModified? {#datemodified}
 
-> `optional` **dateModified**: `string`
+> `optional` **dateModified?**: `string`
 
 The date/time of when the alias was last modified.
 
 ***
 
-### dateDeleted?
+### dateDeleted? {#datedeleted}
 
-> `optional` **dateDeleted**: `string`
+> `optional` **dateDeleted?**: `string`
 
 The timestamp of when the alias was deleted, as we never actually remove items.
 
 ***
 
-### annotationObject?
+### annotationObject? {#annotationobject}
 
-> `optional` **annotationObject**: `IJsonLdNodeObject`
+> `optional` **annotationObject?**: `IJsonLdNodeObject`
 
 Object to associate with the alias as JSON-LD.
+
+***
+
+### unique? {#unique}
+
+> `optional` **unique?**: `boolean`
+
+Whether the alias should be unique across the graph, meaning that no other vertex can have the same alias. Defaults to false.

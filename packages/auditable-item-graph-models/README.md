@@ -1,6 +1,8 @@
 # TWIN Auditable Item Graph Models
 
-Models which define the structure of the auditable item graph contracts and connectors.
+This package defines the shared contracts used by the wider graph ecosystem, including typed interfaces, JSON schemas, and JSON-LD contexts.
+
+It provides the common data foundation needed to exchange graph items and audit structures reliably across services and clients.
 
 ## Installation
 

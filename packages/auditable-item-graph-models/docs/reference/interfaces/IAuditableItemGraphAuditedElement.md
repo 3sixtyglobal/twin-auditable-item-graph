@@ -10,32 +10,32 @@ Interface describing the base properties for auditable elements.
 
 ## Properties
 
-### id?
+### id? {#id}
 
-> `optional` **id**: `string`
+> `optional` **id?**: `string`
 
 The id of the element.
 
 ***
 
-### dateCreated?
+### dateCreated? {#datecreated}
 
-> `optional` **dateCreated**: `string`
+> `optional` **dateCreated?**: `string`
 
 The date/time of when the element was created.
 
 ***
 
-### dateModified?
+### dateModified? {#datemodified}
 
-> `optional` **dateModified**: `string`
+> `optional` **dateModified?**: `string`
 
 The date/time of when the element was modified.
 
 ***
 
-### dateDeleted?
+### dateDeleted? {#datedeleted}
 
-> `optional` **dateDeleted**: `string`
+> `optional` **dateDeleted?**: `string`
 
 The date/time of when the element was deleted, as we never actually remove items.

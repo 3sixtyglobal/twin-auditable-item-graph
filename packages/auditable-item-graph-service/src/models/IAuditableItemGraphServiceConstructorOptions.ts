@@ -1,6 +1,6 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import type { IAuditableItemGraphServiceConfig } from "./IAuditableItemGraphServiceConfig";
+import type { IAuditableItemGraphServiceConfig } from "./IAuditableItemGraphServiceConfig.js";
 
 /**
  * Options for the constructor of the auditable item graph service.
@@ -28,6 +28,11 @@ export interface IAuditableItemGraphServiceConstructorOptions {
 	 * The event bus component type, defaults to no event bus.
 	 */
 	eventBusComponentType?: string;
+
+	/**
+	 * The component type for the optional telemetry component used for event metrics, defaults to no telemetry.
+	 */
+	telemetryComponentType?: string;
 
 	/**
 	 * The configuration for the service.

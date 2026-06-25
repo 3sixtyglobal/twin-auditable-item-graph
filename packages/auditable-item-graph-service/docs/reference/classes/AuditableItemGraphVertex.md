@@ -14,7 +14,7 @@ Class describing the auditable item graph vertex.
 
 ## Properties
 
-### id
+### id {#id}
 
 > **id**: `string`
 
@@ -22,15 +22,15 @@ The id of the vertex.
 
 ***
 
-### nodeIdentity?
+### organizationIdentity {#organizationidentity}
 
-> `optional` **nodeIdentity**: `string`
+> **organizationIdentity**: `string`
 
-The identity of the node which controls the vertex.
+The identity of the organization which controls the vertex.
 
 ***
 
-### dateCreated
+### dateCreated {#datecreated}
 
 > **dateCreated**: `string`
 
@@ -38,56 +38,64 @@ The date/time of when the vertex was created.
 
 ***
 
-### dateModified?
+### dateModified? {#datemodified}
 
-> `optional` **dateModified**: `string`
+> `optional` **dateModified?**: `string`
 
 The date/time of when the vertex was last modified.
 
 ***
 
-### aliasIndex?
+### aliasIndex? {#aliasindex}
 
-> `optional` **aliasIndex**: `string`
+> `optional` **aliasIndex?**: `string`
 
 Combined alias index for the vertex used for querying.
 
 ***
 
-### resourceTypeIndex?
+### resourceTypeIndex? {#resourcetypeindex}
 
-> `optional` **resourceTypeIndex**: `string`
+> `optional` **resourceTypeIndex?**: `string`
 
 Combined resource type index for the vertex used for querying.
 
 ***
 
-### annotationObject?
+### annotationObject? {#annotationobject}
 
-> `optional` **annotationObject**: `IJsonLdNodeObject`
+> `optional` **annotationObject?**: `IJsonLdNodeObject`
 
 Object to associate with the vertex as JSON-LD.
 
 ***
 
-### aliases?
+### aliases? {#aliases}
 
-> `optional` **aliases**: [`AuditableItemGraphAlias`](AuditableItemGraphAlias.md)[]
+> `optional` **aliases?**: [`AuditableItemGraphAlias`](AuditableItemGraphAlias.md)[]
 
 Alternative aliases that can be used to identify the vertex.
 
 ***
 
-### resources?
+### resources? {#resources}
 
-> `optional` **resources**: [`AuditableItemGraphResource`](AuditableItemGraphResource.md)[]
+> `optional` **resources?**: [`AuditableItemGraphResource`](AuditableItemGraphResource.md)[]
 
 The resources attached to the vertex.
 
 ***
 
-### edges?
+### edges? {#edges}
 
-> `optional` **edges**: [`AuditableItemGraphEdge`](AuditableItemGraphEdge.md)[]
+> `optional` **edges?**: [`AuditableItemGraphEdge`](AuditableItemGraphEdge.md)[]
 
 Edges connected to the vertex.
+
+***
+
+### version? {#version}
+
+> `optional` **version?**: `number`
+
+The current version of the vertex, incremented on each changeset.

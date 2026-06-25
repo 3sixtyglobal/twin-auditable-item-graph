@@ -7,14 +7,34 @@
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const AuditableItemGraphContexts = {
 	/**
-	 * The context root for the auditable item graph types.
+	 * The canonical RDF namespace URI for Auditable Item Graph.
 	 */
-	ContextRoot: "https://schema.twindev.org/aig/",
+	Namespace: "https://schema.twindev.org/aig/",
 
 	/**
-	 * The context root for the common types.
+	 * The value to use in context for Auditable Item Graph.
 	 */
-	ContextRootCommon: "https://schema.twindev.org/common/"
+	Context: "https://schema.twindev.org/aig/",
+
+	/**
+	 * The JSON-LD Context URL for Auditable Item Graph.
+	 */
+	JsonLdContext: "https://schema.twindev.org/aig/types.jsonld",
+
+	/**
+	 * The canonical RDF namespace URI for TWIN Common.
+	 */
+	NamespaceCommon: "https://schema.twindev.org/common/",
+
+	/**
+	 * The value to use in JSON-LD context for TWIN Common.
+	 */
+	ContextCommon: "https://schema.twindev.org/common/",
+
+	/**
+	 * The JSON-LD Context URL for TWIN Common.
+	 */
+	JsonLdContextCommon: "https://schema.twindev.org/common/types.jsonld"
 } as const;
 
 /**

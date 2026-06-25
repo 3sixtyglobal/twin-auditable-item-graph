@@ -10,12 +10,13 @@
 		"**/tests/**",
 		"*.yaml",
 		"package.json",
-		"rollup.config.mjs",
 		"vitest.config.*",
 		"tsconfig.json",
+		"tsconfig.eslint.json",
 		"typedoc.json",
-		".eslintrc.cjs",
-		"**/wordlists/**"
+		"eslint.config*",
+		"**/wordlists/**",
+		"changelog.md"
 	],
 	"words": [
 		"abbrev",
@@ -27,11 +28,13 @@
 		"nameof",
 		"openapi",
 		"Stiftung",
+		"twindev",
 		"Unrevoke"
 	],
 	"ignoreRegExpList": [
 		"/from\\s+(['\"]).*\\1/",
 		"/eslint-disable.*/",
+		"/^```typescript[\\s\\S]*?```$/gm",
 		"/^```shell[\\s\\S]*?```$/gm",
 		"/^```json[\\s\\S]*?```$/gm",
 		"/tst1.*/"

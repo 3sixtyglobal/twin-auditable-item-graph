@@ -4,15 +4,22 @@
 			"namespaceMismatch": "The namespace in the urn \"{id}\" does not match the namespace of the Auditable Item Graph service \"{namespace}\"",
 			"createFailed": "Creating the Auditable Item Graph vertex failed",
 			"getFailed": "Getting the Auditable Item Graph vertex failed",
+			"getVersionFailed": "Getting the Auditable Item Graph vertex version failed",
+			"getVersionsFailed": "Getting the Auditable Item Graph vertex versions failed",
+			"versionNotFound": "The version with the Id \"{notFoundId}\" was not found",
 			"updatingFailed": "Updating the Auditable Item Graph vertex failed",
 			"queryingFailed": "Querying the Auditable Item Graph failed",
-			"removeVerifiableFailed": "Removing the verifiable data the Auditable Item Graph vertex failed",
+			"removeProofFailed": "Removing the proof from the Auditable Item Graph vertex failed",
 			"vertexNotFound": "The vertex with the Id \"{notFoundId}\" was not found",
-			"resourceIdMissing": "You must provide either the id, or the resourceObject must contain an id property for index \"{index}\""
+			"changesetNotFound": "The changeset with the Id \"{notFoundId}\" was not found",
+			"resourceIdMissing": "You must provide either the id, or the resourceObject must contain an id property for index \"{index}\"",
+			"aliasNotUnique": "The alias id \"{aliasId}\" is already in use on another vertex and the unique flag was set",
+			"invalidEdgeId": "The edge id \"{edgeId}\" is not valid",
+			"listPatchInvalidFormat": "The property \"{property}\" must be a list patch object with add and/or remove, not a bare array"
 		},
 		"validation": {
 			"auditableItemGraphService": {
-				"edgeIdSameAsVertexId": "The edge id \"{id}\"can not point to the vertex it belongs to"
+				"edgeIdSameAsVertexId": "The edge with target id \"{targetId}\" can not point to the vertex it belongs to"
 			}
 		}
 	},

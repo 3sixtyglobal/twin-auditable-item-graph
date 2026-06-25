@@ -3,9 +3,9 @@
 import type { IValidationFailure } from "@twin.org/core";
 import { DataTypeHelper } from "@twin.org/data-core";
 import { JsonLdDataTypes } from "@twin.org/data-json-ld";
-import { AuditableItemGraphDataTypes } from "../../src/dataTypes/auditableItemGraphDataTypes";
-import { AuditableItemGraphContexts } from "../../src/models/auditableItemGraphContexts";
-import { AuditableItemGraphTypes } from "../../src/models/auditableItemGraphTypes";
+import { AuditableItemGraphDataTypes } from "../../src/dataTypes/auditableItemGraphDataTypes.js";
+import { AuditableItemGraphContexts } from "../../src/models/auditableItemGraphContexts.js";
+import { AuditableItemGraphTypes } from "../../src/models/auditableItemGraphTypes.js";
 
 describe("AuditableItemGraphDataTypes", () => {
 	beforeAll(async () => {
@@ -17,11 +17,11 @@ describe("AuditableItemGraphDataTypes", () => {
 		const validationFailures: IValidationFailure[] = [];
 		const isValid = await DataTypeHelper.validate(
 			"",
-			`${AuditableItemGraphContexts.ContextRoot}${AuditableItemGraphTypes.Vertex}`,
+			`${AuditableItemGraphContexts.Namespace}${AuditableItemGraphTypes.Vertex}`,
 			{},
 			validationFailures
 		);
-		expect(validationFailures.length).toEqual(1);
+		expect(validationFailures.length).toEqual(3);
 		expect(isValid).toEqual(false);
 	});
 
@@ -29,11 +29,11 @@ describe("AuditableItemGraphDataTypes", () => {
 		const validationFailures: IValidationFailure[] = [];
 		const isValid = await DataTypeHelper.validate(
 			"",
-			`${AuditableItemGraphContexts.ContextRoot}${AuditableItemGraphTypes.Vertex}`,
+			`${AuditableItemGraphContexts.Namespace}${AuditableItemGraphTypes.Vertex}`,
 			{
 				"@context": [
-					AuditableItemGraphContexts.ContextRoot,
-					AuditableItemGraphContexts.ContextRootCommon
+					AuditableItemGraphContexts.Namespace,
+					AuditableItemGraphContexts.NamespaceCommon
 				],
 				type: AuditableItemGraphTypes.Vertex,
 				dateCreated: new Date().toISOString(),

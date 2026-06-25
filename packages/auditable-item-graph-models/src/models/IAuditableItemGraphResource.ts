@@ -1,9 +1,9 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
 import type { IJsonLdContextDefinitionElement, IJsonLdNodeObject } from "@twin.org/data-json-ld";
-import type { AuditableItemGraphContexts } from "./auditableItemGraphContexts";
-import type { AuditableItemGraphTypes } from "./auditableItemGraphTypes";
-import type { IAuditableItemGraphAuditedElement } from "./IAuditableItemGraphAuditedElement";
+import type { AuditableItemGraphContexts } from "./auditableItemGraphContexts.js";
+import type { AuditableItemGraphTypes } from "./auditableItemGraphTypes.js";
+import type { IAuditableItemGraphAuditedElement } from "./IAuditableItemGraphAuditedElement.js";
 
 /**
  * Interface describing an auditable item graph vertex resource.
@@ -12,9 +12,9 @@ export interface IAuditableItemGraphResource extends IAuditableItemGraphAuditedE
 	/**
 	 * JSON-LD Context.
 	 */
-	"@context":
-		| typeof AuditableItemGraphContexts.ContextRoot
-		| [typeof AuditableItemGraphContexts.ContextRoot, ...IJsonLdContextDefinitionElement[]];
+	"@context"?:
+		| typeof AuditableItemGraphContexts.Context
+		| [typeof AuditableItemGraphContexts.Context, ...IJsonLdContextDefinitionElement[]];
 
 	/**
 	 * JSON-LD Type.
@@ -23,6 +23,7 @@ export interface IAuditableItemGraphResource extends IAuditableItemGraphAuditedE
 
 	/**
 	 * The JSON-LD object for the resource.
+	 * @json-ld type:json
 	 */
 	resourceObject?: IJsonLdNodeObject;
 }

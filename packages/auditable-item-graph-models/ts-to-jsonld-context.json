@@ -1,0 +1,26 @@
+{
+	"prefix": "twin-aig",
+	"contextUrl": "https://schema.twindev.org/aig/",
+	"additionalContextUrls": {
+		"twin-common": "https://schema.twindev.org/common/",
+		"twin-immutable-proof": "https://schema.twindev.org/immutable-proof/",
+		"sch": "http://schema.org/"
+	},
+	"fixedMappings": {
+		"id": "@id",
+		"type": "@type"
+	},
+	"types": [
+		"./src/models/IAuditableItemGraphAlias.ts",
+		"./src/models/IAuditableItemGraphChangeset.ts",
+		"./src/models/IAuditableItemGraphChangesetList.ts",
+		"./src/models/IAuditableItemGraphEdge.ts",
+		"./src/models/IAuditableItemGraphListPatch.ts",
+		"./src/models/IAuditableItemGraphPartialVertex.ts",
+		"./src/models/IAuditableItemGraphPatchOperation.ts",
+		"./src/models/IAuditableItemGraphResource.ts",
+		"./src/models/IAuditableItemGraphVertex.ts",
+		"./src/models/IAuditableItemGraphVertexList.ts",
+		"./src/models/IAuditableItemGraphVertexVersionList.ts"
+	]
+}

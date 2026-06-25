@@ -1,9 +1,9 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import type { IJsonLdNodeObject } from "@twin.org/data-json-ld";
+import type { IAuditableItemGraphVertex } from "../IAuditableItemGraphVertex.js";
 
 /**
- * Update an auditable item graph vertex.
+ * Update an auditable item graph vertex (PUT — full replacement of vertex state).
  */
 export interface IAuditableItemGraphUpdateRequest {
 	/**
@@ -17,38 +17,7 @@ export interface IAuditableItemGraphUpdateRequest {
 	};
 
 	/**
-	 * The data to be used in the vertex.
+	 * The full vertex payload. Replaces annotation and active sub-lists; omitted collections are cleared.
 	 */
-	body: {
-		/**
-		 * The object to be used in the vertex as JSON-LD.
-		 */
-		annotationObject?: IJsonLdNodeObject;
-
-		/**
-		 * Alternative aliases that can be used to identify the vertex.
-		 */
-		aliases?: {
-			id: string;
-			aliasFormat?: string;
-			annotationObject?: IJsonLdNodeObject;
-		}[];
-
-		/**
-		 * The resources attached to the vertex.
-		 */
-		resources?: {
-			id?: string;
-			resourceObject?: IJsonLdNodeObject;
-		}[];
-
-		/**
-		 * The edges connected to the vertex.
-		 */
-		edges?: {
-			id: string;
-			edgeRelationships: string[];
-			annotationObject?: IJsonLdNodeObject;
-		}[];
-	};
+	body: Omit<IAuditableItemGraphVertex, "id">;
 }

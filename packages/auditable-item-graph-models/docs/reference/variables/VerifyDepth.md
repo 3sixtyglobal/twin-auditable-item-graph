@@ -4,21 +4,21 @@
 
 How deep to verify the signatures.
 
-## Type declaration
+## Type Declaration
 
-### None
+### None {#none}
 
 > `readonly` **None**: `"none"` = `"none"`
 
 Do not verify any signatures.
 
-### Current
+### Current {#current}
 
 > `readonly` **Current**: `"current"` = `"current"`
 
 Verify only the most recent signature.
 
-### All
+### All {#all}
 
 > `readonly` **All**: `"all"` = `"all"`
 

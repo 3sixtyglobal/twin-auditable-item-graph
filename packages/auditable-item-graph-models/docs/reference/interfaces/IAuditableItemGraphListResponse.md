@@ -4,9 +4,9 @@ The response to getting the a list of the vertices with matching ids or aliases.
 
 ## Properties
 
-### headers?
+### headers? {#headers}
 
-> `optional` **headers**: `object`
+> `optional` **headers?**: `object`
 
 The headers which can be used to determine the response data type.
 
@@ -14,9 +14,13 @@ The headers which can be used to determine the response data type.
 
 > **content-type**: `"application/json"` \| `"application/ld+json"`
 
+#### link?
+
+> `optional` **link?**: `string` \| `string`[]
+
 ***
 
-### body
+### body {#body}
 
 > **body**: [`IAuditableItemGraphVertexList`](IAuditableItemGraphVertexList.md)
 

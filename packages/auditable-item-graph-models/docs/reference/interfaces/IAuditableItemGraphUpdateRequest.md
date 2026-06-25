@@ -1,10 +1,10 @@
 # Interface: IAuditableItemGraphUpdateRequest
 
-Update an auditable item graph vertex.
+Update an auditable item graph vertex (PUT — full replacement of vertex state).
 
 ## Properties
 
-### pathParams
+### pathParams {#pathparams}
 
 > **pathParams**: `object`
 
@@ -18,32 +18,8 @@ The id of the vertex to update.
 
 ***
 
-### body
+### body {#body}
 
-> **body**: `object`
+> **body**: `Omit`\<[`IAuditableItemGraphVertex`](IAuditableItemGraphVertex.md), `"id"`\>
 
-The data to be used in the vertex.
-
-#### annotationObject?
-
-> `optional` **annotationObject**: `IJsonLdNodeObject`
-
-The object to be used in the vertex as JSON-LD.
-
-#### aliases?
-
-> `optional` **aliases**: `object`[]
-
-Alternative aliases that can be used to identify the vertex.
-
-#### resources?
-
-> `optional` **resources**: `object`[]
-
-The resources attached to the vertex.
-
-#### edges?
-
-> `optional` **edges**: `object`[]
-
-The edges connected to the vertex.
+The full vertex payload. Replaces annotation and active sub-lists; omitted collections are cleared.

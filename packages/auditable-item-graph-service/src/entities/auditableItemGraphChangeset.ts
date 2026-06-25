@@ -1,7 +1,7 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
 import { entity, property, SortDirection } from "@twin.org/entity";
-import type { AuditableItemGraphPatch } from "./auditableItemGraphPatch";
+import type { AuditableItemGraphPatch } from "./auditableItemGraphPatch.js";
 
 /**
  * Class describing a set of updates to the vertex.
@@ -29,8 +29,8 @@ export class AuditableItemGraphChangeset {
 	/**
 	 * The identity of the user who made the changeset.
 	 */
-	@property({ type: "string" })
-	public userIdentity!: string;
+	@property({ type: "string", optional: true })
+	public userIdentity?: string;
 
 	/**
 	 * The patches in the changeset.
@@ -43,4 +43,10 @@ export class AuditableItemGraphChangeset {
 	 */
 	@property({ type: "string", optional: true })
 	public proofId?: string;
+
+	/**
+	 * The version number of the vertex after this changeset was applied.
+	 */
+	@property({ type: "integer", optional: true, isSecondary: true })
+	public version?: number;
 }

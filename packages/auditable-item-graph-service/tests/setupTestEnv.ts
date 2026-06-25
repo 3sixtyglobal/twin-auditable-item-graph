@@ -24,7 +24,10 @@ import * as dotenv from "dotenv";
 
 console.debug("Setting up test environment from .env and .env.dev files");
 
-dotenv.config({ path: [path.join(__dirname, ".env"), path.join(__dirname, ".env.dev")] });
+dotenv.config({
+	path: [path.join(__dirname, ".env"), path.join(__dirname, ".env.dev")],
+	quiet: true
+});
 
 const TEST_FOLDER = "./tests/.tmp";
 
@@ -35,16 +38,19 @@ EntityStorageConnectorFactory.register(
 	"vault-key",
 	() =>
 		new MemoryEntityStorageConnector<VaultKey>({
-			entitySchema: nameof<VaultKey>()
+			entitySchema: nameof<VaultKey>(),
+			config: { storageKey: "vault-key" }
 		})
 );
 const secretEntityStorage = new MemoryEntityStorageConnector<VaultSecret>({
-	entitySchema: nameof<VaultSecret>()
+	entitySchema: nameof<VaultSecret>(),
+	config: { storageKey: "vault-secret" }
 });
 EntityStorageConnectorFactory.register("vault-secret", () => secretEntityStorage);
 
 const identityDocumentEntityStorage = new MemoryEntityStorageConnector<IdentityDocument>({
-	entitySchema: nameof<IdentityDocument>()
+	entitySchema: nameof<IdentityDocument>(),
+	config: { storageKey: "identity-document" }
 });
 EntityStorageConnectorFactory.register("identity-document", () => identityDocumentEntityStorage);
 
@@ -55,6 +61,9 @@ export const TEST_IDENTITY_CONNECTOR = new EntityStorageIdentityConnector();
 IdentityConnectorFactory.register("identity", () => TEST_IDENTITY_CONNECTOR);
 
 export let TEST_NODE_IDENTITY: string;
+export let TEST_TENANT_IDENTITY: string;
+export let TEST_TENANT_IDENTITY_SHORT: string;
+export let TEST_ORGANIZATION_IDENTITY: string;
 export let TEST_USER_IDENTITY: string;
 export let TEST_VAULT_KEY: string;
 
@@ -65,10 +74,10 @@ export async function setupTestEnv(): Promise<void> {
 	await cleanupTestEnv();
 	await mkdir(TEST_FOLDER, { recursive: true });
 
+	let counter = 1;
 	RandomHelper.generate = vi
 		.fn()
-		.mockImplementationOnce(length => new Uint8Array(length).fill(99))
-		.mockImplementation(length => new Uint8Array(length).fill(88));
+		.mockImplementation(length => new Uint8Array(length).fill(counter++));
 	Bip39.randomMnemonic = vi
 		.fn()
 		.mockImplementation(
@@ -80,15 +89,22 @@ export async function setupTestEnv(): Promise<void> {
 	const testVaultConnector = VaultConnectorFactory.get("vault");
 
 	const didNode = await testIdentityConnector.createDocument("test-node-identity");
+	const didOrganisation = await testIdentityConnector.createDocument("test-organisation-identity");
+	const didUser = await testIdentityConnector.createDocument("test-user-identity");
+
 	await testIdentityConnector.addVerificationMethod(
-		"test-node-identity",
-		didNode.id,
+		"test-organisation-identity",
+		didOrganisation.id,
 		"assertionMethod",
 		"immutable-proof-assertion"
 	);
-	const didUser = await testIdentityConnector.createDocument("test-node-identity");
 
 	TEST_NODE_IDENTITY = didNode.id;
+	TEST_ORGANIZATION_IDENTITY = didOrganisation.id;
+	TEST_TENANT_IDENTITY = "a".repeat(32);
+	TEST_TENANT_IDENTITY_SHORT = Converter.bytesToBase64Url(
+		Converter.hexToBytes(TEST_TENANT_IDENTITY)
+	);
 	TEST_USER_IDENTITY = didUser.id;
 	TEST_VAULT_KEY = `${TEST_NODE_IDENTITY}/immutable-proof-hash`;
 

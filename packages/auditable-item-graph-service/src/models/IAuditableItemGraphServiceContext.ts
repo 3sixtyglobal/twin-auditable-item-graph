@@ -11,12 +11,12 @@ export interface IAuditableItemGraphServiceContext {
 	now: string;
 
 	/**
-	 * The identity of the user.
+	 * The organization identity for the operation.
 	 */
-	userIdentity: string;
+	organizationIdentity: string;
 
 	/**
-	 * The identity of the node.
+	 * The user identity for the operation.
 	 */
-	nodeIdentity: string;
+	userIdentity?: string;
 }
