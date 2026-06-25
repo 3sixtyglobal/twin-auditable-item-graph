@@ -1,7 +1,7 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
 import type { IComponent } from "@twin.org/core";
-import type { IComparator, SortDirection } from "@twin.org/entity";
+import type { EntityCondition, SortDirection } from "@twin.org/entity";
 import type { IAuditableItemGraphChangeset } from "./IAuditableItemGraphChangeset.js";
 import type { IAuditableItemGraphChangesetList } from "./IAuditableItemGraphChangesetList.js";
 import type { IAuditableItemGraphPartialVertex } from "./IAuditableItemGraphPartialVertex.js";
@@ -156,7 +156,7 @@ export interface IAuditableItemGraphComponent extends IComponent {
 			idExact?: boolean;
 			resourceTypes?: string[];
 		},
-		conditions?: IComparator[],
+		conditions?: EntityCondition<IAuditableItemGraphVertex>,
 		orderBy?: keyof Pick<IAuditableItemGraphVertex, "dateCreated" | "dateModified">,
 		orderByDirection?: SortDirection,
 		properties?: (keyof IAuditableItemGraphVertex)[],

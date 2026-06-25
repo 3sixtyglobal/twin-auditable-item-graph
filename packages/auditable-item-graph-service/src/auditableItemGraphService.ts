@@ -50,6 +50,7 @@ import {
 } from "@twin.org/data-json-ld";
 import {
 	ComparisonOperator,
+	type EntityCondition,
 	LogicalOperator,
 	SortDirection,
 	type IComparator
@@ -948,7 +949,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			idExact?: boolean;
 			resourceTypes?: string[];
 		},
-		conditions?: IComparator[],
+		conditions?: EntityCondition<IAuditableItemGraphVertex>,
 		orderBy?: keyof Pick<IAuditableItemGraphVertex, "dateCreated" | "dateModified">,
 		orderByDirection?: SortDirection,
 		properties?: (keyof IAuditableItemGraphVertex)[],
@@ -966,36 +967,53 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				"aliases",
 				"annotationObject"
 			];
-			const combinedConditions = conditions ?? [];
+
+			const andGroups: EntityCondition<IAuditableItemGraphVertex>[] = [];
 			const orderProperty = orderBy ?? "dateCreated";
 			const orderDirection = orderByDirection ?? SortDirection.Descending;
 			const idExact = options?.idExact ?? false;
 
+			if (!Is.empty(conditions)) {
+				andGroups.push(conditions);
+			}
+
 			const idOrAlias = options?.id;
 			if (Is.stringValue(idOrAlias)) {
 				const idMode = options?.idMode ?? "both";
+				const idComparators: IComparator[] = [];
 				if (idMode === "id" || idMode === "both") {
-					combinedConditions.push({
+					idComparators.push({
 						property: "id",
 						comparison: idExact ? ComparisonOperator.Equals : ComparisonOperator.Includes,
 						value: idOrAlias
 					});
 				}
 				if (idMode === "alias" || idMode === "both") {
-					combinedConditions.push({
+					idComparators.push({
 						property: "aliasIndex",
 						comparison: ComparisonOperator.Includes,
 						value: idExact ? `||${idOrAlias.toLowerCase()}||` : idOrAlias.toLowerCase()
 					});
 				}
+				if (idComparators.length === 1) {
+					andGroups.push(idComparators[0]);
+				} else if (idComparators.length > 1) {
+					andGroups.push({ logicalOperator: LogicalOperator.Or, conditions: idComparators });
+				}
 			}
 
 			if (Is.arrayValue(options?.resourceTypes)) {
-				for (const resourceType of options.resourceTypes) {
-					combinedConditions.push({
-						property: "resourceTypeIndex",
-						comparison: ComparisonOperator.Includes,
-						value: `||${resourceType.toLowerCase()}||`
+				const resourceComparators: IComparator[] = options.resourceTypes.map(rt => ({
+					property: "resourceTypeIndex",
+					comparison: ComparisonOperator.Includes,
+					value: `||${rt.toLowerCase()}||`
+				}));
+				if (resourceComparators.length === 1) {
+					andGroups.push(resourceComparators[0]);
+				} else {
+					andGroups.push({
+						logicalOperator: LogicalOperator.Or,
+						conditions: resourceComparators
 					});
 				}
 			}
@@ -1004,13 +1022,13 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				propertiesToReturn.unshift("id");
 			}
 
+			const finalConditions: EntityCondition<IAuditableItemGraphVertex> = {
+				logicalOperator: LogicalOperator.And,
+				conditions: andGroups
+			};
+
 			const results = await this._vertexStorage.query(
-				combinedConditions.length > 0
-					? {
-							conditions: combinedConditions,
-							logicalOperator: LogicalOperator.Or
-						}
-					: undefined,
+				finalConditions,
 				[
 					{
 						property: orderProperty,

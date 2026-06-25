@@ -34,7 +34,7 @@ import type {
 	VerifyDepth
 } from "@twin.org/auditable-item-graph-models";
 import { Coerce, Guards, Urn } from "@twin.org/core";
-import type { IComparator, SortDirection } from "@twin.org/entity";
+import type { EntityCondition, SortDirection } from "@twin.org/entity";
 import { nameof } from "@twin.org/nameof";
 import { HeaderHelper, HeaderTypes, MimeTypes } from "@twin.org/web";
 
@@ -364,7 +364,7 @@ export class AuditableItemGraphRestClient
 			idExact?: boolean;
 			resourceTypes?: string[];
 		},
-		conditions?: IComparator[],
+		conditions?: EntityCondition<IAuditableItemGraphVertex>,
 		orderBy?: keyof Pick<IAuditableItemGraphVertex, "dateCreated" | "dateModified">,
 		orderByDirection?: SortDirection,
 		properties?: (keyof IAuditableItemGraphVertex)[],

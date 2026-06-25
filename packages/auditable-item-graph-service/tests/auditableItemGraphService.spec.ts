@@ -22,7 +22,7 @@ import {
 	type IContextIds
 } from "@twin.org/context";
 import { ComponentFactory, Is, RandomHelper, SharedStore } from "@twin.org/core";
-import { ComparisonOperator } from "@twin.org/entity";
+import { ComparisonOperator, LogicalOperator } from "@twin.org/entity";
 import { MemoryEntityStorageConnector } from "@twin.org/entity-storage-connector-memory";
 import { EntityStorageConnectorFactory } from "@twin.org/entity-storage-models";
 import { DidContextIdHandler } from "@twin.org/identity-models";
@@ -2877,13 +2877,11 @@ describe("AuditableItemGraphService", () => {
 			}
 		});
 
-		const resultsAndCursor = await service.query(undefined, [
-			{
-				property: "annotationObject.id",
-				value: "http://example.org/notes/1",
-				comparison: ComparisonOperator.Equals
-			}
-		]);
+		const resultsAndCursor = await service.query(undefined, {
+			property: "annotationObject.id",
+			value: "http://example.org/notes/1",
+			comparison: ComparisonOperator.Equals
+		});
 		expect(resultsAndCursor.entries).toEqual(
 			expect.objectContaining({
 				"@context": [
@@ -2915,6 +2913,163 @@ describe("AuditableItemGraphService", () => {
 					})
 				]
 			})
+		);
+	});
+
+	test("Can query using a condition group with AND to match on two properties", async () => {
+		const service = new AuditableItemGraphService();
+		const createdId1 = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			annotationObject: {
+				"@context": "https://www.w3.org/ns/activitystreams",
+				id: "http://example.org/notes/10",
+				type: "Create",
+				actor: { type: "Person", id: "acct:alice@example.org", name: "Alice" },
+				object: { type: "Note", content: "Alpha content" },
+				published: "2015-01-25T12:34:56Z"
+			}
+		});
+		await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			annotationObject: {
+				"@context": "https://www.w3.org/ns/activitystreams",
+				id: "http://example.org/notes/20",
+				type: "Delete",
+				actor: { type: "Person", id: "acct:bob@example.org", name: "Bob" },
+				object: { type: "Note", content: "Beta content" },
+				published: "2015-01-25T12:34:56Z"
+			}
+		});
+
+		const resultsAndCursor = await service.query(undefined, {
+			logicalOperator: LogicalOperator.And,
+			conditions: [
+				{
+					property: "annotationObject.id",
+					value: "http://example.org/notes/10",
+					comparison: ComparisonOperator.Equals
+				},
+				{
+					property: "annotationObject.type",
+					value: "Create",
+					comparison: ComparisonOperator.Equals
+				}
+			]
+		});
+
+		expect(resultsAndCursor.entries.itemListElement).toHaveLength(1);
+		expect(resultsAndCursor.entries.itemListElement[0]).toEqual(
+			expect.objectContaining({ id: createdId1 })
+		);
+	});
+
+	test("Can query using a condition group with OR to match either of two annotation object ids", async () => {
+		const service = new AuditableItemGraphService();
+		const createdId1 = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			annotationObject: {
+				"@context": "https://www.w3.org/ns/activitystreams",
+				id: "http://example.org/notes/100",
+				type: "Create",
+				actor: { type: "Person", id: "acct:alice@example.org", name: "Alice" },
+				object: { type: "Note", content: "Note one" },
+				published: "2015-01-25T12:34:56Z"
+			}
+		});
+		const createdId2 = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			annotationObject: {
+				"@context": "https://www.w3.org/ns/activitystreams",
+				id: "http://example.org/notes/200",
+				type: "Create",
+				actor: { type: "Person", id: "acct:bob@example.org", name: "Bob" },
+				object: { type: "Note", content: "Note two" },
+				published: "2015-01-25T12:34:56Z"
+			}
+		});
+		await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			annotationObject: {
+				"@context": "https://www.w3.org/ns/activitystreams",
+				id: "http://example.org/notes/300",
+				type: "Create",
+				actor: { type: "Person", id: "acct:carol@example.org", name: "Carol" },
+				object: { type: "Note", content: "Note three" },
+				published: "2015-01-25T12:34:56Z"
+			}
+		});
+
+		const resultsAndCursor = await service.query(undefined, {
+			logicalOperator: LogicalOperator.Or,
+			conditions: [
+				{
+					property: "annotationObject.id",
+					value: "http://example.org/notes/100",
+					comparison: ComparisonOperator.Equals
+				},
+				{
+					property: "annotationObject.id",
+					value: "http://example.org/notes/200",
+					comparison: ComparisonOperator.Equals
+				}
+			]
+		});
+
+		expect(resultsAndCursor.entries.itemListElement).toHaveLength(2);
+		expect(resultsAndCursor.entries.itemListElement).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({ id: createdId1 }),
+				expect.objectContaining({ id: createdId2 })
+			])
+		);
+	});
+
+	test("Can query combining options filter and conditions", async () => {
+		const service = new AuditableItemGraphService();
+		const createdId1 = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			aliases: [{ type: AuditableItemGraphTypes.Alias, id: "combo-alias" }],
+			annotationObject: {
+				"@context": "https://www.w3.org/ns/activitystreams",
+				id: "http://example.org/notes/combo-1",
+				type: "Create",
+				actor: { type: "Person", id: "acct:alice@example.org", name: "Alice" },
+				object: { type: "Note", content: "Combo match" },
+				published: "2015-01-25T12:34:56Z"
+			}
+		});
+		await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			aliases: [{ type: AuditableItemGraphTypes.Alias, id: "combo-alias" }],
+			annotationObject: {
+				"@context": "https://www.w3.org/ns/activitystreams",
+				id: "http://example.org/notes/combo-2",
+				type: "Delete",
+				actor: { type: "Person", id: "acct:bob@example.org", name: "Bob" },
+				object: { type: "Note", content: "Combo no-match" },
+				published: "2015-01-25T12:34:56Z"
+			}
+		});
+
+		const resultsAndCursor = await service.query(
+			{ id: "combo-alias", idMode: "alias" },
+			{
+				property: "annotationObject.id",
+				value: "http://example.org/notes/combo-1",
+				comparison: ComparisonOperator.Equals
+			}
+		);
+
+		expect(resultsAndCursor.entries.itemListElement).toHaveLength(1);
+		expect(resultsAndCursor.entries.itemListElement[0]).toEqual(
+			expect.objectContaining({ id: createdId1 })
 		);
 	});
 
