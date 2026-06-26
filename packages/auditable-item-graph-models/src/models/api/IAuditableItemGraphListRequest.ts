@@ -40,7 +40,7 @@ export interface IAuditableItemGraphListRequest {
 		resourceTypes?: string;
 
 		/**
-		 * The conditions to filter the streams, JSON stringified EntityCondition<IAuditableItemGraphVertex>.
+		 * The conditions to filter the streams, JSON stringified `EntityCondition<IAuditableItemGraphVertex>`.
 		 */
 		conditions?: string;
 
