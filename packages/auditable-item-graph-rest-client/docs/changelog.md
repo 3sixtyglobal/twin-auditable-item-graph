@@ -1,5 +1,46 @@
 # Changelog
 
+## [0.9.1-next.1](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-rest-client-v0.9.1-next.0...auditable-item-graph-rest-client-v0.9.1-next.1) (2026-06-26)
+
+
+### Features
+
+* add context id features ([#30](https://github.com/iotaledger/twin-auditable-item-graph/issues/30)) ([a35d37c](https://github.com/iotaledger/twin-auditable-item-graph/commit/a35d37c0db62a240adde493965c0a9f7971fec45))
+* add unique flag for alias, and exact match option for id query ([33dbd19](https://github.com/iotaledger/twin-auditable-item-graph/commit/33dbd19cabd9fbfaba81032f1d1a6527584c3f5a))
+* add validate-locales ([e76e6f6](https://github.com/iotaledger/twin-auditable-item-graph/commit/e76e6f6b3ec9c447a04315d353442e32233601d3))
+* add versions ([#60](https://github.com/iotaledger/twin-auditable-item-graph/issues/60)) ([5c36f94](https://github.com/iotaledger/twin-auditable-item-graph/commit/5c36f94b1155c01dddbc8d62f3f65d599916c521))
+* add vertex validation ([#54](https://github.com/iotaledger/twin-auditable-item-graph/issues/54)) ([d3ef124](https://github.com/iotaledger/twin-auditable-item-graph/commit/d3ef1241f60956dc296e22d063f188921255d68c))
+* additional query conditions ([#100](https://github.com/iotaledger/twin-auditable-item-graph/issues/100)) ([4fc6b7a](https://github.com/iotaledger/twin-auditable-item-graph/commit/4fc6b7afd7a854806537954fcd334619304da49c))
+* changeset endpoints ([#44](https://github.com/iotaledger/twin-auditable-item-graph/issues/44)) ([7c854de](https://github.com/iotaledger/twin-auditable-item-graph/commit/7c854de39b247d6f24cd94a04a9f99fa9edde51d))
+* eslint migration to flat config ([1b42a3a](https://github.com/iotaledger/twin-auditable-item-graph/commit/1b42a3a27bd6e32d7816de406b92b6332472edf6))
+* id optional in edge updates ([6b63fe3](https://github.com/iotaledger/twin-auditable-item-graph/commit/6b63fe34553104843ae15aa5066775f5872859e9))
+* improved versioning ([#66](https://github.com/iotaledger/twin-auditable-item-graph/issues/66)) ([1b497cd](https://github.com/iotaledger/twin-auditable-item-graph/commit/1b497cdc88eec9b6707b097283773e109baae3aa))
+* replace nextItem property with Link header ([#39](https://github.com/iotaledger/twin-auditable-item-graph/issues/39)) ([b29a333](https://github.com/iotaledger/twin-auditable-item-graph/commit/b29a333ca78ca2091e54e3e6f4355f84c350007d))
+* rest client expose remove verifiable ([a22a743](https://github.com/iotaledger/twin-auditable-item-graph/commit/a22a743ddc39377630ea0a51ca3f6e97890832c9))
+* typescript 6 update ([2483c31](https://github.com/iotaledger/twin-auditable-item-graph/commit/2483c3171cff4c5ecedc83d958ab551291a4a487))
+* update background task service ([e483ddb](https://github.com/iotaledger/twin-auditable-item-graph/commit/e483ddbc948f035334f92b8342248caa6abbe441))
+* update dependencies ([6986689](https://github.com/iotaledger/twin-auditable-item-graph/commit/698668957a1fcb7f85ce2f117914d5980043924f))
+* update edges to use targetId instead of id ([6c5d0e3](https://github.com/iotaledger/twin-auditable-item-graph/commit/6c5d0e31b6e2ea74bfa2f3344e4be628e5f237af))
+* update framework core ([88ad4e6](https://github.com/iotaledger/twin-auditable-item-graph/commit/88ad4e6421132c3c6c45579b078d982a26f16990))
+* update immutable proof usage ([#73](https://github.com/iotaledger/twin-auditable-item-graph/issues/73)) ([a5181d1](https://github.com/iotaledger/twin-auditable-item-graph/commit/a5181d172cbc492c7cc964d22724cc10c46fc52e))
+* use new nameof operators ([3921c4c](https://github.com/iotaledger/twin-auditable-item-graph/commit/3921c4c9ac53e42459e45f10d9e702afb2797a23))
+* use shared store mechanism ([#10](https://github.com/iotaledger/twin-auditable-item-graph/issues/10)) ([da035e5](https://github.com/iotaledger/twin-auditable-item-graph/commit/da035e5eb8f157482b4eb2bdbc689c6c0647ff7d))
+
+
+### Bug Fixes
+
+* implement removeProof on AuditableItemGraphRestClient and expose DELETE /:id/proof route ([#85](https://github.com/iotaledger/twin-auditable-item-graph/issues/85)) ([ed74458](https://github.com/iotaledger/twin-auditable-item-graph/commit/ed74458aff9bc8606b75657a7bff15af4884189e))
+* incremental edge merge and per-vertex update queue ([#70](https://github.com/iotaledger/twin-auditable-item-graph/issues/70)) ([91eb51d](https://github.com/iotaledger/twin-auditable-item-graph/commit/91eb51d135d2e609eebce90de099670f08eb20ca))
+* only include alias in index if not deleted ([#6](https://github.com/iotaledger/twin-auditable-item-graph/issues/6)) ([5da3c41](https://github.com/iotaledger/twin-auditable-item-graph/commit/5da3c419fafa2afefd34b1c570d103012b888a75))
+* query params force coercion ([2dd9afe](https://github.com/iotaledger/twin-auditable-item-graph/commit/2dd9afe9ec37e2a91c110317fe289f7495c187a0))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/auditable-item-graph-models bumped from 0.9.1-next.0 to 0.9.1-next.1
+
 ## [0.9.0](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-rest-client-v0.9.0...auditable-item-graph-rest-client-v0.9.0) (2026-06-25)
 
 
