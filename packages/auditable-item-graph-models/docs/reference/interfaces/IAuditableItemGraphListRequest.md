@@ -50,7 +50,7 @@ Include vertices with specific resource types, comma separated.
 
 > `optional` **conditions?**: `string`
 
-The conditions to filter the streams, JSON stringified EntityCondition<IAuditableItemGraphVertex>.
+The conditions to filter the streams, JSON stringified `EntityCondition<IAuditableItemGraphVertex>`.
 
 #### orderBy?
 
