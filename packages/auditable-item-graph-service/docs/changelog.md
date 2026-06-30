@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.9.1-next.3](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.9.1-next.2...auditable-item-graph-service-v0.9.1-next.3) (2026-06-30)
+
+
+### Features
+
+* rest enhancements ([1e51050](https://github.com/iotaledger/twin-auditable-item-graph/commit/1e51050af4c1a92f1f127054fe4c9da5e8cb591e))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/auditable-item-graph-models bumped from 0.9.1-next.2 to 0.9.1-next.3
+
 ## [0.9.1-next.2](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.9.1-next.1...auditable-item-graph-service-v0.9.1-next.2) (2026-06-29)
 
 
