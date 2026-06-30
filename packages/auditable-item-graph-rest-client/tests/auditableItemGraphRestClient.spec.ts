@@ -29,6 +29,8 @@ const VERTEX_URN = "urn:aig:vertex001";
 // namespaceSpecificParts()[0] = "vertex001", [2] = "changeset001".
 const CHANGESET_URN = "urn:aig:vertex001:cs:changeset001";
 
+const LOCATION = `${ENDPOINT}/${PREFIX}/${VERTEX_URN}`;
+
 const TEST_VERTEX: IAuditableItemGraphVertex = {
 	"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
 	id: VERTEX_ID,
@@ -81,7 +83,7 @@ describe("AuditableItemGraphRestClient", () => {
 
 	describe("create", () => {
 		test("sends POST to /{prefix}", async () => {
-			fetchMock.mockResolvedValueOnce(createdResponse(VERTEX_URN));
+			fetchMock.mockResolvedValueOnce(createdResponse(LOCATION));
 
 			await client.create(TEST_VERTEX_CREATE);
 
@@ -91,7 +93,7 @@ describe("AuditableItemGraphRestClient", () => {
 		});
 
 		test("sends the vertex as the request body", async () => {
-			fetchMock.mockResolvedValueOnce(createdResponse(VERTEX_URN));
+			fetchMock.mockResolvedValueOnce(createdResponse(LOCATION));
 
 			await client.create(TEST_VERTEX_CREATE);
 
@@ -102,7 +104,7 @@ describe("AuditableItemGraphRestClient", () => {
 		});
 
 		test("returns the Location header value as the new vertex id", async () => {
-			fetchMock.mockResolvedValueOnce(createdResponse(VERTEX_URN));
+			fetchMock.mockResolvedValueOnce(createdResponse(LOCATION));
 
 			const id = await client.create(TEST_VERTEX_CREATE);
 

@@ -4,6 +4,7 @@ import {
 	HttpContextIdKeys,
 	HttpHeaderHelper,
 	HttpParameterHelper,
+	HttpUrlHelper,
 	type ICreatedResponse,
 	type IHttpRequestContext,
 	type INoContentResponse,
@@ -69,7 +70,7 @@ export function generateRestRoutesAuditableItemGraph(
 		method: "POST",
 		path: `${baseRouteName}/`,
 		handler: async (httpRequestContext, request) =>
-			auditableItemGraphCreate(httpRequestContext, componentName, request),
+			auditableItemGraphCreate(httpRequestContext, componentName, request, baseRouteName),
 		requestType: {
 			type: nameof<IAuditableItemGraphCreateRequest>(),
 			examples: [
@@ -994,12 +995,14 @@ export function generateRestRoutesAuditableItemGraph(
  * @param httpRequestContext The request context for the API.
  * @param componentName The name of the component to use in the routes.
  * @param request The request.
+ * @param baseRouteName The base route name for the API.
  * @returns The response object with additional http response properties.
  */
 export async function auditableItemGraphCreate(
 	httpRequestContext: IHttpRequestContext,
 	componentName: string,
-	request: IAuditableItemGraphCreateRequest
+	request: IAuditableItemGraphCreateRequest,
+	baseRouteName: string
 ): Promise<ICreatedResponse> {
 	Guards.object<IAuditableItemGraphCreateRequest>(ROUTES_SOURCE, nameof(request), request);
 	Guards.object<IAuditableItemGraphCreateRequest["body"]>(
@@ -1011,8 +1014,15 @@ export async function auditableItemGraphCreate(
 	const component = ComponentFactory.get<IAuditableItemGraphComponent>(componentName);
 	const id = await component.create(request.body);
 
+	const contextIds = await ContextIdStore.getContextIds();
+	const publicOrigin = contextIds?.[HttpContextIdKeys.PublicOrigin];
+
 	const headers: IHttpHeaders = {};
-	HttpHeaderHelper.buildId(headers, id);
+	HttpHeaderHelper.buildId(
+		headers,
+		id,
+		HttpUrlHelper.combineOriginPath(publicOrigin, `${baseRouteName}/:id`)
+	);
 
 	return {
 		statusCode: HttpStatusCode.created,
