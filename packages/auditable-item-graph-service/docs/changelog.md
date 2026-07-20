@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.9.1-next.4](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.9.1-next.3...auditable-item-graph-service-v0.9.1-next.4) (2026-07-20)
+
+
+### Bug Fixes
+
+* query fixed ordering ([#124](https://github.com/iotaledger/twin-auditable-item-graph/issues/124)) ([f28d46d](https://github.com/iotaledger/twin-auditable-item-graph/commit/f28d46dae9bd2706c0cb1562b992757b1f5012ec))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/auditable-item-graph-models bumped from 0.9.1-next.3 to 0.9.1-next.4
+
 ## [0.9.1-next.3](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.9.1-next.2...auditable-item-graph-service-v0.9.1-next.3) (2026-06-30)
 
 
