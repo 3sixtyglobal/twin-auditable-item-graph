@@ -3073,6 +3073,73 @@ describe("AuditableItemGraphService", () => {
 		);
 	});
 
+	test("Cursor pagination is stable when all vertices share the same dateCreated", async () => {
+		const service = new AuditableItemGraphService();
+
+		Date.now = vi.fn().mockImplementation(() => FIRST_TICK);
+
+		const createdId1 = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex
+		});
+		const createdId2 = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex
+		});
+		const createdId3 = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex
+		});
+
+		const allIds = new Set([createdId1, createdId2, createdId3]);
+
+		const page1 = await service.query(
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+			1
+		);
+		expect(page1.entries.itemListElement).toHaveLength(1);
+		expect(page1.cursor).toBeDefined();
+
+		const page2 = await service.query(
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+			page1.cursor,
+			1
+		);
+		expect(page2.entries.itemListElement).toHaveLength(1);
+		expect(page2.cursor).toBeDefined();
+
+		const page3 = await service.query(
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+			page2.cursor,
+			1
+		);
+		expect(page3.entries.itemListElement).toHaveLength(1);
+
+		const collectedIds = [
+			page1.entries.itemListElement[0].id,
+			page2.entries.itemListElement[0].id,
+			page3.entries.itemListElement[0].id
+		];
+
+		expect(new Set(collectedIds).size).toEqual(3);
+		for (const id of collectedIds) {
+			expect(allIds.has(id)).toEqual(true);
+		}
+	});
+
 	test("Can fail to create a vertex with an alias that already exists and the unique flag set", async () => {
 		const service = new AuditableItemGraphService();
 		const id = await service.create({

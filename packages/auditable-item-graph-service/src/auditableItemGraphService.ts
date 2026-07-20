@@ -1033,6 +1033,10 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 					{
 						property: orderProperty,
 						sortDirection: orderDirection
+					},
+					{
+						property: "id",
+						sortDirection: SortDirection.Ascending
 					}
 				],
 				propertiesToReturn as (keyof AuditableItemGraphVertex)[],
