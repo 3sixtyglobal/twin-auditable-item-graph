@@ -562,7 +562,9 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				vertexModel.verified = verified;
 			}
 
-			const result = await JsonLdProcessor.compact(vertexModel, vertexModel["@context"]);
+			const result = await JsonLdProcessor.compact(vertexModel, vertexModel["@context"], {
+				compactArrays: false
+			});
 			return result;
 		} catch (error) {
 			throw new GeneralError(AuditableItemGraphService.CLASS_NAME, "getFailed", undefined, error);
@@ -641,7 +643,9 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				[SchemaOrgTypes.ItemListElement]: chunk.changesets
 			};
 
-			const result = await JsonLdProcessor.compact(changesetList, changesetList["@context"]);
+			const result = await JsonLdProcessor.compact(changesetList, changesetList["@context"], {
+				compactArrays: false
+			});
 			return {
 				changesets: result,
 				cursor: chunk.cursor
@@ -713,7 +717,9 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				}
 			}
 
-			const result = await JsonLdProcessor.compact(changesetModel, changesetModel["@context"]);
+			const result = await JsonLdProcessor.compact(changesetModel, changesetModel["@context"], {
+				compactArrays: false
+			});
 			return result;
 		} catch (error) {
 			throw new GeneralError(AuditableItemGraphService.CLASS_NAME, "getFailed", undefined, error);
@@ -761,7 +767,9 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			if (version === currentVersion) {
 				const vertexModel = this.vertexEntityToJsonLd(vertexEntity);
 				vertexModel.version = version;
-				return await JsonLdProcessor.compact(vertexModel, vertexModel["@context"]);
+				return await JsonLdProcessor.compact(vertexModel, vertexModel["@context"], {
+					compactArrays: false
+				});
 			}
 
 			const changesets = await this.internalGetChangesets(vertexId, {
@@ -780,7 +788,9 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 			const vertexModel = this.vertexEntityToJsonLd(entityState);
 			vertexModel.version = version;
 
-			const result = await JsonLdProcessor.compact(vertexModel, vertexModel["@context"]);
+			const result = await JsonLdProcessor.compact(vertexModel, vertexModel["@context"], {
+				compactArrays: false
+			});
 			return result;
 		} catch (error) {
 			throw new GeneralError(
@@ -858,7 +868,9 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				[SchemaOrgTypes.ItemListElement]: versions
 			};
 
-			return await JsonLdProcessor.compact(versionList, versionList["@context"]);
+			return await JsonLdProcessor.compact(versionList, versionList["@context"], {
+				compactArrays: false
+			});
 		} catch (error) {
 			throw new GeneralError(
 				AuditableItemGraphService.CLASS_NAME,
@@ -1058,7 +1070,9 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 				[SchemaOrgTypes.ItemListElement]: models
 			};
 
-			const result = await JsonLdProcessor.compact(vertexList, vertexList["@context"]);
+			const result = await JsonLdProcessor.compact(vertexList, vertexList["@context"], {
+				compactArrays: false
+			});
 
 			await MetricHelper.metricIncrement(
 				this._telemetryComponent,
