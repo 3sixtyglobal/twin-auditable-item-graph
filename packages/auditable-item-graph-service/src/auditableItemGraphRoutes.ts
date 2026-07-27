@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0.
 import {
 	HttpContextIdKeys,
+	HttpHeaderHelper,
 	HttpParameterHelper,
 	HttpUrlHelper,
 	type ICreatedResponse,
@@ -32,10 +33,10 @@ import {
 	type IAuditableItemGraphVersionListResponse
 } from "@twin.org/auditable-item-graph-models";
 import { ContextIdStore } from "@twin.org/context";
-import { Coerce, ComponentFactory, Guards, Is } from "@twin.org/core";
+import { Coerce, ComponentFactory, Guards } from "@twin.org/core";
 import { nameof } from "@twin.org/nameof";
 import { SchemaOrgContexts, SchemaOrgTypes } from "@twin.org/standards-schema-org";
-import { HeaderHelper, HeaderTypes, HttpStatusCode, MimeTypes } from "@twin.org/web";
+import { HeaderTypes, HttpStatusCode, type IHttpHeaders, MimeTypes } from "@twin.org/web";
 
 /**
  * The source used when communicating about these routes.
@@ -69,7 +70,7 @@ export function generateRestRoutesAuditableItemGraph(
 		method: "POST",
 		path: `${baseRouteName}/`,
 		handler: async (httpRequestContext, request) =>
-			auditableItemGraphCreate(httpRequestContext, componentName, request),
+			auditableItemGraphCreate(httpRequestContext, componentName, request, baseRouteName),
 		requestType: {
 			type: nameof<IAuditableItemGraphCreateRequest>(),
 			examples: [
@@ -994,12 +995,14 @@ export function generateRestRoutesAuditableItemGraph(
  * @param httpRequestContext The request context for the API.
  * @param componentName The name of the component to use in the routes.
  * @param request The request.
+ * @param baseRouteName The base route name for the API.
  * @returns The response object with additional http response properties.
  */
 export async function auditableItemGraphCreate(
 	httpRequestContext: IHttpRequestContext,
 	componentName: string,
-	request: IAuditableItemGraphCreateRequest
+	request: IAuditableItemGraphCreateRequest,
+	baseRouteName: string
 ): Promise<ICreatedResponse> {
 	Guards.object<IAuditableItemGraphCreateRequest>(ROUTES_SOURCE, nameof(request), request);
 	Guards.object<IAuditableItemGraphCreateRequest["body"]>(
@@ -1010,11 +1013,20 @@ export async function auditableItemGraphCreate(
 
 	const component = ComponentFactory.get<IAuditableItemGraphComponent>(componentName);
 	const id = await component.create(request.body);
+
+	const contextIds = await ContextIdStore.getContextIds();
+	const publicOrigin = contextIds?.[HttpContextIdKeys.PublicOrigin];
+
+	const headers: IHttpHeaders = {};
+	HttpHeaderHelper.buildId(
+		headers,
+		id,
+		HttpUrlHelper.combineOriginPath(publicOrigin, `${baseRouteName}/:id`)
+	);
+
 	return {
 		statusCode: HttpStatusCode.created,
-		headers: {
-			[HeaderTypes.Location]: id
-		}
+		headers
 	};
 }
 
@@ -1044,13 +1056,11 @@ export async function auditableItemGraphGet(
 		verifySignatureDepth: request.query?.verifySignatureDepth
 	});
 
+	const headers: IHttpHeaders = {};
+	HttpHeaderHelper.buildJsonContentType(headers, request.headers);
+
 	return {
-		headers: {
-			[HeaderTypes.ContentType]:
-				request.headers?.[HeaderTypes.Accept] === MimeTypes.JsonLd
-					? MimeTypes.JsonLd
-					: MimeTypes.Json
-		},
+		headers,
 		body: result
 	};
 }
@@ -1085,22 +1095,16 @@ export async function auditableItemGraphChangesetList(
 		}
 	);
 
-	const headers: IAuditableItemGraphListResponse["headers"] = {
-		[HeaderTypes.ContentType]:
-			request.headers?.[HeaderTypes.Accept] === MimeTypes.JsonLd ? MimeTypes.JsonLd : MimeTypes.Json
-	};
+	const headers: IHttpHeaders = {};
+	HttpHeaderHelper.buildJsonContentType(headers, request.headers);
 
-	if (Is.stringValue(result.cursor)) {
-		const contextIds = await ContextIdStore.getContextIds();
-		headers[HeaderTypes.Link] = HeaderHelper.createLinkHeader(
-			HttpUrlHelper.replaceOrigin(
-				httpRequestContext.serverRequest.url,
-				contextIds?.[HttpContextIdKeys.PublicOrigin]
-			),
-			{ cursor: result.cursor },
-			"next"
-		);
-	}
+	const contextIds = await ContextIdStore.getContextIds();
+	HttpHeaderHelper.buildCursor(
+		headers,
+		httpRequestContext.serverRequest.url,
+		contextIds?.[HttpContextIdKeys.PublicOrigin],
+		result.cursor
+	);
 
 	return {
 		headers,
@@ -1134,13 +1138,11 @@ export async function auditableItemGraphChangesetGet(
 		verifySignatureDepth: request.query?.verifySignatureDepth
 	});
 
+	const headers: IHttpHeaders = {};
+	HttpHeaderHelper.buildJsonContentType(headers, request.headers);
+
 	return {
-		headers: {
-			[HeaderTypes.ContentType]:
-				request.headers?.[HeaderTypes.Accept] === MimeTypes.JsonLd
-					? MimeTypes.JsonLd
-					: MimeTypes.Json
-		},
+		headers,
 		body: result
 	};
 }
@@ -1245,22 +1247,16 @@ export async function auditableItemGraphList(
 		Coerce.integer(request.query?.limit)
 	);
 
-	const headers: IAuditableItemGraphListResponse["headers"] = {
-		[HeaderTypes.ContentType]:
-			request.headers?.[HeaderTypes.Accept] === MimeTypes.JsonLd ? MimeTypes.JsonLd : MimeTypes.Json
-	};
+	const headers: IHttpHeaders = {};
+	HttpHeaderHelper.buildJsonContentType(headers, request.headers);
 
-	if (Is.stringValue(result.cursor)) {
-		const contextIds = await ContextIdStore.getContextIds();
-		headers[HeaderTypes.Link] = HeaderHelper.createLinkHeader(
-			HttpUrlHelper.replaceOrigin(
-				httpRequestContext.serverRequest.url,
-				contextIds?.[HttpContextIdKeys.PublicOrigin]
-			),
-			{ cursor: result.cursor },
-			"next"
-		);
-	}
+	const contextIds = await ContextIdStore.getContextIds();
+	HttpHeaderHelper.buildCursor(
+		headers,
+		httpRequestContext.serverRequest.url,
+		contextIds?.[HttpContextIdKeys.PublicOrigin],
+		result.cursor
+	);
 
 	return {
 		headers,
@@ -1294,13 +1290,11 @@ export async function auditableItemGraphVersionGet(
 	const component = ComponentFactory.get<IAuditableItemGraphComponent>(componentName);
 	const result = await component.getVersion(request.pathParams.id, version);
 
+	const headers: IHttpHeaders = {};
+	HttpHeaderHelper.buildJsonContentType(headers, request.headers);
+
 	return {
-		headers: {
-			[HeaderTypes.ContentType]:
-				request.headers?.[HeaderTypes.Accept] === MimeTypes.JsonLd
-					? MimeTypes.JsonLd
-					: MimeTypes.Json
-		},
+		headers,
 		body: result
 	};
 }
@@ -1359,13 +1353,11 @@ export async function auditableItemGraphVersionList(
 		before: request.query?.before
 	});
 
+	const headers: IHttpHeaders = {};
+	HttpHeaderHelper.buildJsonContentType(headers, request.headers);
+
 	return {
-		headers: {
-			[HeaderTypes.ContentType]:
-				request.headers?.[HeaderTypes.Accept] === MimeTypes.JsonLd
-					? MimeTypes.JsonLd
-					: MimeTypes.Json
-		},
+		headers,
 		body: result
 	};
 }

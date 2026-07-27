@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0.
 import { BaseRestClient } from "@twin.org/api-core";
 import {
+	HttpHeaderHelper,
 	HttpParameterHelper,
 	type IBaseRestClientConfig,
 	type ICreatedResponse,
@@ -36,7 +37,7 @@ import type {
 import { Coerce, Guards, Urn } from "@twin.org/core";
 import type { EntityCondition, SortDirection } from "@twin.org/entity";
 import { nameof } from "@twin.org/nameof";
-import { HeaderHelper, HeaderTypes, MimeTypes } from "@twin.org/web";
+import { HeaderTypes, HttpMethod, MimeTypes } from "@twin.org/web";
 
 /**
  * Client for performing auditable item graph through to REST endpoints.
@@ -78,13 +79,13 @@ export class AuditableItemGraphRestClient
 	public async create(vertex: Omit<IAuditableItemGraphVertex, "id">): Promise<string> {
 		const response = await this.fetch<IAuditableItemGraphCreateRequest, ICreatedResponse>(
 			"/",
-			"POST",
+			HttpMethod.POST,
 			{
 				body: vertex
 			}
 		);
 
-		return response.headers[HeaderTypes.Location];
+		return HttpHeaderHelper.extractId(response.headers, `${this.getPathPrefix()}/:id`);
 	}
 
 	/**
@@ -108,7 +109,7 @@ export class AuditableItemGraphRestClient
 		const response = await this.fetch<
 			IAuditableItemGraphGetRequest,
 			IAuditableItemGraphGetResponse
-		>("/:id", "GET", {
+		>("/:id", HttpMethod.GET, {
 			headers: {
 				[HeaderTypes.Accept]: MimeTypes.JsonLd
 			},
@@ -149,7 +150,7 @@ export class AuditableItemGraphRestClient
 		const response = await this.fetch<
 			IAuditableItemGraphChangesetListRequest,
 			IAuditableItemGraphChangesetListResponse
-		>("/:id/changesets", "GET", {
+		>("/:id/changesets", HttpMethod.GET, {
 			headers: {
 				[HeaderTypes.Accept]: MimeTypes.JsonLd
 			},
@@ -165,8 +166,7 @@ export class AuditableItemGraphRestClient
 
 		return {
 			changesets: response.body,
-			cursor: HeaderHelper.extractLinkHeaderRelation(response.headers?.[HeaderTypes.Link], "next")
-				?.urlQueryParams?.cursor
+			cursor: HttpHeaderHelper.extractCursor(response.headers)
 		};
 	}
 
@@ -195,7 +195,7 @@ export class AuditableItemGraphRestClient
 		const response = await this.fetch<
 			IAuditableItemGraphChangesetGetRequest,
 			IAuditableItemGraphChangesetGetResponse
-		>("/:id/changesets/:changesetId", "GET", {
+		>("/:id/changesets/:changesetId", HttpMethod.GET, {
 			headers: {
 				[HeaderTypes.Accept]: MimeTypes.JsonLd
 			},
@@ -230,7 +230,7 @@ export class AuditableItemGraphRestClient
 		const response = await this.fetch<
 			IAuditableItemGraphVersionGetRequest,
 			IAuditableItemGraphVersionGetResponse
-		>("/:id/versions/:version", "GET", {
+		>("/:id/versions/:version", HttpMethod.GET, {
 			headers: {
 				[HeaderTypes.Accept]: MimeTypes.JsonLd
 			},
@@ -264,7 +264,7 @@ export class AuditableItemGraphRestClient
 		const response = await this.fetch<
 			IAuditableItemGraphVersionListRequest,
 			IAuditableItemGraphVersionListResponse
-		>("/:id/versions", "GET", {
+		>("/:id/versions", HttpMethod.GET, {
 			headers: {
 				[HeaderTypes.Accept]: MimeTypes.JsonLd
 			},
@@ -298,7 +298,7 @@ export class AuditableItemGraphRestClient
 
 		const { id, ...rest } = vertex;
 
-		await this.fetch<IAuditableItemGraphUpdateRequest, INoContentResponse>("/:id", "PUT", {
+		await this.fetch<IAuditableItemGraphUpdateRequest, INoContentResponse>("/:id", HttpMethod.PUT, {
 			pathParams: {
 				id
 			},
@@ -317,12 +317,16 @@ export class AuditableItemGraphRestClient
 
 		const { id, ...body } = partial;
 
-		await this.fetch<IAuditableItemGraphUpdatePartialRequest, INoContentResponse>("/:id", "PATCH", {
-			pathParams: {
-				id
-			},
-			body
-		});
+		await this.fetch<IAuditableItemGraphUpdatePartialRequest, INoContentResponse>(
+			"/:id",
+			HttpMethod.PATCH,
+			{
+				pathParams: {
+					id
+				},
+				body
+			}
+		);
 	}
 
 	/**
@@ -335,7 +339,7 @@ export class AuditableItemGraphRestClient
 
 		await this.fetch<IAuditableItemGraphRemoveProofRequest, INoContentResponse>(
 			"/:id/proof",
-			"DELETE",
+			HttpMethod.DELETE,
 			{
 				pathParams: { id }
 			}
@@ -377,7 +381,7 @@ export class AuditableItemGraphRestClient
 		const response = await this.fetch<
 			IAuditableItemGraphListRequest,
 			IAuditableItemGraphListResponse
-		>("/", "GET", {
+		>("/", HttpMethod.GET, {
 			headers: {
 				[HeaderTypes.Accept]: MimeTypes.JsonLd
 			},
@@ -397,8 +401,7 @@ export class AuditableItemGraphRestClient
 
 		return {
 			entries: response.body,
-			cursor: HeaderHelper.extractLinkHeaderRelation(response.headers?.[HeaderTypes.Link], "next")
-				?.urlQueryParams?.cursor
+			cursor: HttpHeaderHelper.extractCursor(response.headers)
 		};
 	}
 }

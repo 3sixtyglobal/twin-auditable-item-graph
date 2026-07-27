@@ -3073,6 +3073,145 @@ describe("AuditableItemGraphService", () => {
 		);
 	});
 
+	test("Querying by empty string returns no results, not all elements (issue #99)", async () => {
+		const service = new AuditableItemGraphService();
+		await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			annotationObject: {
+				"@context": "https://www.w3.org/ns/activitystreams",
+				id: "1111",
+				type: "Create",
+				actor: { type: "Person", id: "acct:alice@example.org", name: "Alice" },
+				object: { type: "Note", content: "Some note" },
+				published: "2015-01-25T12:34:56Z"
+			}
+		});
+		await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			annotationObject: {
+				"@context": "https://www.w3.org/ns/activitystreams",
+				id: "2222",
+				type: "Create",
+				actor: { type: "Person", id: "acct:bob@example.org", name: "Bob" },
+				object: { type: "Note", content: "Another note" },
+				published: "2015-01-25T12:34:56Z"
+			}
+		});
+
+		const emptyStringResult = await service.query(undefined, {
+			property: "annotationObject.id",
+			value: "",
+			comparison: ComparisonOperator.Equals
+		});
+
+		expect(emptyStringResult.entries.itemListElement ?? []).toHaveLength(0);
+	});
+
+	test("Querying by whitespace-only string returns no results, not all elements (issue #99)", async () => {
+		const service = new AuditableItemGraphService();
+		await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			annotationObject: {
+				"@context": "https://www.w3.org/ns/activitystreams",
+				id: "1111",
+				type: "Create",
+				actor: { type: "Person", id: "acct:alice@example.org", name: "Alice" },
+				object: { type: "Note", content: "Some note" },
+				published: "2015-01-25T12:34:56Z"
+			}
+		});
+		await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			annotationObject: {
+				"@context": "https://www.w3.org/ns/activitystreams",
+				id: "2222",
+				type: "Create",
+				actor: { type: "Person", id: "acct:bob@example.org", name: "Bob" },
+				object: { type: "Note", content: "Another note" },
+				published: "2015-01-25T12:34:56Z"
+			}
+		});
+
+		const whitespaceResult = await service.query(undefined, {
+			property: "annotationObject.id",
+			value: "   ",
+			comparison: ComparisonOperator.Equals
+		});
+
+		expect(whitespaceResult.entries.itemListElement ?? []).toHaveLength(0);
+	});
+
+	test("Cursor pagination is stable when all vertices share the same dateCreated", async () => {
+		const service = new AuditableItemGraphService();
+
+		Date.now = vi.fn().mockImplementation(() => FIRST_TICK);
+
+		const createdId1 = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex
+		});
+		const createdId2 = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex
+		});
+		const createdId3 = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex
+		});
+
+		const allIds = new Set([createdId1, createdId2, createdId3]);
+
+		const page1 = await service.query(
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+			1
+		);
+		expect(page1.entries.itemListElement).toHaveLength(1);
+		expect(page1.cursor).toBeDefined();
+
+		const page2 = await service.query(
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+			page1.cursor,
+			1
+		);
+		expect(page2.entries.itemListElement).toHaveLength(1);
+		expect(page2.cursor).toBeDefined();
+
+		const page3 = await service.query(
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+			page2.cursor,
+			1
+		);
+		expect(page3.entries.itemListElement).toHaveLength(1);
+
+		const collectedIds = [
+			page1.entries.itemListElement[0].id,
+			page2.entries.itemListElement[0].id,
+			page3.entries.itemListElement[0].id
+		];
+
+		expect(new Set(collectedIds).size).toEqual(3);
+		for (const id of collectedIds) {
+			expect(allIds.has(id)).toEqual(true);
+		}
+	});
+
 	test("Can fail to create a vertex with an alias that already exists and the unique flag set", async () => {
 		const service = new AuditableItemGraphService();
 		const id = await service.create({

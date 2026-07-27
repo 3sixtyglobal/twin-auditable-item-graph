@@ -1,6 +1,6 @@
 # Function: auditableItemGraphCreate()
 
-> **auditableItemGraphCreate**(`httpRequestContext`, `componentName`, `request`): `Promise`\<`ICreatedResponse`\>
+> **auditableItemGraphCreate**(`httpRequestContext`, `componentName`, `request`, `baseRouteName`): `Promise`\<`ICreatedResponse`\>
 
 Create the graph vertex.
 
@@ -23,6 +23,12 @@ The name of the component to use in the routes.
 `IAuditableItemGraphCreateRequest`
 
 The request.
+
+### baseRouteName
+
+`string`
+
+The base route name for the API.
 
 ## Returns
 
