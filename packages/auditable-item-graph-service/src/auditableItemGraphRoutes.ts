@@ -1148,7 +1148,7 @@ export async function auditableItemGraphChangesetGet(
 }
 
 /**
- * Update the graph vertex (PUT — full replacement of vertex state).
+ * Update the graph vertex (PUT - full replacement of vertex state).
  * @param httpRequestContext The request context for the API.
  * @param componentName The name of the component to use in the routes.
  * @param request The request.
@@ -1180,7 +1180,7 @@ export async function auditableItemGraphUpdate(
 }
 
 /**
- * Partially update the graph vertex (PATCH — optional scalars; list fields use `{ add, remove }`).
+ * Partially update the graph vertex (PATCH - optional scalars; list fields use `{ add, remove }`).
  * @param httpRequestContext The request context for the API.
  * @param componentName The name of the component to use in the routes.
  * @param request The request.

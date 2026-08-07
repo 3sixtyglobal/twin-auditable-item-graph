@@ -26,7 +26,7 @@ export interface IAuditableItemGraphComponent extends IComponent {
 	create(vertex: Omit<IAuditableItemGraphVertex, "id">): Promise<string>;
 
 	/**
-	 * Update a graph vertex (PUT — full replacement of vertex state).
+	 * Update a graph vertex (PUT - full replacement of vertex state).
 	 * Concurrent updates for the same vertex are serialized via `Mutex` on the vertex id.
 	 * Multi-replica deployments are not coordinated.
 	 * @param vertex The vertex to update.

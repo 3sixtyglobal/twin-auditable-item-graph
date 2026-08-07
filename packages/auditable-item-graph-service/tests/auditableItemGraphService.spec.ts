@@ -1,5 +1,6 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
+import { HealthCategory, HealthStatus, type IHealth } from "@twin.org/api-models";
 import { TenantIdContextIdHandler } from "@twin.org/api-tenant-processor";
 import {
 	AuditableItemGraphContexts,
@@ -214,6 +215,22 @@ describe("AuditableItemGraphService", () => {
 			config: { storageKey: "background-task" }
 		});
 		EntityStorageConnectorFactory.register("background-task", () => backgroundTaskStorage);
+
+		ComponentFactory.register("platform", () => ({
+			className: () => "MockPlatform",
+			isMultiTenant: () => false,
+			execute: async (method: () => Promise<void>) => method(),
+			getLocalOriginContext: async () => undefined
+		}));
+
+		ComponentFactory.register("task-scheduler", () => ({
+			className: () => "task-scheduler",
+			addTask: async (taskId: string, times: unknown, taskCallback: () => Promise<void>) => {
+				await taskCallback();
+			},
+			removeTask: async () => {},
+			tasksInfo: async () => ({ tasks: {} })
+		}));
 
 		const backgroundTask = new BackgroundTaskService();
 		ComponentFactory.register("background-task", () => backgroundTask);
@@ -3586,11 +3603,11 @@ describe("AuditableItemGraphService", () => {
 			aliases: [{ type: AuditableItemGraphTypes.Alias, id: "foo123" }]
 		});
 
-		// Using a date well before all changesets — all versions should be included.
+		// Using a date well before all changesets - all versions should be included.
 		const allIncluded = await service.getVersions(id, { after: "2024-01-01T00:00:00.000Z" });
 		expect(allIncluded.itemListElement).toHaveLength(1);
 
-		// Using a date well after all changesets — no versions should be included.
+		// Using a date well after all changesets - no versions should be included.
 		const noneIncluded = await service.getVersions(id, { after: "2025-01-01T00:00:00.000Z" });
 		expect(noneIncluded.itemListElement).toHaveLength(0);
 	});
@@ -3603,11 +3620,11 @@ describe("AuditableItemGraphService", () => {
 			aliases: [{ type: AuditableItemGraphTypes.Alias, id: "foo123" }]
 		});
 
-		// Using a date well after all changesets — all versions should be included.
+		// Using a date well after all changesets - all versions should be included.
 		const allIncluded = await service.getVersions(id, { before: "2025-01-01T00:00:00.000Z" });
 		expect(allIncluded.itemListElement).toHaveLength(1);
 
-		// Using a date well before all changesets — no versions should be included.
+		// Using a date well before all changesets - no versions should be included.
 		const noneIncluded = await service.getVersions(id, { before: "2024-01-01T00:00:00.000Z" });
 		expect(noneIncluded.itemListElement).toHaveLength(0);
 	});
@@ -3620,14 +3637,14 @@ describe("AuditableItemGraphService", () => {
 			aliases: [{ type: AuditableItemGraphTypes.Alias, id: "foo123" }]
 		});
 
-		// Range that spans the changeset timestamp — version is included.
+		// Range that spans the changeset timestamp - version is included.
 		const included = await service.getVersions(id, {
 			after: "2024-01-01T00:00:00.000Z",
 			before: "2025-01-01T00:00:00.000Z"
 		});
 		expect(included.itemListElement).toHaveLength(1);
 
-		// Range entirely before all changesets — no versions included.
+		// Range entirely before all changesets - no versions included.
 		const excluded = await service.getVersions(id, {
 			after: "2023-01-01T00:00:00.000Z",
 			before: "2024-01-01T00:00:00.000Z"
@@ -4197,7 +4214,7 @@ describe("AuditableItemGraphService", () => {
 			});
 		});
 
-		test("update() with changes and no org in context throws — proof service also requires org", async () => {
+		test("update() with changes and no org in context throws - proof service also requires org", async () => {
 			const service = new AuditableItemGraphService();
 
 			const id = await service.create({
@@ -4229,7 +4246,7 @@ describe("AuditableItemGraphService", () => {
 			});
 		});
 
-		test("update() with no changes and no org in context succeeds — no proof created", async () => {
+		test("update() with no changes and no org in context succeeds - no proof created", async () => {
 			const service = new AuditableItemGraphService();
 
 			const id = await service.create({
@@ -4252,6 +4269,36 @@ describe("AuditableItemGraphService", () => {
 
 			expect(await changesetStorage.getStore()).toHaveLength(1);
 			expect(await immutableProofStorage.getStore()).toHaveLength(1);
+		});
+	});
+
+	describe("AuditableItemGraphService health checks", () => {
+		beforeEach(() => {
+			ContextIdStore.getContextIds = vi.fn().mockReturnValue({
+				[ContextIdKeys.Node]: TEST_NODE_IDENTITY,
+				[ContextIdKeys.Tenant]: TEST_TENANT_IDENTITY,
+				[ContextIdKeys.Organization]: TEST_ORGANIZATION_IDENTITY,
+				[ContextIdKeys.User]: TEST_USER_IDENTITY
+			});
+		});
+
+		test("health check returns ok status when vertex storage is accessible", async () => {
+			const service = new AuditableItemGraphService();
+			const results = await service.healthApplication(async () => {});
+			expect(results).toHaveLength(1);
+			const result = (results as IHealth[])[0];
+			expect(result.category).toBe(HealthCategory.Application);
+			expect(result.status).toBe(HealthStatus.Ok);
+		});
+
+		test("health check returns empty results without org context", async () => {
+			ContextIdStore.getContextIds = vi.fn().mockReturnValue({
+				[ContextIdKeys.Node]: TEST_NODE_IDENTITY,
+				[ContextIdKeys.Tenant]: TEST_TENANT_IDENTITY
+			});
+			const service = new AuditableItemGraphService();
+			const results = await service.healthApplication(async () => {});
+			expect(results).toHaveLength(0);
 		});
 	});
 });

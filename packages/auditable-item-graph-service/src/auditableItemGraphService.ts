@@ -1,6 +1,13 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
 import {
+	HealthCategory,
+	HealthStatus,
+	type HealthApplicationCallback,
+	type IHealth,
+	type IHealthProviderComponent
+} from "@twin.org/api-models";
+import {
 	AuditableItemGraphContexts,
 	AuditableItemGraphDataTypes,
 	AuditableItemGraphMetricIds,
@@ -25,6 +32,7 @@ import {
 import { ContextIdHelper, ContextIdKeys, ContextIdStore } from "@twin.org/context";
 import {
 	ArrayHelper,
+	BaseError,
 	Coerce,
 	ComponentFactory,
 	GeneralError,
@@ -85,7 +93,9 @@ import type { IAuditableItemGraphServiceContext } from "./models/IAuditableItemG
 /**
  * Class for performing auditable item graph operations.
  */
-export class AuditableItemGraphService implements IAuditableItemGraphComponent {
+export class AuditableItemGraphService
+	implements IAuditableItemGraphComponent, IHealthProviderComponent
+{
 	/**
 	 * Runtime name for the class.
 	 */
@@ -193,6 +203,53 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	 */
 	public className(): string {
 		return AuditableItemGraphService.CLASS_NAME;
+	}
+
+	/**
+	 * Runs a set/get/remove cycle against the vertex entity storage using the organisation identity
+	 * from the current context.
+	 * @param callback The callback to invoke when a deferred health result is ready.
+	 * @returns The health status of the service.
+	 */
+	public async healthApplication(
+		callback: HealthApplicationCallback
+	): Promise<IHealth[] | undefined> {
+		const contextIds = (await ContextIdStore.getContextIds()) ?? {};
+		const orgId = contextIds[ContextIdKeys.Organization];
+
+		if (!Is.stringValue(orgId)) {
+			return [];
+		}
+
+		try {
+			const healthVertex = {
+				id: RandomHelper.generateUuidV7("compact"),
+				organizationIdentity: orgId,
+				dateCreated: new Date().toISOString()
+			};
+			await this._vertexStorage.set(healthVertex);
+			await this._vertexStorage.get(healthVertex.id);
+			await this._vertexStorage.remove(healthVertex.id);
+			return [
+				{
+					source: AuditableItemGraphService.CLASS_NAME,
+					category: HealthCategory.Application,
+					status: HealthStatus.Ok,
+					description: "healthDescription"
+				}
+			];
+		} catch (error) {
+			return [
+				{
+					source: AuditableItemGraphService.CLASS_NAME,
+					category: HealthCategory.Application,
+					status: HealthStatus.Error,
+					description: "healthDescription",
+					message: "getVertexFailed",
+					error: BaseError.fromError(error)
+				}
+			];
+		}
 	}
 
 	/**
@@ -308,7 +365,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	}
 
 	/**
-	 * Update a graph vertex (PUT — full replacement of vertex state).
+	 * Update a graph vertex (PUT - full replacement of vertex state).
 	 * Concurrent updates for the same vertex are serialized via `Mutex` on the vertex id.
 	 * @param vertex The vertex to update.
 	 * @returns A promise that resolves when the vertex has been updated.
@@ -391,7 +448,7 @@ export class AuditableItemGraphService implements IAuditableItemGraphComponent {
 	}
 
 	/**
-	 * Partially update a graph vertex (PATCH — explicit list patches; only defined properties applied).
+	 * Partially update a graph vertex (PATCH - explicit list patches; only defined properties applied).
 	 * Serialized with `update` via `Mutex` on the same vertex id within this instance.
 	 * @param partial The partial vertex update.
 	 * @returns A promise that resolves when the partial update has been applied.

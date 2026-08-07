@@ -34,8 +34,8 @@
 		"@twin.org/data-core": "next",
 		"@twin.org/data-json-ld": "next",
 		"@twin.org/entity": "next",
-		"@twin.org/nameof": "next",
 		"@twin.org/immutable-proof-models": "next",
+		"@twin.org/nameof": "next",
 		"@twin.org/standards-schema-org": "next",
 		"@twin.org/telemetry-models": "next",
 		"@twin.org/web": "next"
@@ -43,9 +43,9 @@
 	"devDependencies": {
 		"@twin.org/nameof-transformer": "next",
 		"@twin.org/nameof-vitest-plugin": "next",
-		"@twin.org/validate-locales": "next",
 		"@twin.org/ts-to-jsonld-context": "next",
 		"@twin.org/ts-to-schema": "next",
+		"@twin.org/validate-locales": "next",
 		"@vitest/coverage-v8": "4.1.10",
 		"copyfiles": "2.4.1",
 		"nodemon": "3.1.14",

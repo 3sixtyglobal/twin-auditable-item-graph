@@ -22,10 +22,10 @@ const PREFIX = "auditable-item-graph";
 // Plain vertex id used for routes that do not require URN parsing.
 const VERTEX_ID = "vertex001";
 
-// URN whose NSS resolves to a single segment — used by getVersion (namespaceSpecific(0)).
+// URN whose NSS resolves to a single segment - used by getVersion (namespaceSpecific(0)).
 const VERTEX_URN = "urn:aig:vertex001";
 
-// URN with three colon-delimited NSS segments — used by getChangeset.
+// URN with three colon-delimited NSS segments - used by getChangeset.
 // namespaceSpecificParts()[0] = "vertex001", [2] = "changeset001".
 const CHANGESET_URN = "urn:aig:vertex001:cs:changeset001";
 
