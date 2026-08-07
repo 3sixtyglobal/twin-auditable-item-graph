@@ -1,6 +1,6 @@
 # Interface: IAuditableItemGraphPartialVertex
 
-Partial vertex payload for updatePartial (PATCH — requires id).
+Partial vertex payload for updatePartial (PATCH - requires id).
 Sub-lists use explicit `{ add, remove }` patches; bare arrays are not supported.
 
 ## Extends

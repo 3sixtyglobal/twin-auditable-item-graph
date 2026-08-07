@@ -2,7 +2,7 @@
 
 > **auditableItemGraphUpdatePartial**(`httpRequestContext`, `componentName`, `request`): `Promise`\<`INoContentResponse`\>
 
-Partially update the graph vertex (PATCH — optional scalars; list fields use `{ add, remove }`).
+Partially update the graph vertex (PATCH - optional scalars; list fields use `{ add, remove }`).
 
 ## Parameters
 

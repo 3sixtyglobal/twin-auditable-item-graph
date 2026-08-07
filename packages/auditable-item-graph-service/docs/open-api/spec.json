@@ -709,7 +709,7 @@
 					}
 				],
 				"requestBody": {
-					"description": "Update an auditable item graph vertex (PUT — full replacement of vertex state).",
+					"description": "Update an auditable item graph vertex (PUT - full replacement of vertex state).",
 					"required": true,
 					"content": {
 						"application/json": {
@@ -891,7 +891,7 @@
 					}
 				],
 				"requestBody": {
-					"description": "Partially update an auditable item graph vertex (PATCH — explicit list patches).",
+					"description": "Partially update an auditable item graph vertex (PATCH - explicit list patches).",
 					"required": true,
 					"content": {
 						"application/json": {

@@ -1,6 +1,6 @@
 # Interface: IAuditableItemGraphUpdateRequest
 
-Update an auditable item graph vertex (PUT — full replacement of vertex state).
+Update an auditable item graph vertex (PUT - full replacement of vertex state).
 
 ## Properties
 
