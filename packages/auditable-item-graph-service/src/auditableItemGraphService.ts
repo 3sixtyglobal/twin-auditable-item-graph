@@ -1158,7 +1158,7 @@ export class AuditableItemGraphService
 	 * Parse and validate a vertex URN; return the compact storage id.
 	 * @param id The vertex URN.
 	 * @returns The compact vertex id.
-	 * @throws {GeneralError} If the namespace does not match the expected namespace.
+	 * @throws GeneralError If the namespace does not match the expected namespace.
 	 * @internal
 	 */
 	private parseVertexId(id: string): string {
@@ -1179,7 +1179,7 @@ export class AuditableItemGraphService
 	 * @param propertyName The property name for error reporting.
 	 * @param patch The patch value.
 	 * @returns The validated list patch.
-	 * @throws {GeneralError} If the patch value is a bare array instead of a list patch object.
+	 * @throws GeneralError If the patch value is a bare array instead of a list patch object.
 	 * @internal
 	 */
 	private validateListPatch<TItem>(
