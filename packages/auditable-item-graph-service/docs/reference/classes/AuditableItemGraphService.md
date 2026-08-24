@@ -5,6 +5,7 @@ Class for performing auditable item graph operations.
 ## Implements
 
 - `IAuditableItemGraphComponent`
+- `IHealthProviderComponent`
 
 ## Constructors
 
@@ -70,6 +71,33 @@ The class name of the component.
 
 ***
 
+### healthApplication() {#healthapplication}
+
+> **healthApplication**(`callback`): `Promise`\<`IHealth`[] \| `undefined`\>
+
+Runs a set/get/remove cycle against the vertex entity storage using the organisation identity
+from the current context.
+
+#### Parameters
+
+##### callback
+
+`HealthApplicationCallback`
+
+The callback to invoke when a deferred health result is ready.
+
+#### Returns
+
+`Promise`\<`IHealth`[] \| `undefined`\>
+
+The health status of the service.
+
+#### Implementation of
+
+`IHealthProviderComponent.healthApplication`
+
+***
+
 ### start() {#start}
 
 > **start**(): `Promise`\<`void`\>
@@ -118,7 +146,7 @@ The id of the new graph item.
 
 > **update**(`vertex`): `Promise`\<`void`\>
 
-Update a graph vertex (PUT — full replacement of vertex state).
+Update a graph vertex (PUT - full replacement of vertex state).
 Concurrent updates for the same vertex are serialized via `Mutex` on the vertex id.
 
 #### Parameters
@@ -145,7 +173,7 @@ A promise that resolves when the vertex has been updated.
 
 > **updatePartial**(`partial`): `Promise`\<`void`\>
 
-Partially update a graph vertex (PATCH — explicit list patches; only defined properties applied).
+Partially update a graph vertex (PATCH - explicit list patches; only defined properties applied).
 Serialized with `update` via `Mutex` on the same vertex id within this instance.
 
 #### Parameters

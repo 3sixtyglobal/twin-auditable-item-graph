@@ -3,7 +3,7 @@
 import type { IAuditableItemGraphPartialVertex } from "../IAuditableItemGraphPartialVertex.js";
 
 /**
- * Partially update an auditable item graph vertex (PATCH — explicit list patches).
+ * Partially update an auditable item graph vertex (PATCH - explicit list patches).
  */
 export interface IAuditableItemGraphUpdatePartialRequest {
 	/**

@@ -10,7 +10,7 @@ import type { IAuditableItemGraphResource } from "./IAuditableItemGraphResource.
 import type { IAuditableItemGraphVertex } from "./IAuditableItemGraphVertex.js";
 
 /**
- * Partial vertex payload for updatePartial (PATCH — requires id).
+ * Partial vertex payload for updatePartial.
  * Sub-lists use explicit `{ add, remove }` patches; bare arrays are not supported.
  */
 export interface IAuditableItemGraphPartialVertex extends Omit<

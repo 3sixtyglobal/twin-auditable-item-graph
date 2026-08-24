@@ -281,7 +281,7 @@ export class AuditableItemGraphRestClient
 	}
 
 	/**
-	 * Update a graph vertex (PUT — full replacement of vertex state).
+	 * Update a graph vertex (PUT - full replacement of vertex state).
 	 * The server serializes concurrent updates for the same vertex via `Mutex` on the vertex id;
 	 * requests load-balanced across replicas can still race.
 	 * @param vertex The vertex to update.
@@ -307,7 +307,7 @@ export class AuditableItemGraphRestClient
 	}
 
 	/**
-	 * Partially update a graph vertex (PATCH — optional scalars; list fields use `{ add, remove }`).
+	 * Partially update a graph vertex (PATCH - optional scalars; list fields use `{ add, remove }`).
 	 * @param partial The partial vertex update (must include `id`).
 	 * @returns A promise that resolves when the partial update has been applied.
 	 */

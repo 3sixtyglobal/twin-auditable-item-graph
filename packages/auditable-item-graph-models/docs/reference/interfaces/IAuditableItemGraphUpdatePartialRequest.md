@@ -1,6 +1,6 @@
 # Interface: IAuditableItemGraphUpdatePartialRequest
 
-Partially update an auditable item graph vertex (PATCH — explicit list patches).
+Partially update an auditable item graph vertex (PATCH - explicit list patches).
 
 ## Properties
 

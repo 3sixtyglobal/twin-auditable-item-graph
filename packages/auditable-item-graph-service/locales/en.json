@@ -23,5 +23,11 @@
 			}
 		}
 	},
-	"auditableItemGraphService": {}
+	"auditableItemGraphService": {},
+	"health": {
+		"auditableItemGraphService": {
+			"healthDescription": "Auditable item graph service application health check",
+			"getVertexFailed": "Failed to complete the auditable item graph vertex storage health check"
+		}
+	}
 }

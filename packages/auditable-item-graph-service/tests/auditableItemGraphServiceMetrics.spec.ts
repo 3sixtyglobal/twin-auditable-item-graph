@@ -107,7 +107,7 @@ async function waitForProofGeneration(proofCount: number = 1): Promise<void> {
 	);
 }
 
-describe("AuditableItemGraphService — metrics", () => {
+describe("AuditableItemGraphService - metrics", () => {
 	beforeAll(async () => {
 		await setupTestEnv();
 
@@ -213,6 +213,22 @@ describe("AuditableItemGraphService — metrics", () => {
 		ComponentFactory.register("background-task", () => backgroundTask);
 		await backgroundTask.start();
 
+		ComponentFactory.register("platform", () => ({
+			className: () => "MockPlatform",
+			isMultiTenant: () => false,
+			execute: async (method: () => Promise<void>) => method(),
+			getLocalOriginContext: async () => undefined
+		}));
+
+		ComponentFactory.register("task-scheduler", () => ({
+			className: () => "task-scheduler",
+			addTask: async (taskId: string, times: unknown, taskCallback: () => Promise<void>) => {
+				await taskCallback();
+			},
+			removeTask: async () => {},
+			tasksInfo: async () => ({ tasks: {} })
+		}));
+
 		const immutableProofService = new ImmutableProofService();
 		ComponentFactory.register("immutable-proof", () => immutableProofService);
 		await immutableProofService.start();
@@ -255,7 +271,7 @@ describe("AuditableItemGraphService — metrics", () => {
 		expect(ids).toContain("aig_verifications_failed");
 	});
 
-	test("start() is idempotent — AlreadyExistsError is swallowed", async () => {
+	test("start() is idempotent - AlreadyExistsError is swallowed", async () => {
 		let callCount = 0;
 		const component: ITelemetryComponent = {
 			...makeMockTelemetry().component,
@@ -684,7 +700,7 @@ describe("AuditableItemGraphService — metrics", () => {
 		expect(values.filter(v => v.id === "aig_verifications_succeeded")).toHaveLength(0);
 	});
 
-	test("service works without telemetry component — no errors", async () => {
+	test("service works without telemetry component - no errors", async () => {
 		const service = new AuditableItemGraphService();
 
 		const id = await service.create({
