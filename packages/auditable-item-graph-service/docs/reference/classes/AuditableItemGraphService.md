@@ -163,6 +163,10 @@ The vertex to update.
 
 A promise that resolves when the vertex has been updated.
 
+#### Throws
+
+GeneralError If a bypass vertex is being switched back to audited.
+
 #### Implementation of
 
 `IAuditableItemGraphComponent.update`
@@ -189,6 +193,10 @@ The partial vertex update.
 `Promise`\<`void`\>
 
 A promise that resolves when the partial update has been applied.
+
+#### Throws
+
+GeneralError If a bypass vertex is being switched back to audited.
 
 #### Implementation of
 
@@ -362,7 +370,7 @@ The vertex reconstructed at that version.
 
 #### Throws
 
-NotFoundError if the vertex or version is not found.
+NotFoundError if the vertex or version is not found, a bypass vertex never has versions.
 
 #### Implementation of
 
@@ -404,7 +412,8 @@ Only return versions created before this ISO 8601 timestamp (exclusive).
 
 `Promise`\<`IAuditableItemGraphVertexVersionList`\>
 
-The list of vertex versions.
+The list of vertex versions, a bypass vertex returns a single baseline entry for its
+current state when that falls within the requested range.
 
 #### Throws
 

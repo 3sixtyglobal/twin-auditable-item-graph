@@ -9,6 +9,7 @@
 - [AuditableItemGraphPatch](classes/AuditableItemGraphPatch.md)
 - [AuditableItemGraphResource](classes/AuditableItemGraphResource.md)
 - [AuditableItemGraphVertex](classes/AuditableItemGraphVertex.md)
+- [AuditableItemGraphVertexV0](classes/AuditableItemGraphVertexV0.md)
 
 ## Interfaces
 
