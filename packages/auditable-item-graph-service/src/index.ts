@@ -8,6 +8,7 @@ export * from "./entities/auditableItemGraphEdge.js";
 export * from "./entities/auditableItemGraphPatch.js";
 export * from "./entities/auditableItemGraphResource.js";
 export * from "./entities/auditableItemGraphVertex.js";
+export * from "./entities/auditableItemGraphVertexV0.js";
 export * from "./models/IAuditableItemGraphServiceConfig.js";
 export * from "./models/IAuditableItemGraphServiceConstructorOptions.js";
 export * from "./restEntryPoints.js";

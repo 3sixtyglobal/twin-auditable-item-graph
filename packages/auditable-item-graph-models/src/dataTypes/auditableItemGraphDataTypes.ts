@@ -5,6 +5,7 @@ import { AuditableItemGraphContexts } from "../models/auditableItemGraphContexts
 import { AuditableItemGraphTypes } from "../models/auditableItemGraphTypes.js";
 import AuditableItemGraphAliasSchema from "../schemas/AuditableItemGraphAlias.json" with { type: "json" };
 import AuditableItemGraphAuditedElementSchema from "../schemas/AuditableItemGraphAuditedElement.json" with { type: "json" };
+import AuditableItemGraphAuditModeSchema from "../schemas/AuditableItemGraphAuditMode.json" with { type: "json" };
 import AuditableItemGraphChangesetSchema from "../schemas/AuditableItemGraphChangeset.json" with { type: "json" };
 import AuditableItemGraphEdgeSchema from "../schemas/AuditableItemGraphEdge.json" with { type: "json" };
 import AuditableItemGraphListPatchSchema from "../schemas/AuditableItemGraphListPatch.json" with { type: "json" };
@@ -62,6 +63,10 @@ export class AuditableItemGraphDataTypes {
 			{
 				type: AuditableItemGraphTypes.PartialVertex,
 				schema: AuditableItemGraphPartialVertexSchema
+			},
+			{
+				type: AuditableItemGraphTypes.AuditMode,
+				schema: AuditableItemGraphAuditModeSchema
 			}
 		];
 

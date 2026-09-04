@@ -8,6 +8,7 @@ import {
 	type IHealthProviderComponent
 } from "@twin.org/api-models";
 import {
+	AuditableItemGraphAuditMode,
 	AuditableItemGraphContexts,
 	AuditableItemGraphDataTypes,
 	AuditableItemGraphMetricIds,
@@ -267,6 +268,7 @@ export class AuditableItemGraphService
 	/**
 	 * Create a new graph vertex.
 	 * @param vertex The vertex to create.
+	 * @param vertex.auditMode How the mutations of the vertex are recorded, defaults to audited.
 	 * @param vertex.annotationObject The annotation object for the vertex as JSON-LD.
 	 * @param vertex.aliases Alternative aliases that can be used to identify the vertex.
 	 * @param vertex.resources The resources attached to the vertex.
@@ -275,6 +277,14 @@ export class AuditableItemGraphService
 	 */
 	public async create(vertex: Omit<IAuditableItemGraphVertex, "id">): Promise<string> {
 		Guards.object(AuditableItemGraphService.CLASS_NAME, nameof(vertex), vertex);
+		if (Is.notEmpty(vertex.auditMode)) {
+			Guards.arrayOneOf(
+				AuditableItemGraphService.CLASS_NAME,
+				nameof(vertex.auditMode),
+				vertex.auditMode,
+				Object.values(AuditableItemGraphAuditMode)
+			);
+		}
 
 		const contextIds = await ContextIdStore.getContextIds();
 		ContextIdHelper.guard(contextIds, ContextIdKeys.Organization);
@@ -324,17 +334,21 @@ export class AuditableItemGraphService
 			};
 			const originalEntity = ObjectHelper.clone(vertexModel);
 
+			vertexModel.auditMode = vertex.auditMode;
 			vertexModel.annotationObject = vertex.annotationObject;
 
 			await this.updateAliasList(context, vertexModel, vertex.aliases);
 			await this.updateResourceList(context, vertexModel, vertex.resources);
 			await this.updateEdgeList(context, vertexModel, vertex.edges);
 
-			delete originalEntity.aliasIndex;
-			delete originalEntity.resourceTypeIndex;
-			await this.addChangeset(context, originalEntity, vertexModel, true, 0);
+			// Bypass vertices keep no changeset history, so there is no baseline version to record.
+			if (vertex.auditMode !== AuditableItemGraphAuditMode.Bypass) {
+				delete originalEntity.aliasIndex;
+				delete originalEntity.resourceTypeIndex;
+				await this.addChangeset(context, originalEntity, vertexModel, true, 0);
 
-			vertexModel.version = 0;
+				vertexModel.version = 0;
+			}
 
 			await this._vertexStorage.set({
 				...vertexModel,
@@ -369,10 +383,19 @@ export class AuditableItemGraphService
 	 * Concurrent updates for the same vertex are serialized via `Mutex` on the vertex id.
 	 * @param vertex The vertex to update.
 	 * @returns A promise that resolves when the vertex has been updated.
+	 * @throws GeneralError If a bypass vertex is being switched back to audited.
 	 */
 	public async update(vertex: IAuditableItemGraphVertex): Promise<void> {
 		Guards.object(AuditableItemGraphService.CLASS_NAME, nameof(vertex), vertex);
 		Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(vertex.id), vertex.id);
+		if (Is.notEmpty(vertex.auditMode)) {
+			Guards.arrayOneOf(
+				AuditableItemGraphService.CLASS_NAME,
+				nameof(vertex.auditMode),
+				vertex.auditMode,
+				Object.values(AuditableItemGraphAuditMode)
+			);
+		}
 
 		const vertexId = this.parseVertexId(vertex.id);
 
@@ -424,6 +447,8 @@ export class AuditableItemGraphService
 					userIdentity: contextIds?.[ContextIdKeys.User]
 				};
 
+				const auditModeTransition = this.resolveAuditModeTransition(vertexEntity, vertex.auditMode);
+
 				delete vertexEntity.aliasIndex;
 				const originalEntity = ObjectHelper.clone(vertexEntity);
 				const newEntity = ObjectHelper.clone(vertexEntity);
@@ -433,7 +458,14 @@ export class AuditableItemGraphService
 				await this.updateResourceList(context, newEntity, vertex.resources);
 				await this.updateEdgeList(context, newEntity, vertex.edges);
 
-				await this.persistVertexChanges(context, vertexId, vertex.id, originalEntity, newEntity);
+				await this.persistVertexChanges(
+					context,
+					vertexId,
+					vertex.id,
+					originalEntity,
+					newEntity,
+					auditModeTransition
+				);
 			} catch (error) {
 				throw new GeneralError(
 					AuditableItemGraphService.CLASS_NAME,
@@ -452,6 +484,7 @@ export class AuditableItemGraphService
 	 * Serialized with `update` via `Mutex` on the same vertex id within this instance.
 	 * @param partial The partial vertex update.
 	 * @returns A promise that resolves when the partial update has been applied.
+	 * @throws GeneralError If a bypass vertex is being switched back to audited.
 	 */
 	public async updatePartial(partial: IAuditableItemGraphPartialVertex): Promise<void> {
 		Guards.object<IAuditableItemGraphPartialVertex>(
@@ -460,6 +493,14 @@ export class AuditableItemGraphService
 			partial
 		);
 		Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(partial.id), partial.id);
+		if (Is.notEmpty(partial.auditMode)) {
+			Guards.arrayOneOf(
+				AuditableItemGraphService.CLASS_NAME,
+				nameof(partial.auditMode),
+				partial.auditMode,
+				Object.values(AuditableItemGraphAuditMode)
+			);
+		}
 
 		const vertexId = this.parseVertexId(partial.id);
 
@@ -500,6 +541,11 @@ export class AuditableItemGraphService
 					userIdentity: contextIds?.[ContextIdKeys.User]
 				};
 
+				const auditModeTransition = this.resolveAuditModeTransition(
+					vertexEntity,
+					partial.auditMode
+				);
+
 				delete vertexEntity.aliasIndex;
 				const originalEntity = ObjectHelper.clone(vertexEntity);
 				const newEntity = ObjectHelper.clone(vertexEntity);
@@ -529,7 +575,14 @@ export class AuditableItemGraphService
 					await this.applyEdgePatch(context, newEntity, edgePatch);
 				}
 
-				await this.persistVertexChanges(context, vertexId, partial.id, originalEntity, newEntity);
+				await this.persistVertexChanges(
+					context,
+					vertexId,
+					partial.id,
+					originalEntity,
+					newEntity,
+					auditModeTransition
+				);
 			} catch (error) {
 				throw new GeneralError(
 					AuditableItemGraphService.CLASS_NAME,
@@ -581,7 +634,10 @@ export class AuditableItemGraphService
 
 			const vertexModel = this.vertexEntityToJsonLd(vertexEntity);
 
-			const verifySignatureDepth = options?.verifySignatureDepth ?? VerifyDepth.None;
+			// Bypass vertices have no changesets to verify, so verification is never reported for them.
+			const verifySignatureDepth = this.isBypass(vertexEntity)
+				? VerifyDepth.None
+				: (options?.verifySignatureDepth ?? VerifyDepth.None);
 
 			let verified: boolean | undefined;
 
@@ -669,14 +725,20 @@ export class AuditableItemGraphService
 				throw new NotFoundError(AuditableItemGraphService.CLASS_NAME, "vertexNotFound", id);
 			}
 
-			const chunk = await this.verifyChangesetChunk(
-				vertexId,
-				options?.verifySignatureDepth ?? VerifyDepth.None,
-				cursor,
-				limit
-			);
+			// Bypass vertices maintain no changeset history.
+			const chunk = this.isBypass(vertexEntity)
+				? { changesets: [], verified: true, cursor: undefined }
+				: await this.verifyChangesetChunk(
+						vertexId,
+						options?.verifySignatureDepth ?? VerifyDepth.None,
+						cursor,
+						limit
+					);
 
-			if ((options?.verifySignatureDepth ?? VerifyDepth.None) !== VerifyDepth.None) {
+			if (
+				!this.isBypass(vertexEntity) &&
+				(options?.verifySignatureDepth ?? VerifyDepth.None) !== VerifyDepth.None
+			) {
 				if (chunk.verified) {
 					await MetricHelper.metricIncrement(
 						this._telemetryComponent,
@@ -747,6 +809,11 @@ export class AuditableItemGraphService
 				throw new NotFoundError(AuditableItemGraphService.CLASS_NAME, "vertexNotFound", id);
 			}
 
+			// Bypass vertices maintain no changeset history.
+			if (this.isBypass(vertexEntity)) {
+				throw new NotFoundError(AuditableItemGraphService.CLASS_NAME, "changesetNotFound", id);
+			}
+
 			const changesetEntity = await this._changesetStorage.get(changesetId);
 			if (Is.empty(changesetEntity)) {
 				throw new NotFoundError(AuditableItemGraphService.CLASS_NAME, "changesetNotFound", id);
@@ -788,7 +855,7 @@ export class AuditableItemGraphService
 	 * @param id The id of the vertex.
 	 * @param version The version number to retrieve.
 	 * @returns The vertex reconstructed at that version.
-	 * @throws NotFoundError if the vertex or version is not found.
+	 * @throws NotFoundError if the vertex or version is not found, a bypass vertex never has versions.
 	 */
 	public async getVersion(id: string, version: number): Promise<IAuditableItemGraphVertex> {
 		Guards.stringValue(AuditableItemGraphService.CLASS_NAME, nameof(id), id);
@@ -809,6 +876,15 @@ export class AuditableItemGraphService
 			const vertexEntity = await this._vertexStorage.get(vertexId);
 			if (Is.empty(vertexEntity)) {
 				throw new NotFoundError(AuditableItemGraphService.CLASS_NAME, "vertexNotFound", id);
+			}
+
+			// Bypass vertices maintain no version chain.
+			if (this.isBypass(vertexEntity)) {
+				throw new NotFoundError(
+					AuditableItemGraphService.CLASS_NAME,
+					"versionNotFound",
+					version.toString()
+				);
 			}
 
 			const currentVersion = vertexEntity.version ?? 0;
@@ -865,7 +941,8 @@ export class AuditableItemGraphService
 	 * @param options Additional options for the operation.
 	 * @param options.after Only return versions created after this ISO 8601 timestamp (exclusive).
 	 * @param options.before Only return versions created before this ISO 8601 timestamp (exclusive).
-	 * @returns The list of vertex versions.
+	 * @returns The list of vertex versions, a bypass vertex returns a single baseline entry for its
+	 * current state when that falls within the requested range.
 	 * @throws NotFoundError if the vertex is not found.
 	 */
 	public async getVersions(
@@ -897,23 +974,9 @@ export class AuditableItemGraphService
 			const beforeDate = Coerce.dateTime(options?.before);
 			const afterDate = Coerce.dateTime(options?.after);
 
-			const allChangesets = await this.internalGetChangesets(vertexId, {
-				before: beforeDate?.toISOString()
-			});
-
-			const versions: { version: number; dateCreated: string }[] = [];
-			for (const changeset of allChangesets) {
-				const changesetDate = Coerce.dateTime(changeset.dateCreated);
-				const afterExcluded =
-					!Is.empty(afterDate) && !Is.empty(changesetDate) && changesetDate <= afterDate;
-
-				if (!afterExcluded) {
-					versions.push({
-						version: changeset.version ?? 0,
-						dateCreated: changeset.dateCreated
-					});
-				}
-			}
+			const versions = this.isBypass(vertexEntity)
+				? this.bypassVersions(vertexEntity, afterDate, beforeDate)
+				: await this.auditedVersions(vertexId, afterDate, beforeDate);
 
 			const versionList: IAuditableItemGraphVertexVersionList = {
 				"@context": [
@@ -1202,12 +1265,72 @@ export class AuditableItemGraphService
 	}
 
 	/**
+	 * Resolve the audit mode for an update, bypass is terminal so it can not return to audited.
+	 * @param vertexEntity The stored vertex entity.
+	 * @param requestedMode The audit mode requested by the caller, when absent the stored mode is kept.
+	 * @returns The audit mode to apply and whether the existing history must be compacted.
+	 * @throws GeneralError If a bypass vertex is being switched back to audited.
+	 * @internal
+	 */
+	private resolveAuditModeTransition(
+		vertexEntity: AuditableItemGraphVertex,
+		requestedMode?: AuditableItemGraphAuditMode
+	): { auditMode: AuditableItemGraphAuditMode; compactHistory: boolean } {
+		const currentMode = vertexEntity.auditMode ?? AuditableItemGraphAuditMode.Audited;
+
+		if (Is.empty(requestedMode)) {
+			return { auditMode: currentMode, compactHistory: false };
+		}
+
+		if (
+			currentMode === AuditableItemGraphAuditMode.Bypass &&
+			requestedMode === AuditableItemGraphAuditMode.Audited
+		) {
+			throw new GeneralError(
+				AuditableItemGraphService.CLASS_NAME,
+				"auditModeTransitionNotAllowed",
+				{
+					currentMode,
+					requestedMode
+				}
+			);
+		}
+
+		return {
+			auditMode: requestedMode,
+			compactHistory:
+				currentMode === AuditableItemGraphAuditMode.Audited &&
+				requestedMode === AuditableItemGraphAuditMode.Bypass
+		};
+	}
+
+	/**
+	 * Discard the changeset history for a vertex along with any proofs the changesets reference.
+	 * @param vertexId The compact vertex id.
+	 * @returns A promise that resolves when the history and its proofs have been removed.
+	 * @internal
+	 */
+	private async compactVertexHistory(vertexId: string): Promise<void> {
+		const changesets = await this.internalGetChangesets(vertexId);
+
+		for (const changeset of changesets) {
+			await this._changesetStorage.remove(changeset.id);
+			if (Is.stringValue(changeset.proofId)) {
+				await this._immutableProofComponent.remove(changeset.proofId);
+			}
+		}
+	}
+
+	/**
 	 * Persist vertex changes after update or partial update.
 	 * @param context The context for the operation.
 	 * @param vertexId The compact vertex id.
 	 * @param vertexUrn The vertex URN for events.
 	 * @param originalEntity The entity before changes.
 	 * @param newEntity The entity after changes.
+	 * @param auditModeTransition The audit mode to apply and whether the history must be compacted.
+	 * @param auditModeTransition.auditMode The audit mode to apply.
+	 * @param auditModeTransition.compactHistory Whether the existing history must be discarded.
 	 * @returns A promise that resolves when the changes have been persisted and events published.
 	 * @internal
 	 */
@@ -1216,8 +1339,21 @@ export class AuditableItemGraphService
 		vertexId: string,
 		vertexUrn: string,
 		originalEntity: AuditableItemGraphVertex,
-		newEntity: AuditableItemGraphVertex
+		newEntity: AuditableItemGraphVertex,
+		auditModeTransition: { auditMode: AuditableItemGraphAuditMode; compactHistory: boolean }
 	): Promise<void> {
+		if (auditModeTransition.auditMode === AuditableItemGraphAuditMode.Bypass) {
+			await this.persistBypassChanges(
+				context,
+				vertexId,
+				vertexUrn,
+				originalEntity,
+				newEntity,
+				auditModeTransition.compactHistory
+			);
+			return;
+		}
+
 		const nextVersion = Is.empty(originalEntity.version)
 			? (await this.internalGetChangesets(vertexId)).length
 			: originalEntity.version + 1;
@@ -1249,6 +1385,70 @@ export class AuditableItemGraphService
 	}
 
 	/**
+	 * Persist vertex changes for a bypass vertex, overwriting the stored state with no changeset.
+	 * @param context The context for the operation.
+	 * @param vertexId The compact vertex id.
+	 * @param vertexUrn The vertex URN for events.
+	 * @param originalEntity The entity before changes.
+	 * @param newEntity The entity after changes.
+	 * @param compactHistory Whether the vertex is switching from audited and must discard its history.
+	 * @returns A promise that resolves when the changes have been persisted and events published.
+	 * @internal
+	 */
+	private async persistBypassChanges(
+		context: IAuditableItemGraphServiceContext,
+		vertexId: string,
+		vertexUrn: string,
+		originalEntity: AuditableItemGraphVertex,
+		newEntity: AuditableItemGraphVertex,
+		compactHistory: boolean
+	): Promise<void> {
+		newEntity.auditMode = AuditableItemGraphAuditMode.Bypass;
+		delete newEntity.version;
+
+		const patches = JsonHelper.diff(originalEntity, newEntity);
+		if (patches.length === 0) {
+			return;
+		}
+
+		if (compactHistory) {
+			await this.compactVertexHistory(vertexId);
+		}
+
+		newEntity.dateModified = context.now;
+
+		const indexes = this.buildIndexes(newEntity);
+
+		await this._vertexStorage.set({
+			...newEntity,
+			...indexes
+		});
+
+		await MetricHelper.metricIncrement(
+			this._telemetryComponent,
+			AuditableItemGraphMetricIds.VerticesUpdated,
+			{
+				patchCount: patches.length
+			}
+		);
+
+		await this._eventBusComponent?.publish<IAuditableItemGraphEventBusVertexUpdated>(
+			AuditableItemGraphTopics.VertexUpdated,
+			{ id: vertexUrn, patches }
+		);
+	}
+
+	/**
+	 * Whether the vertex records its mutations in place with no audit trail.
+	 * @param vertexEntity The stored vertex entity.
+	 * @returns True if the vertex is in bypass mode.
+	 * @internal
+	 */
+	private isBypass(vertexEntity: AuditableItemGraphVertex): boolean {
+		return vertexEntity.auditMode === AuditableItemGraphAuditMode.Bypass;
+	}
+
+	/**
 	 * Map the vertex entity to JSON-LD.
 	 * @param vertexEntity The vertex entity.
 	 * @returns The model.
@@ -1266,6 +1466,7 @@ export class AuditableItemGraphService
 			dateCreated: vertexEntity.dateCreated,
 			dateModified: vertexEntity.dateModified,
 			organizationIdentity: vertexEntity.organizationIdentity,
+			auditMode: vertexEntity.auditMode,
 			annotationObject: vertexEntity.annotationObject
 		};
 
@@ -1425,6 +1626,69 @@ export class AuditableItemGraphService
 		} while (Is.stringValue(cursor));
 
 		return all;
+	}
+
+	/**
+	 * Build the version list for an audited vertex from its changesets.
+	 * @param vertexId The compact vertex id.
+	 * @param afterDate Only include versions created after this date, exclusive.
+	 * @param beforeDate Only include versions created before this date, exclusive.
+	 * @returns The matching versions in ascending order.
+	 * @internal
+	 */
+	private async auditedVersions(
+		vertexId: string,
+		afterDate?: Date,
+		beforeDate?: Date
+	): Promise<{ version: number; dateCreated: string }[]> {
+		const allChangesets = await this.internalGetChangesets(vertexId, {
+			before: beforeDate?.toISOString()
+		});
+
+		const versions: { version: number; dateCreated: string }[] = [];
+		for (const changeset of allChangesets) {
+			const changesetDate = Coerce.dateTime(changeset.dateCreated);
+			const afterExcluded =
+				!Is.empty(afterDate) && !Is.empty(changesetDate) && changesetDate <= afterDate;
+
+			if (!afterExcluded) {
+				versions.push({
+					version: changeset.version ?? 0,
+					dateCreated: changeset.dateCreated
+				});
+			}
+		}
+
+		return versions;
+	}
+
+	/**
+	 * Build the version list for a bypass vertex, which only exposes its current state as
+	 * a single baseline entry numbered zero.
+	 * @param vertexEntity The stored vertex entity.
+	 * @param afterDate Only include the state when it was modified after this date, exclusive.
+	 * @param beforeDate Only include the state when it was modified before this date, exclusive.
+	 * @returns The baseline entry when the state falls within the range, otherwise empty.
+	 * @internal
+	 */
+	private bypassVersions(
+		vertexEntity: AuditableItemGraphVertex,
+		afterDate?: Date,
+		beforeDate?: Date
+	): { version: number; dateCreated: string }[] {
+		const stateDate = vertexEntity.dateModified ?? vertexEntity.dateCreated;
+		const stateDateTime = Coerce.dateTime(stateDate);
+
+		if (!Is.empty(stateDateTime)) {
+			if (!Is.empty(beforeDate) && stateDateTime >= beforeDate) {
+				return [];
+			}
+			if (!Is.empty(afterDate) && stateDateTime <= afterDate) {
+				return [];
+			}
+		}
+
+		return [{ version: 0, dateCreated: stateDate }];
 	}
 
 	/**

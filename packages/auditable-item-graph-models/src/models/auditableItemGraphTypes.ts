@@ -59,7 +59,12 @@ export const AuditableItemGraphTypes = {
 	/**
 	 * Represents auditable item graph list patch.
 	 */
-	ListPatch: "AuditableItemGraphListPatch"
+	ListPatch: "AuditableItemGraphListPatch",
+
+	/**
+	 * Represents auditable item graph audit mode.
+	 */
+	AuditMode: "AuditableItemGraphAuditMode"
 } as const;
 
 /**

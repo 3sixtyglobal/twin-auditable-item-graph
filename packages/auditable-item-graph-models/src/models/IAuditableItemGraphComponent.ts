@@ -17,6 +17,7 @@ export interface IAuditableItemGraphComponent extends IComponent {
 	/**
 	 * Create a new graph vertex.
 	 * @param vertex The vertex to create.
+	 * @param vertex.auditMode How the mutations of the vertex are recorded, defaults to audited.
 	 * @param vertex.annotationObject The annotation object for the vertex as JSON-LD.
 	 * @param vertex.aliases Alternative aliases that can be used to identify the vertex.
 	 * @param vertex.resources The resources attached to the vertex.
@@ -31,11 +32,13 @@ export interface IAuditableItemGraphComponent extends IComponent {
 	 * Multi-replica deployments are not coordinated.
 	 * @param vertex The vertex to update.
 	 * @param vertex.id The id of the vertex to update.
+	 * @param vertex.auditMode How the mutations of the vertex are recorded, when absent the current mode is kept.
 	 * @param vertex.annotationObject The annotation object for the vertex as JSON-LD.
 	 * @param vertex.aliases Alternative aliases that can be used to identify the vertex.
 	 * @param vertex.resources The resources attached to the vertex.
 	 * @param vertex.edges The edges connected to the vertex.
 	 * @returns A promise that resolves when the vertex has been updated.
+	 * @throws GeneralError If a bypass vertex is being switched back to audited.
 	 */
 	update(vertex: IAuditableItemGraphVertex): Promise<void>;
 
@@ -45,6 +48,7 @@ export interface IAuditableItemGraphComponent extends IComponent {
 	 * on the same vertex id.
 	 * @param partial The partial vertex update (must include `id`).
 	 * @returns A promise that resolves when the partial update has been applied.
+	 * @throws GeneralError If a bypass vertex is being switched back to audited.
 	 */
 	updatePartial(partial: IAuditableItemGraphPartialVertex): Promise<void>;
 
@@ -72,7 +76,7 @@ export interface IAuditableItemGraphComponent extends IComponent {
 	 * @param limit Limit the number of entities to return.
 	 * @param options Additional options for the get operation.
 	 * @param options.verifySignatureDepth How many signatures to verify, defaults to "none".
-	 * @returns The changeset if found.
+	 * @returns The changeset if found, always empty for a bypass vertex.
 	 * @throws NotFoundError if the vertex is not found.
 	 */
 	getChangesets(
@@ -93,7 +97,7 @@ export interface IAuditableItemGraphComponent extends IComponent {
 	 * @param options Additional options for the get operation.
 	 * @param options.verifySignatureDepth How many signatures to verify, defaults to "none".
 	 * @returns The changeset if found.
-	 * @throws NotFoundError if the vertex or changeset is not found.
+	 * @throws NotFoundError if the vertex or changeset is not found, a bypass vertex never has changesets.
 	 */
 	getChangeset(
 		id: string,
@@ -105,7 +109,7 @@ export interface IAuditableItemGraphComponent extends IComponent {
 	 * @param id The id of the vertex.
 	 * @param version The version number to retrieve.
 	 * @returns The vertex reconstructed at that version.
-	 * @throws NotFoundError if the vertex or version is not found.
+	 * @throws NotFoundError if the vertex or version is not found, a bypass vertex never has versions.
 	 */
 	getVersion(id: string, version: number): Promise<IAuditableItemGraphVertex>;
 
@@ -115,7 +119,8 @@ export interface IAuditableItemGraphComponent extends IComponent {
 	 * @param options Additional options for the operation.
 	 * @param options.after Only return versions created after this ISO 8601 timestamp (exclusive).
 	 * @param options.before Only return versions created before this ISO 8601 timestamp (exclusive).
-	 * @returns The list of vertex versions.
+	 * @returns The list of vertex versions, a bypass vertex returns a single baseline entry for its
+	 * current state when that falls within the requested range.
 	 * @throws NotFoundError if the vertex is not found.
 	 */
 	getVersions(

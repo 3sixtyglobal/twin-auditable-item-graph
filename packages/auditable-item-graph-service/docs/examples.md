@@ -116,6 +116,38 @@ console.log(queryResult.entries.itemListElement?.length ?? 0); // 3
 await service.removeVerifiable('aig:018f5a6cfd9444d58c7c2d4df1fd0a23');
 ```
 
+Vertices which only need their current state can opt out of versioning with `auditMode`. Bypass is a
+terminal mode; switching an audited vertex to bypass compacts its history and removes the associated
+proofs, and a bypass vertex can never return to audited.
+
+```typescript
+import { AuditableItemGraphAuditMode } from '@twin.org/auditable-item-graph-models';
+import { AuditableItemGraphService } from '@twin.org/auditable-item-graph-service';
+
+const service = new AuditableItemGraphService();
+
+const lookupId = await service.create({
+  auditMode: AuditableItemGraphAuditMode.Bypass,
+  aliases: [{ id: 'currency-rates', aliasFormat: 'lookupRef' }]
+});
+
+// Overwrites the stored state in place, no changeset is written.
+await service.updatePartial({
+  id: lookupId,
+  annotationObject: { '@context': 'https://schema.org', type: 'Thing', name: 'Rates 2026-03-10' }
+});
+
+const changesets = await service.getChangesets(lookupId);
+
+console.log(changesets.changesets.itemListElement?.length ?? 0); // 0
+
+// Archive an existing audited vertex by compacting it to its current state.
+await service.updatePartial({
+  id: 'aig:018f5a6cfd9444d58c7c2d4df1fd0a23',
+  auditMode: AuditableItemGraphAuditMode.Bypass
+});
+```
+
 ## AuditableItemGraphVertex
 
 ```typescript

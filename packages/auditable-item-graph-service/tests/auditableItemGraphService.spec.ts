@@ -3,6 +3,7 @@
 import { HealthCategory, HealthStatus, type IHealth } from "@twin.org/api-models";
 import { TenantIdContextIdHandler } from "@twin.org/api-tenant-processor";
 import {
+	AuditableItemGraphAuditMode,
 	AuditableItemGraphContexts,
 	AuditableItemGraphTypes,
 	type IAuditableItemGraphAlias,
@@ -3650,6 +3651,356 @@ describe("AuditableItemGraphService", () => {
 			before: "2024-01-01T00:00:00.000Z"
 		});
 		expect(excluded.itemListElement).toHaveLength(0);
+	});
+
+	test("Can create a vertex in bypass mode with no changeset or version", async () => {
+		const service = new AuditableItemGraphService();
+		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			auditMode: AuditableItemGraphAuditMode.Bypass,
+			aliases: [{ type: AuditableItemGraphTypes.Alias, id: "foo123" }]
+		});
+
+		expect(await changesetStorage.getStore()).toHaveLength(0);
+
+		const vertexStore = await vertexStorage.getStore();
+		expect(vertexStore).toHaveLength(1);
+		expect(vertexStore[0].auditMode).toEqual(AuditableItemGraphAuditMode.Bypass);
+		expect(vertexStore[0].version).toBeUndefined();
+
+		const result = await service.get(id);
+		expect(result.auditMode).toEqual(AuditableItemGraphAuditMode.Bypass);
+		expect(result.version).toBeUndefined();
+		expect(result.verified).toBeUndefined();
+	});
+
+	test("Can update a bypass vertex in place with no changeset or version", async () => {
+		const service = new AuditableItemGraphService();
+		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			auditMode: AuditableItemGraphAuditMode.Bypass,
+			aliases: [{ type: AuditableItemGraphTypes.Alias, id: "foo123" }]
+		});
+
+		await service.update({
+			id,
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			aliases: [{ type: AuditableItemGraphTypes.Alias, id: "bar456" }]
+		});
+
+		expect(await changesetStorage.getStore()).toHaveLength(0);
+
+		const vertexStore = await vertexStorage.getStore();
+		expect(vertexStore).toHaveLength(1);
+		expect(vertexStore[0].auditMode).toEqual(AuditableItemGraphAuditMode.Bypass);
+		expect(vertexStore[0].version).toBeUndefined();
+		expect(vertexStore[0].dateCreated).toEqual(new Date(FIRST_TICK).toISOString());
+		expect(vertexStore[0].dateModified).toEqual(new Date(SECOND_TICK).toISOString());
+
+		const result = await service.get(id);
+		expect(result.aliases).toEqual([
+			expect.objectContaining({ id: "bar456", type: AuditableItemGraphTypes.Alias })
+		]);
+	});
+
+	test("Can update a bypass vertex without repeating the audit mode", async () => {
+		const service = new AuditableItemGraphService();
+		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			auditMode: AuditableItemGraphAuditMode.Bypass
+		});
+
+		await service.updatePartial({
+			id,
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			aliasPatches: { add: [{ type: AuditableItemGraphTypes.Alias, id: "foo123" }] }
+		});
+
+		expect(await changesetStorage.getStore()).toHaveLength(0);
+
+		const result = await service.get(id);
+		expect(result.auditMode).toEqual(AuditableItemGraphAuditMode.Bypass);
+		expect(result.version).toBeUndefined();
+	});
+
+	test("Can switch a vertex from audited to bypass which compacts the history", async () => {
+		const service = new AuditableItemGraphService();
+		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			aliases: [{ type: AuditableItemGraphTypes.Alias, id: "foo123" }]
+		});
+
+		await waitForProofGeneration();
+
+		expect(await changesetStorage.getStore()).toHaveLength(1);
+		expect(await immutableProofStorage.getStore()).toHaveLength(1);
+		expect(notarizationStore.size).toEqual(1);
+
+		await service.update({
+			id,
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			auditMode: AuditableItemGraphAuditMode.Bypass,
+			aliases: [{ type: AuditableItemGraphTypes.Alias, id: "foo123" }]
+		});
+
+		expect(await changesetStorage.getStore()).toHaveLength(0);
+		expect(await immutableProofStorage.getStore()).toHaveLength(0);
+		expect(notarizationStore.size).toEqual(0);
+
+		const vertexStore = await vertexStorage.getStore();
+		expect(vertexStore[0].auditMode).toEqual(AuditableItemGraphAuditMode.Bypass);
+		expect(vertexStore[0].version).toBeUndefined();
+
+		const changesets = await service.getChangesets(id);
+		expect(changesets.changesets.itemListElement).toHaveLength(0);
+	});
+
+	test("Can switch a vertex from audited to bypass with updatePartial", async () => {
+		const service = new AuditableItemGraphService();
+		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			aliases: [{ type: AuditableItemGraphTypes.Alias, id: "foo123" }]
+		});
+
+		await waitForProofGeneration();
+
+		await service.updatePartial({
+			id,
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			auditMode: AuditableItemGraphAuditMode.Bypass
+		});
+
+		expect(await changesetStorage.getStore()).toHaveLength(0);
+		expect(await immutableProofStorage.getStore()).toHaveLength(0);
+		expect(notarizationStore.size).toEqual(0);
+
+		const result = await service.get(id);
+		expect(result.auditMode).toEqual(AuditableItemGraphAuditMode.Bypass);
+		expect(result.aliases).toEqual([
+			expect.objectContaining({ id: "foo123", type: AuditableItemGraphTypes.Alias })
+		]);
+	});
+
+	test("Can switch a vertex with multiple changesets from audited to bypass", async () => {
+		const service = new AuditableItemGraphService();
+		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			aliases: [{ type: AuditableItemGraphTypes.Alias, id: "foo123" }]
+		});
+
+		await service.update({
+			id,
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			aliases: [
+				{ type: AuditableItemGraphTypes.Alias, id: "foo123" },
+				{ type: AuditableItemGraphTypes.Alias, id: "bar456" }
+			]
+		});
+
+		await waitForProofGeneration(2);
+
+		expect(await changesetStorage.getStore()).toHaveLength(2);
+		expect(await immutableProofStorage.getStore()).toHaveLength(2);
+		expect(notarizationStore.size).toEqual(2);
+
+		await service.updatePartial({
+			id,
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			auditMode: AuditableItemGraphAuditMode.Bypass
+		});
+
+		expect(await changesetStorage.getStore()).toHaveLength(0);
+		expect(await immutableProofStorage.getStore()).toHaveLength(0);
+		expect(notarizationStore.size).toEqual(0);
+
+		const vertexStore = await vertexStorage.getStore();
+		expect(vertexStore[0].auditMode).toEqual(AuditableItemGraphAuditMode.Bypass);
+		expect(vertexStore[0].version).toBeUndefined();
+
+		const changesets = await service.getChangesets(id);
+		expect(changesets.changesets.itemListElement).toHaveLength(0);
+	});
+
+	test("Throws when switching a bypass vertex back to audited with update", async () => {
+		const service = new AuditableItemGraphService();
+		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			auditMode: AuditableItemGraphAuditMode.Bypass
+		});
+
+		await expect(
+			service.update({
+				id,
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex,
+				auditMode: AuditableItemGraphAuditMode.Audited
+			})
+		).rejects.toMatchObject({
+			message: "auditableItemGraphService.updatingFailed",
+			cause: {
+				message: "auditableItemGraphService.auditModeTransitionNotAllowed",
+				properties: {
+					currentMode: AuditableItemGraphAuditMode.Bypass,
+					requestedMode: AuditableItemGraphAuditMode.Audited
+				}
+			}
+		});
+	});
+
+	test("Throws when switching a bypass vertex back to audited with updatePartial", async () => {
+		const service = new AuditableItemGraphService();
+		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			auditMode: AuditableItemGraphAuditMode.Bypass
+		});
+
+		await expect(
+			service.updatePartial({
+				id,
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				auditMode: AuditableItemGraphAuditMode.Audited
+			})
+		).rejects.toMatchObject({
+			message: "auditableItemGraphService.updatingFailed",
+			cause: {
+				message: "auditableItemGraphService.auditModeTransitionNotAllowed"
+			}
+		});
+	});
+
+	test("Does not verify a bypass vertex when verification is requested", async () => {
+		const service = new AuditableItemGraphService();
+		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			auditMode: AuditableItemGraphAuditMode.Bypass
+		});
+
+		const result = await service.get(id, { verifySignatureDepth: VerifyDepth.All });
+
+		expect(result.verified).toBeUndefined();
+		expect(result["@context"]).not.toContain("https://schema.twindev.org/immutable-proof/");
+	});
+
+	test("Returns an empty changeset list for a bypass vertex", async () => {
+		const service = new AuditableItemGraphService();
+		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			auditMode: AuditableItemGraphAuditMode.Bypass
+		});
+
+		const result = await service.getChangesets(id, undefined, undefined, {
+			verifySignatureDepth: VerifyDepth.All
+		});
+
+		expect(result.changesets.itemListElement).toHaveLength(0);
+		expect(result.cursor).toBeUndefined();
+	});
+
+	test("Throws not found when getting a changeset for a bypass vertex", async () => {
+		const service = new AuditableItemGraphService();
+		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			auditMode: AuditableItemGraphAuditMode.Bypass
+		});
+
+		await expect(
+			service.getChangeset(`${id}:changeset:00000000000000000000000000000000`)
+		).rejects.toMatchObject({
+			message: "auditableItemGraphService.getFailed",
+			cause: {
+				message: "auditableItemGraphService.changesetNotFound"
+			}
+		});
+	});
+
+	test("Throws not found when getting a version of a bypass vertex", async () => {
+		const service = new AuditableItemGraphService();
+		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			auditMode: AuditableItemGraphAuditMode.Bypass
+		});
+
+		await expect(service.getVersion(id, 0)).rejects.toMatchObject({
+			message: "auditableItemGraphService.getVersionFailed",
+			cause: {
+				message: "auditableItemGraphService.versionNotFound"
+			}
+		});
+	});
+
+	test("Returns the current state as a single version entry for a bypass vertex", async () => {
+		const service = new AuditableItemGraphService();
+		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			auditMode: AuditableItemGraphAuditMode.Bypass
+		});
+
+		const all = await service.getVersions(id);
+		expect(all.itemListElement).toEqual([
+			{ version: 0, dateCreated: new Date(FIRST_TICK).toISOString() }
+		]);
+
+		const included = await service.getVersions(id, {
+			after: "2024-01-01T00:00:00.000Z",
+			before: "2025-01-01T00:00:00.000Z"
+		});
+		expect(included.itemListElement).toHaveLength(1);
+
+		const excludedAfter = await service.getVersions(id, { after: "2025-01-01T00:00:00.000Z" });
+		expect(excludedAfter.itemListElement).toHaveLength(0);
+
+		const excludedBefore = await service.getVersions(id, { before: "2024-01-01T00:00:00.000Z" });
+		expect(excludedBefore.itemListElement).toHaveLength(0);
+	});
+
+	test("Returns the modified date as the version entry for an updated bypass vertex", async () => {
+		const service = new AuditableItemGraphService();
+		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			auditMode: AuditableItemGraphAuditMode.Bypass
+		});
+
+		await service.updatePartial({
+			id,
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			aliasPatches: { add: [{ type: AuditableItemGraphTypes.Alias, id: "foo123" }] }
+		});
+
+		const result = await service.getVersions(id);
+		expect(result.itemListElement).toEqual([
+			{ version: 0, dateCreated: new Date(SECOND_TICK).toISOString() }
+		]);
+	});
+
+	test("Throws when an unknown audit mode is supplied", async () => {
+		const service = new AuditableItemGraphService();
+
+		await expect(
+			service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex,
+				auditMode: "sometimes" as AuditableItemGraphAuditMode
+			})
+		).rejects.toMatchObject({
+			message: "guard.arrayOneOf"
+		});
 	});
 
 	test("Validation fails when edge is missing required type property", async () => {

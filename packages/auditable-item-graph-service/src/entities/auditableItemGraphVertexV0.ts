@@ -1,6 +1,5 @@
-// Copyright 2024 IOTA Stiftung.
+// Copyright 2026 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import type { AuditableItemGraphAuditMode } from "@twin.org/auditable-item-graph-models";
 import { JsonLdTypes, type IJsonLdNodeObject } from "@twin.org/data-json-ld";
 import { entity, property, SortDirection } from "@twin.org/entity";
 import type { AuditableItemGraphAlias } from "./auditableItemGraphAlias.js";
@@ -8,10 +7,10 @@ import type { AuditableItemGraphEdge } from "./auditableItemGraphEdge.js";
 import type { AuditableItemGraphResource } from "./auditableItemGraphResource.js";
 
 /**
- * Class describing the auditable item graph vertex.
+ * Class describing the auditable item graph vertex, version 0.
  */
-@entity({ version: 1 })
-export class AuditableItemGraphVertex {
+@entity({ version: 0 })
+export class AuditableItemGraphVertexV0 {
 	/**
 	 * The id of the vertex.
 	 */
@@ -40,12 +39,6 @@ export class AuditableItemGraphVertex {
 		optional: true
 	})
 	public dateModified?: string;
-
-	/**
-	 * How the mutations of the vertex are recorded, when absent the vertex behaves as audited.
-	 */
-	@property({ type: "string", optional: true })
-	public auditMode?: AuditableItemGraphAuditMode;
 
 	/**
 	 * Combined alias index for the vertex used for querying.

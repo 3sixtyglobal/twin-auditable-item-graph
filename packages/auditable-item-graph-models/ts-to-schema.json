@@ -1,6 +1,7 @@
 {
 	"baseUrl": "https://schema.twindev.org/aig/",
 	"types": [
+		"./src/models/auditableItemGraphAuditMode.ts",
 		"./src/models/IAuditableItemGraphAlias.ts",
 		"./src/models/IAuditableItemGraphAuditedElement.ts",
 		"./src/models/IAuditableItemGraphChangeset.ts",

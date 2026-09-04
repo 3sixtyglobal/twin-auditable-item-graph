@@ -11,6 +11,7 @@
 		"type": "@type"
 	},
 	"types": [
+		"./src/models/auditableItemGraphAuditMode.ts",
 		"./src/models/IAuditableItemGraphAlias.ts",
 		"./src/models/IAuditableItemGraphChangeset.ts",
 		"./src/models/IAuditableItemGraphChangesetList.ts",
