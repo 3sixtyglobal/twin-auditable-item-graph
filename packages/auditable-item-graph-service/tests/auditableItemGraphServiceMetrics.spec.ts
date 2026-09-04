@@ -105,6 +105,9 @@ async function waitForProofGeneration(proofCount: number = 1): Promise<void> {
 		(await immutableProofStorage.getStore()).filter(p => p.notarizationId).length < proofCount &&
 		count++ < proofCount * 40
 	);
+	if (count >= proofCount * 40) {
+		throw new Error("Proof generation timed out");
+	}
 }
 
 describe("AuditableItemGraphService - metrics", () => {
@@ -145,6 +148,7 @@ describe("AuditableItemGraphService - metrics", () => {
 		await vertexStorage.teardown();
 		await changesetStorage.teardown();
 		await immutableProofStorage.teardown();
+		await backgroundTaskStorage.teardown();
 	});
 
 	beforeEach(async () => {
