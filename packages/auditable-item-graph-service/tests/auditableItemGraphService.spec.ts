@@ -3684,6 +3684,9 @@ describe("AuditableItemGraphService", () => {
 			aliases: [{ type: AuditableItemGraphTypes.Alias, id: "foo123" }]
 		});
 
+		const createdVertex = (await vertexStorage.getStore())[0];
+		expect(createdVertex.dateModified).toBeUndefined();
+
 		await service.update({
 			id,
 			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
@@ -3697,7 +3700,7 @@ describe("AuditableItemGraphService", () => {
 		expect(vertexStore).toHaveLength(1);
 		expect(vertexStore[0].auditMode).toEqual(AuditableItemGraphAuditMode.Bypass);
 		expect(vertexStore[0].version).toBeUndefined();
-		expect(vertexStore[0].dateCreated).toEqual(new Date(FIRST_TICK).toISOString());
+		expect(vertexStore[0].dateCreated).toEqual(createdVertex.dateCreated);
 		expect(vertexStore[0].dateModified).toEqual(new Date(SECOND_TICK).toISOString());
 
 		const result = await service.get(id);
@@ -3951,10 +3954,10 @@ describe("AuditableItemGraphService", () => {
 			auditMode: AuditableItemGraphAuditMode.Bypass
 		});
 
+		const createdVertex = (await vertexStorage.getStore())[0];
+
 		const all = await service.getVersions(id);
-		expect(all.itemListElement).toEqual([
-			{ version: 0, dateCreated: new Date(FIRST_TICK).toISOString() }
-		]);
+		expect(all.itemListElement).toEqual([{ version: 0, dateCreated: createdVertex.dateCreated }]);
 
 		const included = await service.getVersions(id, {
 			after: "2024-01-01T00:00:00.000Z",
