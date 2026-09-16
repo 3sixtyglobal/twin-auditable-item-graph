@@ -15,7 +15,8 @@
 			"resourceIdMissing": "You must provide either the id, or the resourceObject must contain an id property for index \"{index}\"",
 			"aliasNotUnique": "The alias id \"{aliasId}\" is already in use on another vertex and the unique flag was set",
 			"invalidEdgeId": "The edge id \"{edgeId}\" is not valid",
-			"listPatchInvalidFormat": "The property \"{property}\" must be a list patch object with add and/or remove, not a bare array"
+			"listPatchInvalidFormat": "The property \"{property}\" must be a list patch object with add and/or remove, not a bare array",
+			"auditModeTransitionNotAllowed": "The vertex audit mode can not be changed from \"{currentMode}\" to \"{requestedMode}\", bypass is a terminal mode"
 		},
 		"validation": {
 			"auditableItemGraphService": {

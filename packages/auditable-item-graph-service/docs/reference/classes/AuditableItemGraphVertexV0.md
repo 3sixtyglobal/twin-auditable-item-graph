@@ -1,16 +1,16 @@
-# Class: AuditableItemGraphVertex
+# Class: AuditableItemGraphVertexV0
 
-Class describing the auditable item graph vertex.
+Class describing the auditable item graph vertex, version 0.
 
 ## Constructors
 
 ### Constructor
 
-> **new AuditableItemGraphVertex**(): `AuditableItemGraphVertex`
+> **new AuditableItemGraphVertexV0**(): `AuditableItemGraphVertexV0`
 
 #### Returns
 
-`AuditableItemGraphVertex`
+`AuditableItemGraphVertexV0`
 
 ## Properties
 
@@ -43,14 +43,6 @@ The date/time of when the vertex was created.
 > `optional` **dateModified?**: `string`
 
 The date/time of when the vertex was last modified.
-
-***
-
-### auditMode? {#auditmode}
-
-> `optional` **auditMode?**: `AuditableItemGraphAuditMode`
-
-How the mutations of the vertex are recorded, when absent the vertex behaves as audited.
 
 ***
 

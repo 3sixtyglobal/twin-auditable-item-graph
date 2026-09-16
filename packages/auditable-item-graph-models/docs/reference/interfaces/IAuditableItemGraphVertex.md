@@ -80,6 +80,15 @@ The identity of the organization which controls the vertex.
 
 ***
 
+### auditMode? {#auditmode}
+
+> `optional` **auditMode?**: [`AuditableItemGraphAuditMode`](../type-aliases/AuditableItemGraphAuditMode.md)
+
+How the mutations of the vertex are recorded, when absent the vertex behaves as audited.
+Once a vertex is set to bypass it can not be returned to audited.
+
+***
+
 ### annotationObject? {#annotationobject}
 
 > `optional` **annotationObject?**: `IJsonLdNodeObject`
@@ -117,6 +126,7 @@ Edges connected to the vertex.
 > `optional` **verified?**: `boolean`
 
 Is the vertex verified, will only be populated when verification is requested.
+Always undefined when the vertex is in bypass mode.
 
 ***
 
@@ -125,4 +135,5 @@ Is the vertex verified, will only be populated when verification is requested.
 > `optional` **version?**: `number`
 
 The version of the vertex, populated only when getting a specific version.
+Always undefined when the vertex is in bypass mode.
 Maps to https://schema.org/version.

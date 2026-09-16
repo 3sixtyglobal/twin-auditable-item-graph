@@ -40,6 +40,7 @@
 
 ## Type Aliases
 
+- [AuditableItemGraphAuditMode](type-aliases/AuditableItemGraphAuditMode.md)
 - [AuditableItemGraphContexts](type-aliases/AuditableItemGraphContexts.md)
 - [AuditableItemGraphMetricIds](type-aliases/AuditableItemGraphMetricIds.md)
 - [AuditableItemGraphTopics](type-aliases/AuditableItemGraphTopics.md)
@@ -48,6 +49,7 @@
 
 ## Variables
 
+- [AuditableItemGraphAuditMode](variables/AuditableItemGraphAuditMode.md)
 - [AuditableItemGraphContexts](variables/AuditableItemGraphContexts.md)
 - [AuditableItemGraphMetricIds](variables/AuditableItemGraphMetricIds.md)
 - [AuditableItemGraphMetrics](variables/AuditableItemGraphMetrics.md)

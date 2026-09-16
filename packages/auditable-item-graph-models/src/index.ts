@@ -17,6 +17,7 @@ export * from "./models/api/IAuditableItemGraphVersionGetRequest.js";
 export * from "./models/api/IAuditableItemGraphVersionGetResponse.js";
 export * from "./models/api/IAuditableItemGraphVersionListRequest.js";
 export * from "./models/api/IAuditableItemGraphVersionListResponse.js";
+export * from "./models/auditableItemGraphAuditMode.js";
 export * from "./models/auditableItemGraphContexts.js";
 export * from "./models/auditableItemGraphMetricIds.js";
 export * from "./models/auditableItemGraphMetrics.js";

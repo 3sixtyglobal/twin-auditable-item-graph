@@ -4,6 +4,7 @@ import type { IValidationFailure } from "@twin.org/core";
 import { DataTypeHelper } from "@twin.org/data-core";
 import { JsonLdDataTypes } from "@twin.org/data-json-ld";
 import { AuditableItemGraphDataTypes } from "../../src/dataTypes/auditableItemGraphDataTypes.js";
+import { AuditableItemGraphAuditMode } from "../../src/models/auditableItemGraphAuditMode.js";
 import { AuditableItemGraphContexts } from "../../src/models/auditableItemGraphContexts.js";
 import { AuditableItemGraphTypes } from "../../src/models/auditableItemGraphTypes.js";
 
@@ -43,5 +44,47 @@ describe("AuditableItemGraphDataTypes", () => {
 		);
 		expect(validationFailures.length).toEqual(0);
 		expect(isValid).toEqual(true);
+	});
+
+	test("Can validate a bypass vertex", async () => {
+		const validationFailures: IValidationFailure[] = [];
+		const isValid = await DataTypeHelper.validate(
+			"",
+			`${AuditableItemGraphContexts.Namespace}${AuditableItemGraphTypes.Vertex}`,
+			{
+				"@context": [
+					AuditableItemGraphContexts.Namespace,
+					AuditableItemGraphContexts.NamespaceCommon
+				],
+				type: AuditableItemGraphTypes.Vertex,
+				dateCreated: new Date().toISOString(),
+				id: "1111",
+				auditMode: AuditableItemGraphAuditMode.Bypass
+			},
+			validationFailures
+		);
+		expect(validationFailures.length).toEqual(0);
+		expect(isValid).toEqual(true);
+	});
+
+	test("Can fail to validate a vertex with an unknown audit mode", async () => {
+		const validationFailures: IValidationFailure[] = [];
+		const isValid = await DataTypeHelper.validate(
+			"",
+			`${AuditableItemGraphContexts.Namespace}${AuditableItemGraphTypes.Vertex}`,
+			{
+				"@context": [
+					AuditableItemGraphContexts.Namespace,
+					AuditableItemGraphContexts.NamespaceCommon
+				],
+				type: AuditableItemGraphTypes.Vertex,
+				dateCreated: new Date().toISOString(),
+				id: "1111",
+				auditMode: "sometimes"
+			},
+			validationFailures
+		);
+		expect(validationFailures.length).toBeGreaterThan(0);
+		expect(isValid).toEqual(false);
 	});
 });

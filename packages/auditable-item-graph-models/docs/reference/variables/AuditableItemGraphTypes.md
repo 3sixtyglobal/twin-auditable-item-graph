@@ -71,3 +71,9 @@ Represents auditable item graph partial vertex.
 > `readonly` **ListPatch**: `"AuditableItemGraphListPatch"` = `"AuditableItemGraphListPatch"`
 
 Represents auditable item graph list patch.
+
+### AuditMode {#auditmode}
+
+> `readonly` **AuditMode**: `"AuditableItemGraphAuditMode"` = `"AuditableItemGraphAuditMode"`
+
+Represents auditable item graph audit mode.

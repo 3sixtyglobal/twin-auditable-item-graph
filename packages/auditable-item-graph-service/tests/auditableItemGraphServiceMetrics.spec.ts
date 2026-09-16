@@ -17,7 +17,7 @@ import {
 	ContextIdStore,
 	type IContextIds
 } from "@twin.org/context";
-import { AlreadyExistsError, ComponentFactory } from "@twin.org/core";
+import { AlreadyExistsError, ComponentFactory, Is } from "@twin.org/core";
 import { MemoryEntityStorageConnector } from "@twin.org/entity-storage-connector-memory";
 import { EntityStorageConnectorFactory } from "@twin.org/entity-storage-models";
 import { DidContextIdHandler } from "@twin.org/identity-models";
@@ -70,13 +70,19 @@ function makeMockTelemetry(): {
 		start: async () => {},
 		stop: async () => {},
 		createMetric: async m => {
-			created.push({ ...m });
+			for (const metric of Is.array(m) ? m : [m]) {
+				created.push({ ...metric });
+			}
 		},
 		getMetric: async () => ({ metric: {} as never, value: {} as never }),
 		updateMetric: async () => {},
 		addMetricValue: async (id, value, customData) => {
 			values.push({ id, value, customData });
 			return "v";
+		},
+		addMetricValues: async entries => {
+			values.push(...entries);
+			return entries.map(() => "v");
 		},
 		getMetricValue: async (id, valueId) => ({
 			id: valueId,
@@ -105,6 +111,9 @@ async function waitForProofGeneration(proofCount: number = 1): Promise<void> {
 		(await immutableProofStorage.getStore()).filter(p => p.notarizationId).length < proofCount &&
 		count++ < proofCount * 40
 	);
+	if (count >= proofCount * 40) {
+		throw new Error("Proof generation timed out");
+	}
 }
 
 describe("AuditableItemGraphService - metrics", () => {
@@ -145,6 +154,7 @@ describe("AuditableItemGraphService - metrics", () => {
 		await vertexStorage.teardown();
 		await changesetStorage.teardown();
 		await immutableProofStorage.teardown();
+		await backgroundTaskStorage.teardown();
 	});
 
 	beforeEach(async () => {

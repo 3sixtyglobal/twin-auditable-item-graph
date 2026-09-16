@@ -52,6 +52,10 @@ The vertex to update.
 
 A promise that resolves when the vertex has been updated.
 
+#### Throws
+
+GeneralError If a bypass vertex is being switched back to audited.
+
 ***
 
 ### updatePartial() {#updatepartial}
@@ -75,6 +79,10 @@ The partial vertex update (must include `id`).
 `Promise`\<`void`\>
 
 A promise that resolves when the partial update has been applied.
+
+#### Throws
+
+GeneralError If a bypass vertex is being switched back to audited.
 
 ***
 
@@ -160,7 +168,7 @@ How many signatures to verify, defaults to "none".
 
 `Promise`\<\{ `changesets`: [`IAuditableItemGraphChangesetList`](IAuditableItemGraphChangesetList.md); `cursor?`: `string`; \}\>
 
-The changeset if found.
+The changeset if found, always empty for a bypass vertex.
 
 #### Throws
 
@@ -200,7 +208,7 @@ The changeset if found.
 
 #### Throws
 
-NotFoundError if the vertex or changeset is not found.
+NotFoundError if the vertex or changeset is not found, a bypass vertex never has changesets.
 
 ***
 
@@ -232,7 +240,7 @@ The vertex reconstructed at that version.
 
 #### Throws
 
-NotFoundError if the vertex or version is not found.
+NotFoundError if the vertex or version is not found, a bypass vertex never has versions.
 
 ***
 
@@ -270,7 +278,8 @@ Only return versions created before this ISO 8601 timestamp (exclusive).
 
 `Promise`\<[`IAuditableItemGraphVertexVersionList`](IAuditableItemGraphVertexVersionList.md)\>
 
-The list of vertex versions.
+The list of vertex versions, a bypass vertex returns a single baseline entry for its
+current state when that falls within the requested range.
 
 #### Throws
 

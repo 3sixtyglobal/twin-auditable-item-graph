@@ -1,6 +1,7 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
 import type { IJsonLdContextDefinitionElement, IJsonLdNodeObject } from "@twin.org/data-json-ld";
+import type { AuditableItemGraphAuditMode } from "./auditableItemGraphAuditMode.js";
 import type { AuditableItemGraphContexts } from "./auditableItemGraphContexts.js";
 import type { AuditableItemGraphTypes } from "./auditableItemGraphTypes.js";
 import type { IAuditableItemGraphAlias } from "./IAuditableItemGraphAlias.js";
@@ -41,6 +42,13 @@ export interface IAuditableItemGraphVertex extends Omit<
 	organizationIdentity?: string;
 
 	/**
+	 * How the mutations of the vertex are recorded, when absent the vertex behaves as audited.
+	 * Once a vertex is set to bypass it can not be returned to audited.
+	 * @json-ld type:sch:Text
+	 */
+	auditMode?: AuditableItemGraphAuditMode;
+
+	/**
 	 * The JSON-LD annotation object for the vertex.
 	 * @json-ld namespace:twin-common
 	 */
@@ -66,12 +74,14 @@ export interface IAuditableItemGraphVertex extends Omit<
 
 	/**
 	 * Is the vertex verified, will only be populated when verification is requested.
+	 * Always undefined when the vertex is in bypass mode.
 	 * @json-ld namespace:twin-common
 	 */
 	verified?: boolean;
 
 	/**
 	 * The version of the vertex, populated only when getting a specific version.
+	 * Always undefined when the vertex is in bypass mode.
 	 * Maps to https://schema.org/version.
 	 * @json-ld namespace:sch
 	 */
