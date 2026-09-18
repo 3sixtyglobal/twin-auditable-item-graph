@@ -10,19 +10,19 @@ export class AuditableItemGraphPatch {
 	/**
 	 * The operation for the patch.
 	 */
-	@property({ type: "string" })
+	@property({ type: "string", maxLength: 10 })
 	public op!: "add" | "remove" | "replace" | "move" | "copy" | "test";
 
 	/**
 	 * The path for the patch.
 	 */
-	@property({ type: "string" })
+	@property({ type: "string", maxLength: 1024 })
 	public path!: string;
 
 	/**
 	 * The from for the patch.
 	 */
-	@property({ type: "string", optional: true })
+	@property({ type: "string", maxLength: 1024, optional: true })
 	public from?: string;
 
 	/**

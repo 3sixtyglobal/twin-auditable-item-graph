@@ -65,7 +65,8 @@ export interface IAuditableItemGraphListRequest {
 		cursor?: string;
 
 		/**
-		 * Limit the number of entities to return.
+		 * The maximum number of entities to return, a page can contain fewer so follow the cursor
+		 * until it is absent to read them all.
 		 */
 		limit?: string;
 	};

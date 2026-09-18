@@ -11,7 +11,7 @@ export class AuditableItemGraphResource {
 	/**
 	 * The id of the resource.
 	 */
-	@property({ type: "string", optional: true })
+	@property({ type: "string", maxLength: 255, optional: true })
 	public id?: string;
 
 	/**

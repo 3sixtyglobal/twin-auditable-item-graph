@@ -9,6 +9,7 @@
 			"versionNotFound": "The version with the Id \"{notFoundId}\" was not found",
 			"updatingFailed": "Updating the Auditable Item Graph vertex failed",
 			"queryingFailed": "Querying the Auditable Item Graph failed",
+			"invalidCursor": "The cursor is not valid, it must be one returned by a matching query",
 			"removeProofFailed": "Removing the proof from the Auditable Item Graph vertex failed",
 			"vertexNotFound": "The vertex with the Id \"{notFoundId}\" was not found",
 			"changesetNotFound": "The changeset with the Id \"{notFoundId}\" was not found",

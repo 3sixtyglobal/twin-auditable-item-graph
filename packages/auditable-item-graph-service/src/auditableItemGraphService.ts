@@ -36,6 +36,7 @@ import {
 	BaseError,
 	Coerce,
 	ComponentFactory,
+	Converter,
 	GeneralError,
 	Guards,
 	Is,
@@ -59,9 +60,9 @@ import {
 } from "@twin.org/data-json-ld";
 import {
 	ComparisonOperator,
-	type EntityCondition,
 	LogicalOperator,
 	SortDirection,
+	type EntityCondition,
 	type IComparator
 } from "@twin.org/entity";
 import {
@@ -88,6 +89,7 @@ import type { AuditableItemGraphChangeset } from "./entities/auditableItemGraphC
 import type { AuditableItemGraphEdge } from "./entities/auditableItemGraphEdge.js";
 import type { AuditableItemGraphResource } from "./entities/auditableItemGraphResource.js";
 import type { AuditableItemGraphVertex } from "./entities/auditableItemGraphVertex.js";
+import type { AuditableItemGraphVertexIndex } from "./entities/auditableItemGraphVertexIndex.js";
 import type { IAuditableItemGraphServiceConstructorOptions } from "./models/IAuditableItemGraphServiceConstructorOptions.js";
 import type { IAuditableItemGraphServiceContext } from "./models/IAuditableItemGraphServiceContext.js";
 
@@ -119,6 +121,30 @@ export class AuditableItemGraphService
 	public static readonly NAMESPACE_EDGE: string = "edge";
 
 	/**
+	 * The number of vertices returned by a query when the caller gives no limit.
+	 * @internal
+	 */
+	private static readonly _DEFAULT_PAGE_SIZE: number = 40;
+
+	/**
+	 * The index type for the id of the vertex itself.
+	 * @internal
+	 */
+	private static readonly _INDEX_TYPE_VERTEX: string = "vertex";
+
+	/**
+	 * The index type for vertex aliases.
+	 * @internal
+	 */
+	private static readonly _INDEX_TYPE_ALIAS: string = "alias";
+
+	/**
+	 * The index type for vertex resource types.
+	 * @internal
+	 */
+	private static readonly _INDEX_TYPE_RESOURCE_TYPE: string = "resourceType";
+
+	/**
 	 * The keys to pick when creating the proof for the stream.
 	 * @internal
 	 */
@@ -141,6 +167,12 @@ export class AuditableItemGraphService
 	 * @internal
 	 */
 	private readonly _vertexStorage: IEntityStorageConnector<AuditableItemGraphVertex>;
+
+	/**
+	 * The entity storage for vertex indices.
+	 * @internal
+	 */
+	private readonly _vertexIndexStorage: IEntityStorageConnector<AuditableItemGraphVertexIndex>;
 
 	/**
 	 * The entity storage for changesets.
@@ -177,6 +209,10 @@ export class AuditableItemGraphService
 
 		this._vertexStorage = EntityStorageConnectorFactory.get(
 			options?.vertexEntityStorageType ?? nameofKebabCase<AuditableItemGraphVertex>()
+		);
+
+		this._vertexIndexStorage = EntityStorageConnectorFactory.get(
+			options?.vertexIndexEntityStorageType ?? nameofKebabCase<AuditableItemGraphVertexIndex>()
 		);
 
 		this._changesetStorage = EntityStorageConnectorFactory.get(
@@ -343,17 +379,13 @@ export class AuditableItemGraphService
 
 			// Bypass vertices keep no changeset history, so there is no baseline version to record.
 			if (vertex.auditMode !== AuditableItemGraphAuditMode.Bypass) {
-				delete originalEntity.aliasIndex;
-				delete originalEntity.resourceTypeIndex;
 				await this.addChangeset(context, originalEntity, vertexModel, true, 0);
 
 				vertexModel.version = 0;
 			}
 
-			await this._vertexStorage.set({
-				...vertexModel,
-				...this.buildIndexes(vertexModel)
-			});
+			await this._vertexStorage.set(vertexModel);
+			await this.syncVertexIndexes(vertexModel);
 
 			await MetricHelper.metricIncrement(
 				this._telemetryComponent,
@@ -449,7 +481,6 @@ export class AuditableItemGraphService
 
 				const auditModeTransition = this.resolveAuditModeTransition(vertexEntity, vertex.auditMode);
 
-				delete vertexEntity.aliasIndex;
 				const originalEntity = ObjectHelper.clone(vertexEntity);
 				const newEntity = ObjectHelper.clone(vertexEntity);
 
@@ -546,7 +577,6 @@ export class AuditableItemGraphService
 					partial.auditMode
 				);
 
-				delete vertexEntity.aliasIndex;
 				const originalEntity = ObjectHelper.clone(vertexEntity);
 				const newEntity = ObjectHelper.clone(vertexEntity);
 
@@ -905,7 +935,7 @@ export class AuditableItemGraphService
 				});
 			}
 
-			const changesets = await this.internalGetChangesets(vertexId, {
+			const changesets = await this.internalGetChangesets(vertexId, ["patches"], {
 				maxVersion: version
 			});
 
@@ -1071,7 +1101,8 @@ export class AuditableItemGraphService
 	 * @param orderByDirection The direction for the order, defaults to desc.
 	 * @param properties The properties to return, if not provided defaults to id, created, aliases and object.
 	 * @param cursor The cursor to request the next chunk of entities.
-	 * @param limit Limit the number of entities to return.
+	 * @param limit The maximum number of entities to return, a page can contain fewer so follow
+	 * the cursor until it is absent to read them all.
 	 * @returns The entities, which can be partial if a limited keys list was provided.
 	 */
 	public async query(
@@ -1100,65 +1131,101 @@ export class AuditableItemGraphService
 				"annotationObject"
 			];
 
-			const andGroups: EntityCondition<IAuditableItemGraphVertex>[] = [];
 			const orderProperty = orderBy ?? "dateCreated";
 			const orderDirection = orderByDirection ?? SortDirection.Descending;
 			const idExact = options?.idExact ?? false;
-
-			if (!Is.empty(conditions)) {
-				andGroups.push(conditions);
-			}
-
 			const idOrAlias = options?.id;
-			if (Is.stringValue(idOrAlias)) {
-				const idMode = options?.idMode ?? "both";
-				const idComparators: IComparator[] = [];
-				if (idMode === "id" || idMode === "both") {
-					idComparators.push({
-						property: "id",
-						comparison: idExact ? ComparisonOperator.Equals : ComparisonOperator.Includes,
-						value: idOrAlias
-					});
-				}
-				if (idMode === "alias" || idMode === "both") {
-					idComparators.push({
-						property: "aliasIndex",
-						comparison: ComparisonOperator.Includes,
-						value: idExact ? `||${idOrAlias.toLowerCase()}||` : idOrAlias.toLowerCase()
-					});
-				}
-				if (idComparators.length === 1) {
-					andGroups.push(idComparators[0]);
-				} else if (idComparators.length > 1) {
-					andGroups.push({ logicalOperator: LogicalOperator.Or, conditions: idComparators });
-				}
-			}
-
-			if (Is.arrayValue(options?.resourceTypes)) {
-				const resourceComparators: IComparator[] = options.resourceTypes.map(rt => ({
-					property: "resourceTypeIndex",
-					comparison: ComparisonOperator.Includes,
-					value: `||${rt.toLowerCase()}||`
-				}));
-				if (resourceComparators.length === 1) {
-					andGroups.push(resourceComparators[0]);
-				} else {
-					andGroups.push({
-						logicalOperator: LogicalOperator.Or,
-						conditions: resourceComparators
-					});
-				}
-			}
+			const idMode = options?.idMode ?? "both";
+			const resourceTypes = options?.resourceTypes;
+			const hasIdFilter = Is.stringValue(idOrAlias);
+			const hasResourceTypes = Is.arrayValue(resourceTypes);
 
 			if (!propertiesToReturn.includes("id")) {
 				propertiesToReturn.unshift("id");
 			}
 
-			const finalConditions: EntityCondition<IAuditableItemGraphVertex> = {
-				logicalOperator: LogicalOperator.And,
-				conditions: andGroups
-			};
+			// Every id, alias and resource type match is held in the index storage, which carries
+			// the ordering dates so it can page its own matches by key set. Nothing is drained into
+			// memory, so a term matching a very large number of entries costs one page.
+			const indexPredicates: EntityCondition<AuditableItemGraphVertexIndex>[] = [];
 
+			if (hasIdFilter) {
+				const comparison = idExact ? ComparisonOperator.Equals : ComparisonOperator.Includes;
+				const term = idOrAlias.toLowerCase();
+				if (idMode === "id" || idMode === "both") {
+					indexPredicates.push(
+						this.indexTypeValueCondition(
+							AuditableItemGraphService._INDEX_TYPE_VERTEX,
+							comparison,
+							term
+						)
+					);
+				}
+				if (idMode === "alias" || idMode === "both") {
+					indexPredicates.push(
+						this.indexTypeValueCondition(
+							AuditableItemGraphService._INDEX_TYPE_ALIAS,
+							comparison,
+							term
+						)
+					);
+				}
+			} else if (hasResourceTypes) {
+				for (const resourceType of resourceTypes) {
+					indexPredicates.push(
+						this.indexTypeValueCondition(
+							AuditableItemGraphService._INDEX_TYPE_RESOURCE_TYPE,
+							ComparisonOperator.Equals,
+							resourceType.toLowerCase()
+						)
+					);
+				}
+			}
+
+			if (indexPredicates.length > 0) {
+				const indexPage = await this.queryIndexVertexIdPage(
+					indexPredicates,
+					orderProperty,
+					orderDirection,
+					this.decodeCursor("i", cursor),
+					limit
+				);
+
+				let pageVertexIds = indexPage.vertexIds;
+
+				// An OR over the index gives the union, so when an id or alias filter is combined
+				// with resource types the page is narrowed to the intersection here.
+				if (hasIdFilter && hasResourceTypes) {
+					pageVertexIds = await this.filterVertexIdsByResourceTypes(
+						pageVertexIds,
+						resourceTypes.map(resourceType => resourceType.toLowerCase())
+					);
+				}
+
+				const indexEntities = await this.fetchVerticesInOrder(
+					pageVertexIds,
+					propertiesToReturn as (keyof AuditableItemGraphVertex)[],
+					conditions
+				);
+
+				return await this.buildVertexList(
+					indexEntities,
+					indexPage.hasMore
+						? this.encodeCursor({
+								s: "i",
+								d: indexPage.keySet?.d,
+								i: indexPage.keySet?.i
+							})
+						: undefined
+				);
+			}
+
+			const finalConditions: EntityCondition<IAuditableItemGraphVertex> = Is.empty(conditions)
+				? { logicalOperator: LogicalOperator.And, conditions: [] }
+				: conditions;
+
+			// With no id, alias or resource type filter there is nothing for the index to answer,
+			// so the vertex storage is queried directly and paged by its own cursor.
 			const results = await this._vertexStorage.query(
 				finalConditions,
 				[
@@ -1172,41 +1239,16 @@ export class AuditableItemGraphService
 					}
 				],
 				propertiesToReturn as (keyof AuditableItemGraphVertex)[],
-				cursor,
+				this.decodeCursor("v", cursor)?.c,
 				limit
 			);
 
-			const models: IAuditableItemGraphVertex[] = results.entities.map(e =>
-				this.vertexEntityToJsonLd(e as AuditableItemGraphVertex)
+			return await this.buildVertexList(
+				results.entities,
+				Is.stringValue(results.cursor)
+					? this.encodeCursor({ s: "v", c: results.cursor })
+					: undefined
 			);
-
-			const vertexList: IAuditableItemGraphVertexList = {
-				"@context": [
-					SchemaOrgContexts.Context,
-					AuditableItemGraphContexts.Context,
-					AuditableItemGraphContexts.ContextCommon
-				],
-				type: [SchemaOrgTypes.ItemList, AuditableItemGraphTypes.VertexList],
-				[SchemaOrgTypes.ItemListElement]: models
-			};
-
-			const result = await JsonLdProcessor.compact(vertexList, vertexList["@context"], {
-				compactArrays: false
-			});
-
-			await MetricHelper.metricIncrement(
-				this._telemetryComponent,
-				AuditableItemGraphMetricIds.QueriesExecuted,
-				{
-					resultCount: models.length,
-					hasMore: Is.stringValue(results.cursor)
-				}
-			);
-
-			return {
-				entries: result,
-				cursor: results.cursor
-			};
 		} catch (error) {
 			throw new GeneralError(
 				AuditableItemGraphService.CLASS_NAME,
@@ -1311,7 +1353,7 @@ export class AuditableItemGraphService
 	 * @internal
 	 */
 	private async compactVertexHistory(vertexId: string): Promise<void> {
-		const changesets = await this.internalGetChangesets(vertexId);
+		const changesets = await this.internalGetChangesets(vertexId, ["proofId"]);
 
 		for (const changeset of changesets) {
 			await this._changesetStorage.remove(changeset.id);
@@ -1355,19 +1397,15 @@ export class AuditableItemGraphService
 		}
 
 		const nextVersion = Is.empty(originalEntity.version)
-			? (await this.internalGetChangesets(vertexId)).length
+			? (await this.internalGetChangesets(vertexId, [])).length
 			: originalEntity.version + 1;
 		const patches = await this.addChangeset(context, originalEntity, newEntity, false, nextVersion);
 		if (patches.length > 0) {
 			newEntity.dateModified = context.now;
 			newEntity.version = nextVersion;
 
-			const indexes = this.buildIndexes(newEntity);
-
-			await this._vertexStorage.set({
-				...newEntity,
-				...indexes
-			});
+			await this._vertexStorage.set(newEntity);
+			await this.syncVertexIndexes(newEntity);
 
 			await MetricHelper.metricIncrement(
 				this._telemetryComponent,
@@ -1417,12 +1455,8 @@ export class AuditableItemGraphService
 
 		newEntity.dateModified = context.now;
 
-		const indexes = this.buildIndexes(newEntity);
-
-		await this._vertexStorage.set({
-			...newEntity,
-			...indexes
-		});
+		await this._vertexStorage.set(newEntity);
+		await this.syncVertexIndexes(newEntity);
 
 		await MetricHelper.metricIncrement(
 			this._telemetryComponent,
@@ -1583,6 +1617,9 @@ export class AuditableItemGraphService
 	/**
 	 * Fetch all changesets for a vertex in ascending date order.
 	 * @param vertexId The internal vertex id.
+	 * @param properties The additional changeset properties to retrieve, the id and dateCreated sort
+	 * keys are always included. Only the requested properties are populated on the returned
+	 * entities, so the large patches payload is only transferred when a caller reads it.
 	 * @param options Optional filtering options.
 	 * @param options.before Only fetch changesets created strictly before this ISO 8601 timestamp.
 	 * @param options.maxVersion Only fetch changesets with version <= this value.
@@ -1591,10 +1628,18 @@ export class AuditableItemGraphService
 	 */
 	private async internalGetChangesets(
 		vertexId: string,
+		properties: (keyof AuditableItemGraphChangeset)[],
 		options?: { before?: string; maxVersion?: number }
 	): Promise<AuditableItemGraphChangeset[]> {
 		const all: AuditableItemGraphChangeset[] = [];
 		let cursor: string | undefined;
+
+		const propertiesToReturn: (keyof AuditableItemGraphChangeset)[] = ["id", "dateCreated"];
+		for (const property of properties) {
+			if (!propertiesToReturn.includes(property)) {
+				propertiesToReturn.push(property);
+			}
+		}
 
 		const conditions: IComparator[] = [
 			{ property: "vertexId", value: vertexId, comparison: ComparisonOperator.Equals }
@@ -1618,7 +1663,7 @@ export class AuditableItemGraphService
 			const result = await this._changesetStorage.query(
 				{ conditions, logicalOperator: LogicalOperator.And },
 				[{ property: "dateCreated", sortDirection: SortDirection.Ascending }],
-				undefined,
+				propertiesToReturn,
 				cursor
 			);
 			all.push(...(result.entities as AuditableItemGraphChangeset[]));
@@ -1641,7 +1686,7 @@ export class AuditableItemGraphService
 		afterDate?: Date,
 		beforeDate?: Date
 	): Promise<{ version: number; dateCreated: string }[]> {
-		const allChangesets = await this.internalGetChangesets(vertexId, {
+		const allChangesets = await this.internalGetChangesets(vertexId, ["version"], {
 			before: beforeDate?.toISOString()
 		});
 
@@ -2353,42 +2398,507 @@ export class AuditableItemGraphService
 	}
 
 	/**
-	 * Build the indexes for the vertex.
-	 * @param vertex The vertex to build the indexes for.
-	 * @returns The indexes.
+	 * Synchronise the index storage with the current state of a vertex.
+	 * @param vertex The vertex to synchronise the index entries for.
+	 * @returns A promise that resolves when the index entries match the vertex.
 	 * @internal
 	 */
-	private buildIndexes(vertex: AuditableItemGraphVertex): {
-		aliasIndex?: string;
-		resourceTypeIndex?: string;
-	} {
-		const aliasIndex = vertex.aliases
-			?.filter(a => Is.empty(a.dateDeleted))
-			.map(a => a.id)
-			.join("||")
-			.toLowerCase();
+	private async syncVertexIndexes(vertex: AuditableItemGraphVertex): Promise<void> {
+		const required = new Map<string, { type: string; value: string }>();
 
-		const resourceTypes: string[] = [];
-		if (Is.arrayValue(vertex.resources)) {
-			for (const resource of vertex.resources) {
-				const resourceType = ObjectHelper.extractProperty<string>(
-					resource.resourceObject,
-					["@type", "type"],
-					false
+		// An entry always carries a modified date so a query ordered by it can be paged by the
+		// same key set as the creation date, falling back to the creation date for a vertex which
+		// has never been modified rather than leaving the column empty.
+		const indexDateModified = vertex.dateModified ?? vertex.dateCreated;
+
+		// Every vertex carries an entry for its own id, so a query matching on the vertex id can
+		// be answered from the index alone. Without it a vertex holding no aliases and no
+		// resources would have no entries at all and could never be matched here.
+		const vertexIdValue = vertex.id.toLowerCase();
+		required.set(`${AuditableItemGraphService._INDEX_TYPE_VERTEX}|${vertexIdValue}`, {
+			type: AuditableItemGraphService._INDEX_TYPE_VERTEX,
+			value: vertexIdValue
+		});
+
+		// Index values are case folded here, and every lookup folds its term to match, so the
+		// comparisons stay case insensitive without relying on the column collation or on the
+		// connector folding case itself. The vertex keeps the value exactly as supplied.
+		for (const alias of vertex.aliases ?? []) {
+			if (Is.empty(alias.dateDeleted) && Is.stringValue(alias.id)) {
+				const value = alias.id.toLowerCase();
+				required.set(`${AuditableItemGraphService._INDEX_TYPE_ALIAS}|${value}`, {
+					type: AuditableItemGraphService._INDEX_TYPE_ALIAS,
+					value
+				});
+			}
+		}
+
+		for (const resource of vertex.resources ?? []) {
+			const resourceType = ObjectHelper.extractProperty<string>(
+				resource.resourceObject,
+				["@type", "type"],
+				false
+			);
+
+			if (Is.stringValue(resourceType)) {
+				const value = resourceType.toLowerCase();
+				required.set(`${AuditableItemGraphService._INDEX_TYPE_RESOURCE_TYPE}|${value}`, {
+					type: AuditableItemGraphService._INDEX_TYPE_RESOURCE_TYPE,
+					value
+				});
+			}
+		}
+
+		const existing = await this.queryVertexIndexes(
+			{
+				property: "vertexId",
+				comparison: ComparisonOperator.Equals,
+				value: vertex.id
+			},
+			["id", "type", "value", "dateCreated", "dateModified"]
+		);
+
+		// Collapse by row id first. A paged read can return the same row on more than one page,
+		// and without this a retained row could be queued for removal by its own duplicate.
+		const existingById = new Map<string, Partial<AuditableItemGraphVertexIndex>>();
+		for (const entry of existing) {
+			if (Is.stringValue(entry.id)) {
+				existingById.set(entry.id, entry);
+			}
+		}
+
+		const retainedKeys = new Set<string>();
+		const removeIds: string[] = [];
+		const writeEntries: AuditableItemGraphVertexIndex[] = [];
+
+		for (const [id, entry] of existingById) {
+			// Entries which are no longer required, and any duplicates of a retained entry,
+			// are removed so exactly one entry remains per index value.
+			const key = `${entry.type}|${entry.value}`;
+			const requiredEntry = required.get(key);
+			if (!Is.empty(requiredEntry) && !retainedKeys.has(key)) {
+				retainedKeys.add(key);
+				if (entry.dateCreated !== vertex.dateCreated || entry.dateModified !== indexDateModified) {
+					// Keep the row id so the copied dates are corrected in place rather than duplicated.
+					writeEntries.push({
+						id,
+						vertexId: vertex.id,
+						type: requiredEntry.type,
+						value: requiredEntry.value,
+						dateCreated: vertex.dateCreated,
+						dateModified: indexDateModified
+					});
+				}
+			} else {
+				removeIds.push(id);
+			}
+		}
+
+		for (const [key, entry] of required) {
+			if (!retainedKeys.has(key)) {
+				writeEntries.push({
+					id: Converter.bytesToHex(RandomHelper.generate(16)),
+					vertexId: vertex.id,
+					type: entry.type,
+					value: entry.value,
+					dateCreated: vertex.dateCreated,
+					dateModified: indexDateModified
+				});
+			}
+		}
+
+		if (removeIds.length > 0) {
+			await this._vertexIndexStorage.removeBatch(removeIds);
+		}
+
+		if (writeEntries.length > 0) {
+			await this._vertexIndexStorage.setBatch(writeEntries);
+		}
+	}
+
+	/**
+	 * Build the JSON-LD vertex list returned by query, and record the query metric.
+	 * @param entities The vertex entities for the page.
+	 * @param cursor The already encoded cursor for the next page.
+	 * @returns The compacted vertex list and the cursor.
+	 * @internal
+	 */
+	private async buildVertexList(
+		entities: Partial<AuditableItemGraphVertex>[],
+		cursor?: string
+	): Promise<{ entries: IAuditableItemGraphVertexList; cursor?: string }> {
+		const models: IAuditableItemGraphVertex[] = entities.map(e =>
+			this.vertexEntityToJsonLd(e as AuditableItemGraphVertex)
+		);
+
+		const vertexList: IAuditableItemGraphVertexList = {
+			"@context": [
+				SchemaOrgContexts.Context,
+				AuditableItemGraphContexts.Context,
+				AuditableItemGraphContexts.ContextCommon
+			],
+			type: [SchemaOrgTypes.ItemList, AuditableItemGraphTypes.VertexList],
+			[SchemaOrgTypes.ItemListElement]: models
+		};
+
+		const result = await JsonLdProcessor.compact(vertexList, vertexList["@context"], {
+			compactArrays: false
+		});
+
+		await MetricHelper.metricIncrement(
+			this._telemetryComponent,
+			AuditableItemGraphMetricIds.QueriesExecuted,
+			{
+				resultCount: models.length,
+				hasMore: Is.stringValue(cursor)
+			}
+		);
+
+		return {
+			entries: result,
+			cursor
+		};
+	}
+
+	/**
+	 * Encode a storage cursor into the opaque cursor handed back to callers.
+	 * Every cursor this service returns is in this format, so a cursor which does not decode
+	 * is invalid rather than a cursor from somewhere else.
+	 * @param payload The position to encode.
+	 * @param payload.s The strategy the position belongs to, i for index paged, v for vertex paged.
+	 * @param payload.d The ordering date of the last vertex returned, index strategy only.
+	 * @param payload.i The id of the last vertex returned, index strategy only.
+	 * @param payload.c The storage connector cursor, vertex strategy only.
+	 * @returns The encoded cursor, or undefined when there is no further page.
+	 * @internal
+	 */
+	private encodeCursor(payload: { s: "i" | "v"; d?: string; i?: string; c?: string }): string {
+		return Converter.bytesToBase64(ObjectHelper.toBytes(payload));
+	}
+
+	/**
+	 * Decode a cursor produced by encodeCursor.
+	 * @param strategy The strategy the current query is using.
+	 * @param cursor The cursor supplied by the caller.
+	 * @returns The decoded payload, or undefined when no cursor was supplied.
+	 * @throws GeneralError If the cursor is malformed or belongs to a different strategy.
+	 * @internal
+	 */
+	private decodeCursor(
+		strategy: "i" | "v",
+		cursor?: string
+	): { d?: string; i?: string; c?: string } | undefined {
+		if (!Is.stringValue(cursor)) {
+			return undefined;
+		}
+
+		let decoded: { s?: string; d?: string; i?: string; c?: string } | undefined;
+		if (Is.stringBase64(cursor)) {
+			try {
+				decoded = ObjectHelper.fromBytes<{ s?: string; d?: string; i?: string; c?: string }>(
+					Converter.base64ToBytes(cursor)
 				);
+			} catch (error) {
+				// Base64 which is not an encoded cursor is still only an invalid cursor, so every
+				// malformed cursor reports the same failure rather than leaking a parse error.
+				throw new GeneralError(
+					AuditableItemGraphService.CLASS_NAME,
+					"invalidCursor",
+					undefined,
+					error
+				);
+			}
+		}
 
-				if (Is.stringValue(resourceType) && !resourceTypes.includes(resourceType)) {
-					resourceTypes.push(resourceType);
+		// A cursor from a different strategy cannot be applied to this query, and silently
+		// restarting from the first page would loop a caller which keeps following the cursor.
+		const populated =
+			decoded?.s === strategy &&
+			(strategy === "v"
+				? Is.stringValue(decoded.c)
+				: Is.stringValue(decoded.d) && Is.stringValue(decoded.i));
+
+		if (!populated) {
+			throw new GeneralError(AuditableItemGraphService.CLASS_NAME, "invalidCursor");
+		}
+
+		return decoded;
+	}
+
+	/**
+	 * Build the condition matching one index type and value.
+	 * @param type The index type to match.
+	 * @param comparison The comparison to apply to the value.
+	 * @param value The index value to match, already lower cased.
+	 * @returns The condition.
+	 * @internal
+	 */
+	private indexTypeValueCondition(
+		type: string,
+		comparison: ComparisonOperator,
+		value: string
+	): EntityCondition<AuditableItemGraphVertexIndex> {
+		return {
+			logicalOperator: LogicalOperator.And,
+			conditions: [
+				{ property: "type", comparison: ComparisonOperator.Equals, value: type },
+				{ property: "value", comparison, value }
+			]
+		};
+	}
+
+	/**
+	 * Build the condition which resumes an index scan after a position.
+	 * Every entry for a vertex carries the same date and vertex id, so a position on that pair
+	 * steps past all the remaining entries of the vertex it names.
+	 * @param orderProperty The index date property being ordered by.
+	 * @param orderDirection The direction being ordered in.
+	 * @param lastDate The date of the last vertex returned.
+	 * @param lastVertexId The id of the last vertex returned.
+	 * @returns The condition.
+	 * @internal
+	 */
+	private indexKeySetCondition(
+		orderProperty: "dateCreated" | "dateModified",
+		orderDirection: SortDirection,
+		lastDate: string,
+		lastVertexId: string
+	): EntityCondition<AuditableItemGraphVertexIndex> {
+		const dateComparison =
+			orderDirection === SortDirection.Ascending
+				? ComparisonOperator.GreaterThan
+				: ComparisonOperator.LessThan;
+
+		return {
+			logicalOperator: LogicalOperator.Or,
+			conditions: [
+				{ property: orderProperty, comparison: dateComparison, value: lastDate },
+				{
+					logicalOperator: LogicalOperator.And,
+					conditions: [
+						{ property: orderProperty, comparison: ComparisonOperator.Equals, value: lastDate },
+						{
+							property: "vertexId",
+							comparison: ComparisonOperator.GreaterThan,
+							value: lastVertexId
+						}
+					]
+				}
+			]
+		};
+	}
+
+	/**
+	 * Read one page of distinct vertex ids from the index storage using a key set, so a broad
+	 * match is never drained into memory however many entries it has.
+	 * @param predicates The type and value conditions to match, combined with OR.
+	 * @param orderProperty The index date property to order by.
+	 * @param orderDirection The direction to order in.
+	 * @param keySet The position returned by the previous page.
+	 * @param keySet.d The ordering date of the last vertex returned.
+	 * @param keySet.i The id of the last vertex returned.
+	 * @param limit The maximum number of distinct vertices to return.
+	 * @returns The vertex ids in order, the position to resume from, and whether more remain.
+	 * @internal
+	 */
+	private async queryIndexVertexIdPage(
+		predicates: EntityCondition<AuditableItemGraphVertexIndex>[],
+		orderProperty: "dateCreated" | "dateModified",
+		orderDirection: SortDirection,
+		keySet?: { d?: string; i?: string },
+		limit?: number
+	): Promise<{ vertexIds: string[]; keySet?: { d: string; i: string }; hasMore: boolean }> {
+		const pageSize = limit ?? AuditableItemGraphService._DEFAULT_PAGE_SIZE;
+		const match: EntityCondition<AuditableItemGraphVertexIndex> =
+			predicates.length === 1
+				? predicates[0]
+				: { logicalOperator: LogicalOperator.Or, conditions: predicates };
+
+		const vertexIds: string[] = [];
+		const positions: { d: string; i: string }[] = [];
+		const seen = new Set<string>();
+		let scan = keySet;
+		let exhausted = false;
+
+		// One extra vertex is collected to tell whether a further page exists. Each pass either
+		// adds a vertex or exhausts the match, so this runs at most pageSize + 1 times.
+		while (vertexIds.length <= pageSize && !exhausted) {
+			const conditions: EntityCondition<AuditableItemGraphVertexIndex>[] = [match];
+
+			if (Is.stringValue(scan?.d) && Is.stringValue(scan?.i)) {
+				conditions.push(this.indexKeySetCondition(orderProperty, orderDirection, scan.d, scan.i));
+			}
+
+			const results = await this._vertexIndexStorage.query(
+				{ logicalOperator: LogicalOperator.And, conditions },
+				[
+					{ property: orderProperty, sortDirection: orderDirection },
+					{ property: "vertexId", sortDirection: SortDirection.Ascending }
+				],
+				["vertexId", orderProperty],
+				undefined,
+				pageSize + 1
+			);
+
+			if (results.entities.length === 0) {
+				exhausted = true;
+			}
+
+			for (const entity of results.entities) {
+				const entityDate = entity[orderProperty];
+				if (Is.stringValue(entity.vertexId) && Is.stringValue(entityDate)) {
+					const position = { d: entityDate, i: entity.vertexId };
+					scan = position;
+					if (!seen.has(entity.vertexId) && vertexIds.length <= pageSize) {
+						seen.add(entity.vertexId);
+						vertexIds.push(entity.vertexId);
+						positions.push(position);
+					}
 				}
 			}
 		}
 
-		const resourceTypeIndex = resourceTypes.join("||").toLowerCase();
+		let hasMore = false;
+		if (vertexIds.length > pageSize) {
+			vertexIds.length = pageSize;
+			positions.length = pageSize;
+			hasMore = true;
+		}
 
 		return {
-			aliasIndex: Is.stringValue(aliasIndex) ? `||${aliasIndex}||` : undefined,
-			resourceTypeIndex: Is.stringValue(resourceTypeIndex) ? `||${resourceTypeIndex}||` : undefined
+			vertexIds,
+			keySet: positions.length > 0 ? positions[positions.length - 1] : undefined,
+			hasMore
 		};
+	}
+
+	/**
+	 * Narrow a page of vertex ids to those which also carry one of the resource types.
+	 * @param vertexIds The candidate vertex ids.
+	 * @param resourceTypes The resource types to match, already lower cased.
+	 * @returns The matching vertex ids, keeping the incoming order.
+	 * @internal
+	 */
+	private async filterVertexIdsByResourceTypes(
+		vertexIds: string[],
+		resourceTypes: string[]
+	): Promise<string[]> {
+		if (vertexIds.length === 0) {
+			return [];
+		}
+
+		const results = await this._vertexIndexStorage.query(
+			{
+				logicalOperator: LogicalOperator.And,
+				conditions: [
+					{
+						property: "type",
+						comparison: ComparisonOperator.Equals,
+						value: AuditableItemGraphService._INDEX_TYPE_RESOURCE_TYPE
+					},
+					{ property: "value", comparison: ComparisonOperator.In, value: resourceTypes },
+					{ property: "vertexId", comparison: ComparisonOperator.In, value: vertexIds }
+				]
+			},
+			undefined,
+			["vertexId"],
+			undefined,
+			vertexIds.length * resourceTypes.length
+		);
+
+		const matched = new Set<string>();
+		for (const entity of results.entities) {
+			if (Is.stringValue(entity.vertexId)) {
+				matched.add(entity.vertexId);
+			}
+		}
+
+		return vertexIds.filter(vertexId => matched.has(vertexId));
+	}
+
+	/**
+	 * Read the vertices for a page of ids, keeping the order the ids were given in.
+	 * @param vertexIds The vertex ids to read.
+	 * @param propertiesToReturn The vertex properties to return.
+	 * @param conditions Additional conditions the vertices must match.
+	 * @returns The vertices which exist and match, in the order of the ids.
+	 * @internal
+	 */
+	private async fetchVerticesInOrder(
+		vertexIds: string[],
+		propertiesToReturn: (keyof AuditableItemGraphVertex)[],
+		conditions?: EntityCondition<IAuditableItemGraphVertex>
+	): Promise<Partial<AuditableItemGraphVertex>[]> {
+		if (vertexIds.length === 0) {
+			return [];
+		}
+
+		const idCondition: EntityCondition<AuditableItemGraphVertex> = {
+			property: "id",
+			comparison: ComparisonOperator.In,
+			value: vertexIds
+		};
+
+		const results = await this._vertexStorage.query(
+			Is.empty(conditions)
+				? idCondition
+				: {
+						logicalOperator: LogicalOperator.And,
+						conditions: [idCondition, conditions]
+					},
+			undefined,
+			propertiesToReturn,
+			undefined,
+			vertexIds.length
+		);
+
+		// An In lookup has no guaranteed order, so the index ordering is reapplied here.
+		const vertexById = new Map<string, Partial<AuditableItemGraphVertex>>();
+		for (const entity of results.entities) {
+			if (Is.stringValue(entity.id)) {
+				vertexById.set(entity.id, entity);
+			}
+		}
+
+		const ordered: Partial<AuditableItemGraphVertex>[] = [];
+		for (const vertexId of vertexIds) {
+			const entity = vertexById.get(vertexId);
+			if (!Is.empty(entity)) {
+				ordered.push(entity);
+			}
+		}
+
+		return ordered;
+	}
+
+	/**
+	 * Query all the pages of the vertex index storage which match the conditions.
+	 * @param conditions The conditions to match.
+	 * @param properties The properties to return.
+	 * @returns The matching index entries.
+	 * @internal
+	 */
+	private async queryVertexIndexes(
+		conditions: EntityCondition<AuditableItemGraphVertexIndex>,
+		properties: (keyof AuditableItemGraphVertexIndex)[]
+	): Promise<Partial<AuditableItemGraphVertexIndex>[]> {
+		const entities: Partial<AuditableItemGraphVertexIndex>[] = [];
+		let cursor: string | undefined;
+
+		do {
+			// Paging needs a deterministic order or a row can be repeated or skipped between
+			// pages, the entity declares no default sort so the primary key is used.
+			const results = await this._vertexIndexStorage.query(
+				conditions,
+				[{ property: "id", sortDirection: SortDirection.Ascending }],
+				properties,
+				cursor
+			);
+			entities.push(...results.entities);
+			cursor = results.cursor;
+		} while (Is.stringValue(cursor));
+
+		return entities;
 	}
 
 	/**
@@ -2399,23 +2909,31 @@ export class AuditableItemGraphService
 	 * @internal
 	 */
 	private async findMatchingVertices(vertexId: string, aliasId: string): Promise<boolean> {
-		const results = await this._vertexStorage.query({
-			conditions: [
-				{
-					property: "aliasIndex",
-					comparison: ComparisonOperator.Includes,
-					value: `||${aliasId.toLowerCase()}||`
-				},
-				{
-					property: "id",
-					value: vertexId,
-					comparison: ComparisonOperator.NotEquals
-				}
-			],
-			logicalOperator: LogicalOperator.And
-		});
+		const entities = await this.queryVertexIndexes(
+			{
+				logicalOperator: LogicalOperator.And,
+				conditions: [
+					{
+						property: "type",
+						comparison: ComparisonOperator.Equals,
+						value: AuditableItemGraphService._INDEX_TYPE_ALIAS
+					},
+					{
+						property: "value",
+						comparison: ComparisonOperator.Equals,
+						value: aliasId.toLowerCase()
+					},
+					{
+						property: "vertexId",
+						comparison: ComparisonOperator.NotEquals,
+						value: vertexId
+					}
+				]
+			},
+			["vertexId"]
+		);
 
-		return results.entities.length > 0;
+		return entities.length > 0;
 	}
 
 	/**

@@ -23,8 +23,15 @@ import {
 	ContextIdStore,
 	type IContextIds
 } from "@twin.org/context";
-import { ComponentFactory, Is, RandomHelper, SharedStore } from "@twin.org/core";
-import { ComparisonOperator, LogicalOperator } from "@twin.org/entity";
+import {
+	ComponentFactory,
+	Converter,
+	Is,
+	ObjectHelper,
+	RandomHelper,
+	SharedStore
+} from "@twin.org/core";
+import { ComparisonOperator, LogicalOperator, SortDirection } from "@twin.org/entity";
 import { MemoryEntityStorageConnector } from "@twin.org/entity-storage-connector-memory";
 import { EntityStorageConnectorFactory } from "@twin.org/entity-storage-models";
 import { DidContextIdHandler } from "@twin.org/identity-models";
@@ -47,9 +54,11 @@ import {
 import { AuditableItemGraphService } from "../src/auditableItemGraphService.js";
 import type { AuditableItemGraphChangeset } from "../src/entities/auditableItemGraphChangeset.js";
 import type { AuditableItemGraphVertex } from "../src/entities/auditableItemGraphVertex.js";
+import type { AuditableItemGraphVertexIndex } from "../src/entities/auditableItemGraphVertexIndex.js";
 import { initSchema } from "../src/schema.js";
 
 let vertexStorage: MemoryEntityStorageConnector<AuditableItemGraphVertex>;
+let vertexIndexStorage: MemoryEntityStorageConnector<AuditableItemGraphVertexIndex>;
 let changesetStorage: MemoryEntityStorageConnector<AuditableItemGraphChangeset>;
 let immutableProofStorage: MemoryEntityStorageConnector<ImmutableProof>;
 let notarizationStore: Map<string, INotarization>;
@@ -66,6 +75,16 @@ const IMMUTABLE_PROOF_URN_PATTERN = /^immutable-proof:[\da-f]+$/;
  * Parallel attach count aligned with supply-chain concurrency repro (issue #69).
  */
 const PARALLEL_EDGE_ATTACH_COUNT = 10;
+
+/**
+ * Read the index entries of one type. Every vertex also carries an entry for its own id, so a
+ * count of alias or resource type entries has to exclude it.
+ * @param type The index type to filter by.
+ * @returns The matching index entries.
+ */
+async function indexEntriesOfType(type: string): Promise<AuditableItemGraphVertexIndex[]> {
+	return (await vertexIndexStorage.getStore()).filter(entry => entry.type === type);
+}
 
 /**
  * Extract the vertex ID from the AIG URN.
@@ -160,6 +179,12 @@ describe("AuditableItemGraphService", () => {
 			config: { storageKey: "auditable-item-graph-vertex" }
 		});
 
+		vertexIndexStorage = new MemoryEntityStorageConnector<AuditableItemGraphVertexIndex>({
+			entitySchema: nameof<AuditableItemGraphVertexIndex>(),
+			partitionContextIds: [ContextIdKeys.Tenant],
+			config: { storageKey: "auditable-item-graph-vertex-index" }
+		});
+
 		changesetStorage = new MemoryEntityStorageConnector<AuditableItemGraphChangeset>({
 			entitySchema: nameof<AuditableItemGraphChangeset>(),
 			partitionContextIds: [ContextIdKeys.Tenant],
@@ -167,6 +192,10 @@ describe("AuditableItemGraphService", () => {
 		});
 
 		EntityStorageConnectorFactory.register("auditable-item-graph-vertex", () => vertexStorage);
+		EntityStorageConnectorFactory.register(
+			"auditable-item-graph-vertex-index",
+			() => vertexIndexStorage
+		);
 		EntityStorageConnectorFactory.register(
 			"auditable-item-graph-changeset",
 			() => changesetStorage
@@ -255,6 +284,7 @@ describe("AuditableItemGraphService", () => {
 
 	afterEach(async () => {
 		await vertexStorage.teardown();
+		await vertexIndexStorage.teardown();
 		await changesetStorage.teardown();
 		await immutableProofStorage.teardown();
 		await changesetStorage.teardown();
@@ -288,9 +318,12 @@ describe("AuditableItemGraphService", () => {
 			})
 		);
 		expect(vertex.id).toEqual(storedVertexId);
-		expect(vertex.aliasIndex).toBeUndefined();
 		expect(vertex.annotationObject).toBeUndefined();
-		expect(vertex.resourceTypeIndex).toBeUndefined();
+		expect(await indexEntriesOfType("alias")).toHaveLength(0);
+		expect(await indexEntriesOfType("resourceType")).toHaveLength(0);
+		expect(await indexEntriesOfType("vertex")).toEqual([
+			expect.objectContaining({ vertexId: storedVertexId, value: storedVertexId })
+		]);
 
 		const changesetStore = await changesetStorage.getStore();
 		expect(changesetStore).toHaveLength(1);
@@ -338,7 +371,6 @@ describe("AuditableItemGraphService", () => {
 				id: storedVertexId,
 				dateCreated: expect.any(String),
 				organizationIdentity: TEST_ORGANIZATION_IDENTITY,
-				aliasIndex: "||foo123||bar456||",
 				aliases: [
 					{
 						id: "foo123",
@@ -350,6 +382,15 @@ describe("AuditableItemGraphService", () => {
 					}
 				]
 			})
+		);
+
+		const vertexIndexStore = await indexEntriesOfType("alias");
+		expect(vertexIndexStore).toHaveLength(2);
+		expect(vertexIndexStore).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({ vertexId: storedVertexId, type: "alias", value: "foo123" }),
+				expect.objectContaining({ vertexId: storedVertexId, type: "alias", value: "bar456" })
+			])
 		);
 
 		const changesetStore = await changesetStorage.getStore();
@@ -442,8 +483,8 @@ describe("AuditableItemGraphService", () => {
 				}
 			})
 		);
-		expect(vertex.aliasIndex).toBeUndefined();
-		expect(vertex.resourceTypeIndex).toBeUndefined();
+		expect(await indexEntriesOfType("alias")).toHaveLength(0);
+		expect(await indexEntriesOfType("resourceType")).toHaveLength(0);
 
 		const changesetStore = await changesetStorage.getStore();
 
@@ -2792,6 +2833,886 @@ describe("AuditableItemGraphService", () => {
 		);
 	});
 
+	test("Removing an alias removes its index entry", async () => {
+		const service = new AuditableItemGraphService();
+		const createdId = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			aliases: [
+				{ type: AuditableItemGraphTypes.Alias, id: "keep-me" },
+				{ type: AuditableItemGraphTypes.Alias, id: "drop-me" }
+			]
+		});
+
+		await waitForProofGeneration();
+
+		expect(await indexEntriesOfType("alias")).toHaveLength(2);
+
+		await service.updatePartial({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			id: createdId,
+			aliasPatches: { remove: ["drop-me"] }
+		});
+
+		const vertexIndexStore = await indexEntriesOfType("alias");
+		expect(vertexIndexStore).toHaveLength(1);
+		expect(vertexIndexStore[0]).toEqual(
+			expect.objectContaining({
+				vertexId: extractAigId(createdId),
+				type: "alias",
+				value: "keep-me"
+			})
+		);
+
+		const dropped = await service.query({ id: "drop-me", idMode: "alias", idExact: true });
+		expect(dropped.entries.itemListElement ?? []).toHaveLength(0);
+
+		const kept = await service.query({ id: "keep-me", idMode: "alias", idExact: true });
+		expect(kept.entries.itemListElement).toHaveLength(1);
+		expect(kept.entries.itemListElement[0]).toEqual(expect.objectContaining({ id: createdId }));
+	});
+
+	test("Re-adding the same alias does not duplicate its index entry", async () => {
+		const service = new AuditableItemGraphService();
+		const createdId = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			aliases: [{ type: AuditableItemGraphTypes.Alias, id: "recycled" }]
+		});
+
+		await waitForProofGeneration();
+
+		await service.updatePartial({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			id: createdId,
+			aliasPatches: { remove: ["recycled"] }
+		});
+
+		expect(await indexEntriesOfType("alias")).toHaveLength(0);
+
+		await service.updatePartial({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			id: createdId,
+			aliasPatches: { add: [{ type: AuditableItemGraphTypes.Alias, id: "recycled" }] }
+		});
+
+		const vertexIndexStore = await indexEntriesOfType("alias");
+		expect(vertexIndexStore).toHaveLength(1);
+		expect(vertexIndexStore[0]).toEqual(
+			expect.objectContaining({
+				vertexId: extractAigId(createdId),
+				type: "alias",
+				value: "recycled"
+			})
+		);
+	});
+
+	test("Matches an alias stored in a different case to the one queried", async () => {
+		const service = new AuditableItemGraphService();
+		const createdId = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			aliases: [{ type: AuditableItemGraphTypes.Alias, id: "MixedCaseAlias" }]
+		});
+
+		await waitForProofGeneration();
+
+		// The index entry is case folded for lookup, the vertex keeps the alias as supplied.
+		const vertexIndexStore = await indexEntriesOfType("alias");
+		expect(vertexIndexStore).toHaveLength(1);
+		expect(vertexIndexStore[0]).toEqual(
+			expect.objectContaining({ type: "alias", value: "mixedcasealias" })
+		);
+
+		const vertexStore = await vertexStorage.getStore();
+		expect(vertexStore[0].aliases?.[0].id).toEqual("MixedCaseAlias");
+
+		const lower = await service.query({ id: "mixedcasealias", idMode: "alias", idExact: true });
+		expect(lower.entries.itemListElement).toHaveLength(1);
+		expect(lower.entries.itemListElement[0]).toEqual(expect.objectContaining({ id: createdId }));
+
+		const upper = await service.query({ id: "MIXEDCASEALIAS", idMode: "alias", idExact: true });
+		expect(upper.entries.itemListElement).toHaveLength(1);
+		expect(upper.entries.itemListElement[0]).toEqual(expect.objectContaining({ id: createdId }));
+	});
+
+	test("Rejects a unique alias differing only by case from an existing alias", async () => {
+		const service = new AuditableItemGraphService();
+		await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			aliases: [{ type: AuditableItemGraphTypes.Alias, id: "UniqueAlias" }]
+		});
+
+		await waitForProofGeneration();
+
+		await expect(
+			service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex,
+				aliases: [{ type: AuditableItemGraphTypes.Alias, id: "uniquealias", unique: true }]
+			})
+		).rejects.toMatchObject({
+			message: "auditableItemGraphService.createFailed",
+			cause: {
+				message: "auditableItemGraphService.aliasNotUnique"
+			}
+		});
+	});
+
+	test("Matches a resource type stored in a different case to the one queried", async () => {
+		const service = new AuditableItemGraphService();
+		const createdId = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			resources: [
+				{
+					type: AuditableItemGraphTypes.Resource,
+					id: "resource1",
+					resourceObject: {
+						"@context": "https://www.w3.org/ns/activitystreams",
+						type: "Create",
+						actor: {
+							type: "Person",
+							id: "acct:person@example.org",
+							name: "Person"
+						},
+						object: {
+							type: "Note",
+							content: "This is a simple note"
+						},
+						published: "2015-01-25T12:34:56Z"
+					}
+				}
+			]
+		});
+
+		await waitForProofGeneration();
+
+		const vertexIndexStore = await vertexIndexStorage.getStore();
+		expect(vertexIndexStore).toEqual(
+			expect.arrayContaining([expect.objectContaining({ type: "resourceType", value: "create" })])
+		);
+
+		const results = await service.query({ resourceTypes: ["CREATE"] });
+		expect(results.entries.itemListElement).toHaveLength(1);
+		expect(results.entries.itemListElement[0]).toEqual(expect.objectContaining({ id: createdId }));
+	});
+
+	test("Keeps an alias index entry when a paged read repeats the same row", async () => {
+		const service = new AuditableItemGraphService();
+		const createdId = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			aliases: [{ type: AuditableItemGraphTypes.Alias, id: "paged-alias" }]
+		});
+
+		await waitForProofGeneration();
+
+		// An index read with no stable order can return the same row on two pages, which is
+		// equivalent to it appearing twice in one result set.
+		const realQuery = vertexIndexStorage.query.bind(vertexIndexStorage);
+		let repeated = false;
+		const querySpy = vi
+			.spyOn(vertexIndexStorage, "query")
+			.mockImplementation(async (conditions, sort, properties, cursor, limit) => {
+				const result = await realQuery(conditions, sort, properties, cursor, limit);
+				if (!repeated && result.entities.length > 0) {
+					repeated = true;
+					return { entities: [...result.entities, ...result.entities] };
+				}
+				return result;
+			});
+
+		try {
+			await service.updatePartial({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				id: createdId,
+				annotationObject: {
+					"@context": "https://www.w3.org/ns/activitystreams",
+					type: "Note",
+					content: "forces a persist"
+				}
+			});
+		} finally {
+			querySpy.mockRestore();
+		}
+
+		const vertexIndexStore = await indexEntriesOfType("alias");
+		expect(vertexIndexStore).toHaveLength(1);
+		expect(vertexIndexStore[0]).toEqual(
+			expect.objectContaining({ type: "alias", value: "paged-alias" })
+		);
+		expect(await indexEntriesOfType("vertex")).toHaveLength(1);
+
+		const found = await service.query({ id: "paged-alias", idMode: "alias", idExact: true });
+		expect(found.entries.itemListElement).toHaveLength(1);
+		expect(found.entries.itemListElement[0]).toEqual(expect.objectContaining({ id: createdId }));
+	});
+
+	test("Pages an index driven resource type query without draining the index", async () => {
+		const service = new AuditableItemGraphService();
+
+		const createdIds: string[] = [];
+		for (let i = 0; i < 3; i++) {
+			createdIds.push(
+				await service.create({
+					"@context": [
+						AuditableItemGraphContexts.Context,
+						AuditableItemGraphContexts.ContextCommon
+					],
+					type: AuditableItemGraphTypes.Vertex,
+					resources: [
+						{
+							type: AuditableItemGraphTypes.Resource,
+							id: `paged-resource-${i}`,
+							resourceObject: {
+								"@context": "https://www.w3.org/ns/activitystreams",
+								type: "Note",
+								content: `note ${i}`
+							}
+						}
+					]
+				})
+			);
+		}
+
+		await waitForProofGeneration(3);
+
+		const collected: string[] = [];
+		let cursor: string | undefined;
+		let pages = 0;
+
+		do {
+			const page = await service.query(
+				{ resourceTypes: ["Note"] },
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+				cursor,
+				1
+			);
+			expect(page.entries.itemListElement).toHaveLength(1);
+			collected.push(page.entries.itemListElement[0].id);
+			cursor = page.cursor;
+			pages++;
+		} while (Is.stringValue(cursor) && pages < 10);
+
+		expect(pages).toEqual(3);
+		expect(new Set(collected).size).toEqual(3);
+		expect(new Set(collected)).toEqual(new Set(createdIds));
+	});
+
+	test("Returns an index strategy cursor which is opaque and self describing", async () => {
+		const service = new AuditableItemGraphService();
+		for (let i = 0; i < 2; i++) {
+			await service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex,
+				resources: [
+					{
+						type: AuditableItemGraphTypes.Resource,
+						id: `opaque-resource-${i}`,
+						resourceObject: {
+							"@context": "https://www.w3.org/ns/activitystreams",
+							type: "Article",
+							content: `article ${i}`
+						}
+					}
+				]
+			});
+		}
+
+		await waitForProofGeneration(2);
+
+		const page = await service.query(
+			{ resourceTypes: ["Article"] },
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+			1
+		);
+
+		expect(Is.stringValue(page.cursor)).toEqual(true);
+
+		// An index driven cursor carries the keyset it resumes from, not a storage cursor.
+		const decoded = ObjectHelper.fromBytes<{ s: string; d: string; i: string }>(
+			Converter.base64ToBytes(page.cursor as string)
+		);
+		expect(decoded.s).toEqual("i");
+		expect(Is.stringValue(decoded.d)).toEqual(true);
+		expect(Is.stringValue(decoded.i)).toEqual(true);
+
+		// The keyset names the last vertex returned, so the next page resumes after it.
+		expect(decoded.i).toEqual(extractAigId(page.entries.itemListElement[0].id));
+	});
+
+	test("Rejects a cursor issued for a different query strategy", async () => {
+		const service = new AuditableItemGraphService();
+		for (let i = 0; i < 2; i++) {
+			await service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex,
+				resources: [
+					{
+						type: AuditableItemGraphTypes.Resource,
+						id: `strategy-resource-${i}`,
+						resourceObject: {
+							"@context": "https://www.w3.org/ns/activitystreams",
+							type: "Event",
+							content: `event ${i}`
+						}
+					}
+				]
+			});
+		}
+
+		await waitForProofGeneration(2);
+
+		const indexPage = await service.query(
+			{ resourceTypes: ["Event"] },
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+			1
+		);
+		expect(Is.stringValue(indexPage.cursor)).toEqual(true);
+
+		// The same cursor handed to a vertex driven query must not silently restart page one.
+		await expect(
+			service.query(undefined, undefined, undefined, undefined, undefined, indexPage.cursor, 1)
+		).rejects.toMatchObject({
+			message: "auditableItemGraphService.queryingFailed",
+			cause: {
+				message: "auditableItemGraphService.invalidCursor"
+			}
+		});
+	});
+
+	test("Rejects a malformed cursor rather than restarting from the first page", async () => {
+		const service = new AuditableItemGraphService();
+		await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex
+		});
+
+		await waitForProofGeneration();
+
+		await expect(
+			service.query(undefined, undefined, undefined, undefined, undefined, "not-a-cursor", 1)
+		).rejects.toMatchObject({
+			message: "auditableItemGraphService.queryingFailed",
+			cause: {
+				message: "auditableItemGraphService.invalidCursor"
+			}
+		});
+	});
+
+	describe("query cursor edge conditions", () => {
+		/**
+		 * Create a bypass vertex carrying one resource of the given type. Bypass mode keeps no
+		 * changeset so these fixtures need no proof generation.
+		 * @param service The service to create with.
+		 * @param resourceType The resource type to attach.
+		 * @param index A discriminator for the resource id.
+		 * @returns The created vertex URN.
+		 */
+		async function createIndexedVertex(
+			service: AuditableItemGraphService,
+			resourceType: string,
+			index: number
+		): Promise<string> {
+			return service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex,
+				auditMode: AuditableItemGraphAuditMode.Bypass,
+				resources: [
+					{
+						type: AuditableItemGraphTypes.Resource,
+						id: `${resourceType}-resource-${index}`,
+						resourceObject: {
+							"@context": "https://www.w3.org/ns/activitystreams",
+							type: resourceType,
+							content: `content ${index}`
+						}
+					}
+				]
+			});
+		}
+
+		/**
+		 * Decode the strategy discriminator from a cursor.
+		 * @param cursor The cursor to inspect.
+		 * @returns The strategy character.
+		 */
+		function cursorStrategy(cursor?: string): string | undefined {
+			if (!Is.stringValue(cursor)) {
+				return undefined;
+			}
+			return ObjectHelper.fromBytes<{ s?: string }>(Converter.base64ToBytes(cursor)).s;
+		}
+
+		test("Treats an empty cursor as a request for the first page", async () => {
+			const service = new AuditableItemGraphService();
+			await createIndexedVertex(service, "Empty", 0);
+			await createIndexedVertex(service, "Empty", 1);
+
+			const page = await service.query(
+				{ resourceTypes: ["Empty"] },
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+				"",
+				1
+			);
+
+			expect(page.entries.itemListElement).toHaveLength(1);
+			expect(cursorStrategy(page.cursor)).toEqual("i");
+		});
+
+		test("Rejects a cursor which is valid base64 but not an encoded cursor", async () => {
+			const service = new AuditableItemGraphService();
+			await createIndexedVertex(service, "Garbage", 0);
+
+			await expect(
+				service.query(
+					{ resourceTypes: ["Garbage"] },
+					undefined,
+					undefined,
+					undefined,
+					undefined,
+					"AAAA",
+					1
+				)
+			).rejects.toMatchObject({
+				message: "auditableItemGraphService.queryingFailed",
+				cause: {
+					message: "auditableItemGraphService.invalidCursor"
+				}
+			});
+		});
+
+		test("Rejects a cursor which decodes but carries no inner storage cursor", async () => {
+			const service = new AuditableItemGraphService();
+			await createIndexedVertex(service, "Inner", 0);
+
+			const noInner = Converter.bytesToBase64(ObjectHelper.toBytes({ s: "i" }));
+
+			await expect(
+				service.query(
+					{ resourceTypes: ["Inner"] },
+					undefined,
+					undefined,
+					undefined,
+					undefined,
+					noInner,
+					1
+				)
+			).rejects.toMatchObject({
+				message: "auditableItemGraphService.queryingFailed",
+				cause: {
+					message: "auditableItemGraphService.invalidCursor"
+				}
+			});
+		});
+
+		test("Rejects a vertex strategy cursor on an index driven query", async () => {
+			const service = new AuditableItemGraphService();
+			await createIndexedVertex(service, "Reverse", 0);
+			await createIndexedVertex(service, "Reverse", 1);
+
+			const vertexPage = await service.query(
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+				1
+			);
+			expect(cursorStrategy(vertexPage.cursor)).toEqual("v");
+
+			await expect(
+				service.query(
+					{ resourceTypes: ["Reverse"] },
+					undefined,
+					undefined,
+					undefined,
+					undefined,
+					vertexPage.cursor,
+					1
+				)
+			).rejects.toMatchObject({
+				message: "auditableItemGraphService.queryingFailed",
+				cause: {
+					message: "auditableItemGraphService.invalidCursor"
+				}
+			});
+		});
+
+		test("Returns no cursor for an index driven query with no matches", async () => {
+			const service = new AuditableItemGraphService();
+			await createIndexedVertex(service, "Present", 0);
+
+			const page = await service.query(
+				{ resourceTypes: ["Absent"] },
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+				1
+			);
+
+			expect(page.entries.itemListElement ?? []).toHaveLength(0);
+			expect(page.cursor).toBeUndefined();
+		});
+
+		test("Returns no cursor when the limit covers every index match", async () => {
+			const service = new AuditableItemGraphService();
+			await createIndexedVertex(service, "Covered", 0);
+			await createIndexedVertex(service, "Covered", 1);
+
+			const page = await service.query(
+				{ resourceTypes: ["Covered"] },
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+				10
+			);
+
+			expect(page.entries.itemListElement).toHaveLength(2);
+			expect(page.cursor).toBeUndefined();
+		});
+
+		test("Keeps the creation date ordering across index driven pages", async () => {
+			const service = new AuditableItemGraphService();
+
+			let tick = FIRST_TICK;
+			Date.now = vi.fn().mockImplementation(() => (tick += 1000));
+
+			for (let i = 0; i < 3; i++) {
+				await createIndexedVertex(service, "Ordered", i);
+			}
+
+			for (const direction of [SortDirection.Descending, SortDirection.Ascending]) {
+				const dates: string[] = [];
+				let cursor: string | undefined;
+				let pages = 0;
+
+				do {
+					const page = await service.query(
+						{ resourceTypes: ["Ordered"] },
+						undefined,
+						undefined,
+						direction,
+						undefined,
+						cursor,
+						1
+					);
+					expect(page.entries.itemListElement).toHaveLength(1);
+					const { dateCreated } = page.entries.itemListElement[0];
+					expect(Is.stringValue(dateCreated)).toEqual(true);
+					dates.push(dateCreated ?? "");
+					cursor = page.cursor;
+					pages++;
+				} while (Is.stringValue(cursor) && pages < 10);
+
+				expect(pages).toEqual(3);
+
+				const sorted = [...dates].sort();
+				expect(dates).toEqual(
+					direction === SortDirection.Ascending ? sorted : [...sorted].reverse()
+				);
+			}
+		});
+
+		test("Pages by the modified date from the index", async () => {
+			const service = new AuditableItemGraphService();
+			await createIndexedVertex(service, "Modified", 0);
+			await createIndexedVertex(service, "Modified", 1);
+			await createIndexedVertex(service, "Modified", 2);
+
+			const collected: string[] = [];
+			let cursor: string | undefined;
+			let pages = 0;
+
+			do {
+				const page = await service.query(
+					{ resourceTypes: ["Modified"] },
+					undefined,
+					"dateModified",
+					undefined,
+					undefined,
+					cursor,
+					1
+				);
+				expect(cursorStrategy(page.cursor) ?? "i").toEqual("i");
+				collected.push(...page.entries.itemListElement.map(e => e.id));
+				cursor = page.cursor;
+				pages++;
+			} while (Is.stringValue(cursor) && pages < 10);
+
+			expect(pages).toEqual(3);
+			expect(new Set(collected).size).toEqual(3);
+		});
+
+		test("Applies extra conditions to an index driven page", async () => {
+			const service = new AuditableItemGraphService();
+			await createIndexedVertex(service, "Conditioned", 0);
+			await createIndexedVertex(service, "Conditioned", 1);
+
+			const matching = await service.query(
+				{ resourceTypes: ["Conditioned"] },
+				{
+					property: "organizationIdentity",
+					comparison: ComparisonOperator.Equals,
+					value: TEST_ORGANIZATION_IDENTITY
+				},
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+				10
+			);
+			expect(matching.entries.itemListElement).toHaveLength(2);
+
+			// A condition matching nothing filters the page out, and following the cursor to the
+			// end still terminates rather than looping.
+			const collected: string[] = [];
+			let cursor: string | undefined;
+			let pages = 0;
+
+			do {
+				const page = await service.query(
+					{ resourceTypes: ["Conditioned"] },
+					{
+						property: "organizationIdentity",
+						comparison: ComparisonOperator.Equals,
+						value: "did:entity-storage:nobody"
+					},
+					undefined,
+					undefined,
+					undefined,
+					cursor,
+					1
+				);
+				collected.push(...(page.entries.itemListElement ?? []).map(e => e.id));
+				cursor = page.cursor;
+				pages++;
+			} while (Is.stringValue(cursor) && pages < 10);
+
+			expect(collected).toHaveLength(0);
+			expect(pages).toBeLessThan(10);
+		});
+
+		test("Pages two resource types from the index without repeating a vertex", async () => {
+			const service = new AuditableItemGraphService();
+
+			// One vertex per type plus one carrying both, so a query which only honoured the
+			// first or the last type would return two rather than three. The vertex carrying
+			// both also matches two index entries, which is why this shape cannot be paged by
+			// the index.
+			await service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex,
+				auditMode: AuditableItemGraphAuditMode.Bypass,
+				resources: [
+					{
+						type: AuditableItemGraphTypes.Resource,
+						id: "both-a",
+						resourceObject: {
+							"@context": "https://www.w3.org/ns/activitystreams",
+							type: "Alpha",
+							content: "alpha"
+						}
+					},
+					{
+						type: AuditableItemGraphTypes.Resource,
+						id: "both-b",
+						resourceObject: {
+							"@context": "https://www.w3.org/ns/activitystreams",
+							type: "Beta",
+							content: "beta"
+						}
+					}
+				]
+			});
+			await createIndexedVertex(service, "Alpha", 1);
+			await createIndexedVertex(service, "Beta", 2);
+
+			const collected: string[] = [];
+			let cursor: string | undefined;
+			let pages = 0;
+
+			do {
+				const page = await service.query(
+					{ resourceTypes: ["Alpha", "Beta"] },
+					undefined,
+					undefined,
+					undefined,
+					undefined,
+					cursor,
+					1
+				);
+				expect(cursorStrategy(page.cursor) ?? "i").toEqual("i");
+				collected.push(...page.entries.itemListElement.map(e => e.id));
+				cursor = page.cursor;
+				pages++;
+			} while (Is.stringValue(cursor) && pages < 10);
+
+			expect(collected).toHaveLength(3);
+			expect(new Set(collected).size).toEqual(3);
+		});
+
+		test("Pages a partial alias match from the index without repeating a vertex", async () => {
+			const service = new AuditableItemGraphService();
+
+			// Both aliases match the partial term, so the index holds two entries for one vertex.
+			const twoAliases = await service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex,
+				auditMode: AuditableItemGraphAuditMode.Bypass,
+				aliases: [
+					{ type: AuditableItemGraphTypes.Alias, id: "shared-one" },
+					{ type: AuditableItemGraphTypes.Alias, id: "shared-two" }
+				]
+			});
+			const oneAlias = await service.create({
+				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+				type: AuditableItemGraphTypes.Vertex,
+				auditMode: AuditableItemGraphAuditMode.Bypass,
+				aliases: [{ type: AuditableItemGraphTypes.Alias, id: "shared-three" }]
+			});
+
+			const collected: string[] = [];
+			let cursor: string | undefined;
+			let pages = 0;
+
+			do {
+				const page = await service.query(
+					{ id: "shared-", idMode: "alias" },
+					undefined,
+					undefined,
+					undefined,
+					undefined,
+					cursor,
+					1
+				);
+				expect(cursorStrategy(page.cursor) ?? "i").toEqual("i");
+				collected.push(...page.entries.itemListElement.map(e => e.id));
+				cursor = page.cursor;
+				pages++;
+			} while (Is.stringValue(cursor) && pages < 10);
+
+			expect(new Set(collected)).toEqual(new Set([twoAliases, oneAlias]));
+			expect(collected).toHaveLength(2);
+		});
+
+		test("Reads a bounded number of index entries however many match", async () => {
+			const service = new AuditableItemGraphService();
+
+			const total = 30;
+			for (let i = 0; i < total; i++) {
+				await createIndexedVertex(service, "Bulk", i);
+			}
+
+			const querySpy = vi.spyOn(vertexIndexStorage, "query");
+			try {
+				const page = await service.query(
+					{ resourceTypes: ["Bulk"] },
+					undefined,
+					undefined,
+					undefined,
+					undefined,
+					undefined,
+					2
+				);
+
+				expect(page.entries.itemListElement).toHaveLength(2);
+				expect(Is.stringValue(page.cursor)).toEqual(true);
+
+				// Every read is bounded by the page size, so the 30 matches are never drained.
+				expect(querySpy.mock.calls.length).toBeLessThanOrEqual(2);
+				for (const call of querySpy.mock.calls) {
+					expect(call[4]).toBeDefined();
+					expect(call[4]).toBeLessThanOrEqual(3);
+				}
+
+				const returned = await Promise.all(
+					querySpy.mock.results.map(async result => (await result.value).entities.length)
+				);
+				for (const count of returned) {
+					expect(count).toBeLessThanOrEqual(3);
+				}
+			} finally {
+				querySpy.mockRestore();
+			}
+		});
+
+		test("Walks every match across pages without repeating or dropping one", async () => {
+			const service = new AuditableItemGraphService();
+
+			const total = 12;
+			const created: string[] = [];
+			for (let i = 0; i < total; i++) {
+				created.push(await createIndexedVertex(service, "Walked", i));
+			}
+
+			const collected: string[] = [];
+			let cursor: string | undefined;
+			let pages = 0;
+
+			do {
+				const page = await service.query(
+					{ resourceTypes: ["Walked"] },
+					undefined,
+					undefined,
+					undefined,
+					undefined,
+					cursor,
+					5
+				);
+				collected.push(...page.entries.itemListElement.map(e => e.id));
+				cursor = page.cursor;
+				pages++;
+			} while (Is.stringValue(cursor) && pages < 20);
+
+			expect(pages).toEqual(3);
+			expect(collected).toHaveLength(total);
+			expect(new Set(collected)).toEqual(new Set(created));
+		});
+
+		test("Skips an index entry whose vertex no longer exists", async () => {
+			const service = new AuditableItemGraphService();
+			const kept = await createIndexedVertex(service, "Orphan", 0);
+			const removed = await createIndexedVertex(service, "Orphan", 1);
+
+			await vertexStorage.remove(extractAigId(removed));
+
+			const page = await service.query(
+				{ resourceTypes: ["Orphan"] },
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+				undefined,
+				10
+			);
+
+			expect(page.entries.itemListElement).toHaveLength(1);
+			expect(page.entries.itemListElement[0]).toEqual(expect.objectContaining({ id: kept }));
+		});
+	});
+
 	test("Can query for a vertex using resource types", async () => {
 		const service = new AuditableItemGraphService();
 		const createdId1 = await service.create({
@@ -3566,6 +4487,64 @@ describe("AuditableItemGraphService", () => {
 		await expect(service.getVersion(id, 1000)).rejects.toMatchObject({
 			message: "auditableItemGraphService.getVersionFailed"
 		});
+	});
+
+	test("Fetching a version projects the changeset patches", async () => {
+		const service = new AuditableItemGraphService();
+		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			aliases: [{ type: AuditableItemGraphTypes.Alias, id: "foo123" }]
+		});
+
+		await service.update({
+			id,
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			aliases: [{ type: AuditableItemGraphTypes.Alias, id: "bar456" }]
+		});
+
+		const querySpy = vi.spyOn(changesetStorage, "query");
+		try {
+			const version = await service.getVersion(id, 0);
+			expect(version.version).toEqual(0);
+
+			expect(querySpy).toHaveBeenCalled();
+			for (const call of querySpy.mock.calls) {
+				expect(call[2]).toEqual(["id", "dateCreated", "patches"]);
+			}
+		} finally {
+			querySpy.mockRestore();
+		}
+	});
+
+	test("Listing versions does not project the changeset patches", async () => {
+		const service = new AuditableItemGraphService();
+		const id = await service.create({
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			aliases: [{ type: AuditableItemGraphTypes.Alias, id: "foo123" }]
+		});
+
+		await service.update({
+			id,
+			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
+			type: AuditableItemGraphTypes.Vertex,
+			aliases: [{ type: AuditableItemGraphTypes.Alias, id: "bar456" }]
+		});
+
+		const querySpy = vi.spyOn(changesetStorage, "query");
+		try {
+			const versions = await service.getVersions(id);
+			expect(versions.itemListElement).toHaveLength(2);
+
+			expect(querySpy).toHaveBeenCalled();
+			for (const call of querySpy.mock.calls) {
+				expect(call[2]).toEqual(["id", "dateCreated", "version"]);
+			}
+		} finally {
+			querySpy.mockRestore();
+		}
 	});
 
 	test("Can get all versions of a vertex", async () => {

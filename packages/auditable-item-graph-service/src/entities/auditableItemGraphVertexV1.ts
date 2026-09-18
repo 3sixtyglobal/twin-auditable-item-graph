@@ -1,4 +1,4 @@
-// Copyright 2026 IOTA Stiftung.
+// Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
 import type { AuditableItemGraphAuditMode } from "@twin.org/auditable-item-graph-models";
 import { JsonLdTypes, type IJsonLdNodeObject } from "@twin.org/data-json-ld";
@@ -10,18 +10,18 @@ import type { AuditableItemGraphResource } from "./auditableItemGraphResource.js
 /**
  * Class describing the auditable item graph vertex.
  */
-@entity({ version: 2 })
-export class AuditableItemGraphVertex {
+@entity({ version: 1 })
+export class AuditableItemGraphVertexV1 {
 	/**
 	 * The id of the vertex.
 	 */
-	@property({ type: "string", isPrimary: true, maxLength: 255 })
+	@property({ type: "string", isPrimary: true })
 	public id!: string;
 
 	/**
 	 * The identity of the organization which controls the vertex.
 	 */
-	@property({ type: "string", maxLength: 255 })
+	@property({ type: "string" })
 	public organizationIdentity!: string;
 
 	/**
@@ -44,8 +44,20 @@ export class AuditableItemGraphVertex {
 	/**
 	 * How the mutations of the vertex are recorded, when absent the vertex behaves as audited.
 	 */
-	@property({ type: "string", maxLength: 10, optional: true })
+	@property({ type: "string", optional: true })
 	public auditMode?: AuditableItemGraphAuditMode;
+
+	/**
+	 * Combined alias index for the vertex used for querying.
+	 */
+	@property({ type: "string", isSecondary: true, optional: true })
+	public aliasIndex?: string;
+
+	/**
+	 * Combined resource type index for the vertex used for querying.
+	 */
+	@property({ type: "string", isSecondary: true, optional: true })
+	public resourceTypeIndex?: string;
 
 	/**
 	 * Object to associate with the vertex as JSON-LD.

@@ -19,6 +19,12 @@ export interface IAuditableItemGraphServiceConstructorOptions {
 	vertexEntityStorageType?: string;
 
 	/**
+	 * The entity storage for vertex indices.
+	 * @default auditable-item-graph-vertex-index
+	 */
+	vertexIndexEntityStorageType?: string;
+
+	/**
 	 * The entity storage for changesets.
 	 * @default auditable-item-graph-changeset
 	 */

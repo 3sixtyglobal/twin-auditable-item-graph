@@ -8,7 +8,9 @@ import { AuditableItemGraphEdge } from "./entities/auditableItemGraphEdge.js";
 import { AuditableItemGraphPatch } from "./entities/auditableItemGraphPatch.js";
 import { AuditableItemGraphResource } from "./entities/auditableItemGraphResource.js";
 import { AuditableItemGraphVertex } from "./entities/auditableItemGraphVertex.js";
+import { AuditableItemGraphVertexIndex } from "./entities/auditableItemGraphVertexIndex.js";
 import { AuditableItemGraphVertexV0 } from "./entities/auditableItemGraphVertexV0.js";
+import { AuditableItemGraphVertexV1 } from "./entities/auditableItemGraphVertexV1.js";
 
 /**
  * Initialize the schema for the auditable item graph entity storage connector.
@@ -19,6 +21,12 @@ export function initSchema(): void {
 	);
 	EntitySchemaFactory.register(nameof<AuditableItemGraphVertexV0>(), () =>
 		EntitySchemaHelper.getSchema(AuditableItemGraphVertexV0)
+	);
+	EntitySchemaFactory.register(nameof<AuditableItemGraphVertexV1>(), () =>
+		EntitySchemaHelper.getSchema(AuditableItemGraphVertexV1)
+	);
+	EntitySchemaFactory.register(nameof<AuditableItemGraphVertexIndex>(), () =>
+		EntitySchemaHelper.getSchema(AuditableItemGraphVertexIndex)
 	);
 	EntitySchemaFactory.register(nameof<AuditableItemGraphAlias>(), () =>
 		EntitySchemaHelper.getSchema(AuditableItemGraphAlias)
