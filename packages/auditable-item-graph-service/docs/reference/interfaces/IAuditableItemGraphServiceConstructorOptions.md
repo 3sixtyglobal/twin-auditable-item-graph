@@ -32,6 +32,20 @@ auditable-item-graph-vertex
 
 ***
 
+### vertexIndexEntityStorageType? {#vertexindexentitystoragetype}
+
+> `optional` **vertexIndexEntityStorageType?**: `string`
+
+The entity storage for vertex indices.
+
+#### Default
+
+```ts
+auditable-item-graph-vertex-index
+```
+
+***
+
 ### changesetEntityStorageType? {#changesetentitystoragetype}
 
 > `optional` **changesetEntityStorageType?**: `string`
