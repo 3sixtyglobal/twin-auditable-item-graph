@@ -1,6 +1,6 @@
 {
 	"name": "@twin.org/auditable-item-graph-models",
-	"version": "0.10.1-next.1",
+	"version": "0.10.1-next.2",
 	"description": "Defines shared graph data contracts, JSON schemas, and JSON-LD contexts for consistent interoperability.",
 	"repository": {
 		"type": "git",

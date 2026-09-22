@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.10.1-next.2](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.10.1-next.1...auditable-item-graph-service-v0.10.1-next.2) (2026-09-22)
+
+
+### Features
+
+* use entity storage query join ([#155](https://github.com/iotaledger/twin-auditable-item-graph/issues/155)) ([116bc94](https://github.com/iotaledger/twin-auditable-item-graph/commit/116bc94183fc70442ff2948d2506c65eb920b20e))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/auditable-item-graph-models bumped from 0.10.1-next.1 to 0.10.1-next.2
+
 ## [0.10.1-next.1](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.10.1-next.0...auditable-item-graph-service-v0.10.1-next.1) (2026-09-18)
 
 
