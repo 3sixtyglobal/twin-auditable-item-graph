@@ -121,12 +121,6 @@ export class AuditableItemGraphService
 	public static readonly NAMESPACE_EDGE: string = "edge";
 
 	/**
-	 * The number of vertices returned by a query when the caller gives no limit.
-	 * @internal
-	 */
-	private static readonly _DEFAULT_PAGE_SIZE: number = 40;
-
-	/**
 	 * The index type for the id of the vertex itself.
 	 * @internal
 	 */
@@ -1144,16 +1138,18 @@ export class AuditableItemGraphService
 				propertiesToReturn.unshift("id");
 			}
 
-			// Every id, alias and resource type match is held in the index storage, which carries
-			// the ordering dates so it can page its own matches by key set. Nothing is drained into
-			// memory, so a term matching a very large number of entries costs one page.
-			const indexPredicates: EntityCondition<AuditableItemGraphVertexIndex>[] = [];
+			// Every id, alias and resource type match is held in the index storage. Each filter is
+			// one dimension, satisfied by any one of the entries of a vertex, and a vertex has to
+			// satisfy every dimension it was given.
+			const indexDimensions: EntityCondition<AuditableItemGraphVertexIndex>[] = [];
 
 			if (hasIdFilter) {
 				const comparison = idExact ? ComparisonOperator.Equals : ComparisonOperator.Includes;
 				const term = idOrAlias.toLowerCase();
+				const idPredicates: EntityCondition<AuditableItemGraphVertexIndex>[] = [];
+
 				if (idMode === "id" || idMode === "both") {
-					indexPredicates.push(
+					idPredicates.push(
 						this.indexTypeValueCondition(
 							AuditableItemGraphService._INDEX_TYPE_VERTEX,
 							comparison,
@@ -1162,7 +1158,7 @@ export class AuditableItemGraphService
 					);
 				}
 				if (idMode === "alias" || idMode === "both") {
-					indexPredicates.push(
+					idPredicates.push(
 						this.indexTypeValueCondition(
 							AuditableItemGraphService._INDEX_TYPE_ALIAS,
 							comparison,
@@ -1170,54 +1166,32 @@ export class AuditableItemGraphService
 						)
 					);
 				}
-			} else if (hasResourceTypes) {
-				for (const resourceType of resourceTypes) {
-					indexPredicates.push(
-						this.indexTypeValueCondition(
-							AuditableItemGraphService._INDEX_TYPE_RESOURCE_TYPE,
-							ComparisonOperator.Equals,
-							resourceType.toLowerCase()
-						)
-					);
-				}
+
+				indexDimensions.push(this.anyOfConditions(idPredicates));
 			}
 
-			if (indexPredicates.length > 0) {
-				const indexPage = await this.queryIndexVertexIdPage(
-					indexPredicates,
+			if (hasResourceTypes) {
+				indexDimensions.push(
+					this.indexTypeValueCondition(
+						AuditableItemGraphService._INDEX_TYPE_RESOURCE_TYPE,
+						ComparisonOperator.In,
+						resourceTypes.map(resourceType => resourceType.toLowerCase())
+					)
+				);
+			}
+
+			if (indexDimensions.length > 0) {
+				const indexPage = await this.queryIndexVertices(
+					indexDimensions,
 					orderProperty,
 					orderDirection,
-					this.decodeCursor("i", cursor),
+					propertiesToReturn as (keyof AuditableItemGraphVertex)[],
+					conditions,
+					cursor,
 					limit
 				);
 
-				let pageVertexIds = indexPage.vertexIds;
-
-				// An OR over the index gives the union, so when an id or alias filter is combined
-				// with resource types the page is narrowed to the intersection here.
-				if (hasIdFilter && hasResourceTypes) {
-					pageVertexIds = await this.filterVertexIdsByResourceTypes(
-						pageVertexIds,
-						resourceTypes.map(resourceType => resourceType.toLowerCase())
-					);
-				}
-
-				const indexEntities = await this.fetchVerticesInOrder(
-					pageVertexIds,
-					propertiesToReturn as (keyof AuditableItemGraphVertex)[],
-					conditions
-				);
-
-				return await this.buildVertexList(
-					indexEntities,
-					indexPage.hasMore
-						? this.encodeCursor({
-								s: "i",
-								d: indexPage.keySet?.d,
-								i: indexPage.keySet?.i
-							})
-						: undefined
-				);
+				return await this.buildVertexList(indexPage.entities, indexPage.cursor);
 			}
 
 			const finalConditions: EntityCondition<IAuditableItemGraphVertex> = Is.empty(conditions)
@@ -1239,16 +1213,11 @@ export class AuditableItemGraphService
 					}
 				],
 				propertiesToReturn as (keyof AuditableItemGraphVertex)[],
-				this.decodeCursor("v", cursor)?.c,
+				cursor,
 				limit
 			);
 
-			return await this.buildVertexList(
-				results.entities,
-				Is.stringValue(results.cursor)
-					? this.encodeCursor({ s: "v", c: results.cursor })
-					: undefined
-			);
+			return await this.buildVertexList(results.entities, results.cursor);
 		} catch (error) {
 			throw new GeneralError(
 				AuditableItemGraphService.CLASS_NAME,
@@ -2561,82 +2530,17 @@ export class AuditableItemGraphService
 	}
 
 	/**
-	 * Encode a storage cursor into the opaque cursor handed back to callers.
-	 * Every cursor this service returns is in this format, so a cursor which does not decode
-	 * is invalid rather than a cursor from somewhere else.
-	 * @param payload The position to encode.
-	 * @param payload.s The strategy the position belongs to, i for index paged, v for vertex paged.
-	 * @param payload.d The ordering date of the last vertex returned, index strategy only.
-	 * @param payload.i The id of the last vertex returned, index strategy only.
-	 * @param payload.c The storage connector cursor, vertex strategy only.
-	 * @returns The encoded cursor, or undefined when there is no further page.
-	 * @internal
-	 */
-	private encodeCursor(payload: { s: "i" | "v"; d?: string; i?: string; c?: string }): string {
-		return Converter.bytesToBase64(ObjectHelper.toBytes(payload));
-	}
-
-	/**
-	 * Decode a cursor produced by encodeCursor.
-	 * @param strategy The strategy the current query is using.
-	 * @param cursor The cursor supplied by the caller.
-	 * @returns The decoded payload, or undefined when no cursor was supplied.
-	 * @throws GeneralError If the cursor is malformed or belongs to a different strategy.
-	 * @internal
-	 */
-	private decodeCursor(
-		strategy: "i" | "v",
-		cursor?: string
-	): { d?: string; i?: string; c?: string } | undefined {
-		if (!Is.stringValue(cursor)) {
-			return undefined;
-		}
-
-		let decoded: { s?: string; d?: string; i?: string; c?: string } | undefined;
-		if (Is.stringBase64(cursor)) {
-			try {
-				decoded = ObjectHelper.fromBytes<{ s?: string; d?: string; i?: string; c?: string }>(
-					Converter.base64ToBytes(cursor)
-				);
-			} catch (error) {
-				// Base64 which is not an encoded cursor is still only an invalid cursor, so every
-				// malformed cursor reports the same failure rather than leaking a parse error.
-				throw new GeneralError(
-					AuditableItemGraphService.CLASS_NAME,
-					"invalidCursor",
-					undefined,
-					error
-				);
-			}
-		}
-
-		// A cursor from a different strategy cannot be applied to this query, and silently
-		// restarting from the first page would loop a caller which keeps following the cursor.
-		const populated =
-			decoded?.s === strategy &&
-			(strategy === "v"
-				? Is.stringValue(decoded.c)
-				: Is.stringValue(decoded.d) && Is.stringValue(decoded.i));
-
-		if (!populated) {
-			throw new GeneralError(AuditableItemGraphService.CLASS_NAME, "invalidCursor");
-		}
-
-		return decoded;
-	}
-
-	/**
 	 * Build the condition matching one index type and value.
 	 * @param type The index type to match.
 	 * @param comparison The comparison to apply to the value.
-	 * @param value The index value to match, already lower cased.
+	 * @param value The index value or values to match, already lower cased.
 	 * @returns The condition.
 	 * @internal
 	 */
 	private indexTypeValueCondition(
 		type: string,
 		comparison: ComparisonOperator,
-		value: string
+		value: string | string[]
 	): EntityCondition<AuditableItemGraphVertexIndex> {
 		return {
 			logicalOperator: LogicalOperator.And,
@@ -2648,227 +2552,71 @@ export class AuditableItemGraphService
 	}
 
 	/**
-	 * Build the condition which resumes an index scan after a position.
-	 * Every entry for a vertex carries the same date and vertex id, so a position on that pair
-	 * steps past all the remaining entries of the vertex it names.
-	 * @param orderProperty The index date property being ordered by.
-	 * @param orderDirection The direction being ordered in.
-	 * @param lastDate The date of the last vertex returned.
-	 * @param lastVertexId The id of the last vertex returned.
-	 * @returns The condition.
+	 * Combine conditions so that matching any one of them is enough.
+	 * @param conditions The conditions to combine.
+	 * @returns The single condition when only one was given, otherwise their union.
 	 * @internal
 	 */
-	private indexKeySetCondition(
-		orderProperty: "dateCreated" | "dateModified",
-		orderDirection: SortDirection,
-		lastDate: string,
-		lastVertexId: string
+	private anyOfConditions(
+		conditions: EntityCondition<AuditableItemGraphVertexIndex>[]
 	): EntityCondition<AuditableItemGraphVertexIndex> {
-		const dateComparison =
-			orderDirection === SortDirection.Ascending
-				? ComparisonOperator.GreaterThan
-				: ComparisonOperator.LessThan;
-
-		return {
-			logicalOperator: LogicalOperator.Or,
-			conditions: [
-				{ property: orderProperty, comparison: dateComparison, value: lastDate },
-				{
-					logicalOperator: LogicalOperator.And,
-					conditions: [
-						{ property: orderProperty, comparison: ComparisonOperator.Equals, value: lastDate },
-						{
-							property: "vertexId",
-							comparison: ComparisonOperator.GreaterThan,
-							value: lastVertexId
-						}
-					]
-				}
-			]
-		};
+		return conditions.length === 1
+			? conditions[0]
+			: { logicalOperator: LogicalOperator.Or, conditions };
 	}
 
 	/**
-	 * Read one page of distinct vertex ids from the index storage using a key set, so a broad
-	 * match is never drained into memory however many entries it has.
-	 * @param predicates The type and value conditions to match, combined with OR.
+	 * Read one page of vertices whose index entries satisfy every dimension. The entries of a
+	 * vertex are grouped so it appears once however many of them match, its vertex is joined to
+	 * the page so no second read is needed, and the connector pages the groups with its own cursor.
+	 * @param dimensions The index conditions, a vertex has to satisfy every one of them.
 	 * @param orderProperty The index date property to order by.
 	 * @param orderDirection The direction to order in.
-	 * @param keySet The position returned by the previous page.
-	 * @param keySet.d The ordering date of the last vertex returned.
-	 * @param keySet.i The id of the last vertex returned.
-	 * @param limit The maximum number of distinct vertices to return.
-	 * @returns The vertex ids in order, the position to resume from, and whether more remain.
+	 * @param propertiesToReturn The vertex properties to return.
+	 * @param conditions Additional conditions the vertices must match.
+	 * @param cursor The cursor returned by the previous page.
+	 * @param limit The maximum number of vertices to return.
+	 * @returns The vertices in order and the cursor for the next page.
 	 * @internal
 	 */
-	private async queryIndexVertexIdPage(
-		predicates: EntityCondition<AuditableItemGraphVertexIndex>[],
+	private async queryIndexVertices(
+		dimensions: EntityCondition<AuditableItemGraphVertexIndex>[],
 		orderProperty: "dateCreated" | "dateModified",
 		orderDirection: SortDirection,
-		keySet?: { d?: string; i?: string },
+		propertiesToReturn: (keyof AuditableItemGraphVertex)[],
+		conditions?: EntityCondition<IAuditableItemGraphVertex>,
+		cursor?: string,
 		limit?: number
-	): Promise<{ vertexIds: string[]; keySet?: { d: string; i: string }; hasMore: boolean }> {
-		const pageSize = limit ?? AuditableItemGraphService._DEFAULT_PAGE_SIZE;
-		const match: EntityCondition<AuditableItemGraphVertexIndex> =
-			predicates.length === 1
-				? predicates[0]
-				: { logicalOperator: LogicalOperator.Or, conditions: predicates };
-
-		const vertexIds: string[] = [];
-		const positions: { d: string; i: string }[] = [];
-		const seen = new Set<string>();
-		let scan = keySet;
-		let exhausted = false;
-
-		// One extra vertex is collected to tell whether a further page exists. Each pass either
-		// adds a vertex or exhausts the match, so this runs at most pageSize + 1 times.
-		while (vertexIds.length <= pageSize && !exhausted) {
-			const conditions: EntityCondition<AuditableItemGraphVertexIndex>[] = [match];
-
-			if (Is.stringValue(scan?.d) && Is.stringValue(scan?.i)) {
-				conditions.push(this.indexKeySetCondition(orderProperty, orderDirection, scan.d, scan.i));
-			}
-
-			const results = await this._vertexIndexStorage.query(
-				{ logicalOperator: LogicalOperator.And, conditions },
-				[
+	): Promise<{ entities: Partial<AuditableItemGraphVertex>[]; cursor?: string }> {
+		// An entry only ever satisfies one dimension, so the entries of every dimension have to
+		// survive into the group for the group conditions to find them there, which is why the
+		// conditions are their union and the dimensions are applied across the group.
+		const results = await this._vertexIndexStorage.queryJoin<AuditableItemGraphVertex>(
+			this._vertexStorage,
+			{
+				property: "vertexId",
+				joinProperty: "id",
+				groupProperty: "vertexId",
+				conditions: this.anyOfConditions(dimensions),
+				groupConditions: dimensions.length > 1 ? dimensions : undefined,
+				sortProperties: [
 					{ property: orderProperty, sortDirection: orderDirection },
 					{ property: "vertexId", sortDirection: SortDirection.Ascending }
 				],
-				["vertexId", orderProperty],
-				undefined,
-				pageSize + 1
-			);
-
-			if (results.entities.length === 0) {
-				exhausted = true;
+				properties: ["vertexId"],
+				joinConditions: conditions,
+				joinRequired: true,
+				joinProperties: propertiesToReturn,
+				cursor,
+				limit
 			}
+		);
 
-			for (const entity of results.entities) {
-				const entityDate = entity[orderProperty];
-				if (Is.stringValue(entity.vertexId) && Is.stringValue(entityDate)) {
-					const position = { d: entityDate, i: entity.vertexId };
-					scan = position;
-					if (!seen.has(entity.vertexId) && vertexIds.length <= pageSize) {
-						seen.add(entity.vertexId);
-						vertexIds.push(entity.vertexId);
-						positions.push(position);
-					}
-				}
-			}
-		}
-
-		let hasMore = false;
-		if (vertexIds.length > pageSize) {
-			vertexIds.length = pageSize;
-			positions.length = pageSize;
-			hasMore = true;
-		}
-
+		// The join is required, so every group which survived carries its vertex.
 		return {
-			vertexIds,
-			keySet: positions.length > 0 ? positions[positions.length - 1] : undefined,
-			hasMore
+			entities: results.entities.map(entity => entity.joined[0]),
+			cursor: results.cursor
 		};
-	}
-
-	/**
-	 * Narrow a page of vertex ids to those which also carry one of the resource types.
-	 * @param vertexIds The candidate vertex ids.
-	 * @param resourceTypes The resource types to match, already lower cased.
-	 * @returns The matching vertex ids, keeping the incoming order.
-	 * @internal
-	 */
-	private async filterVertexIdsByResourceTypes(
-		vertexIds: string[],
-		resourceTypes: string[]
-	): Promise<string[]> {
-		if (vertexIds.length === 0) {
-			return [];
-		}
-
-		const results = await this._vertexIndexStorage.query(
-			{
-				logicalOperator: LogicalOperator.And,
-				conditions: [
-					{
-						property: "type",
-						comparison: ComparisonOperator.Equals,
-						value: AuditableItemGraphService._INDEX_TYPE_RESOURCE_TYPE
-					},
-					{ property: "value", comparison: ComparisonOperator.In, value: resourceTypes },
-					{ property: "vertexId", comparison: ComparisonOperator.In, value: vertexIds }
-				]
-			},
-			undefined,
-			["vertexId"],
-			undefined,
-			vertexIds.length * resourceTypes.length
-		);
-
-		const matched = new Set<string>();
-		for (const entity of results.entities) {
-			if (Is.stringValue(entity.vertexId)) {
-				matched.add(entity.vertexId);
-			}
-		}
-
-		return vertexIds.filter(vertexId => matched.has(vertexId));
-	}
-
-	/**
-	 * Read the vertices for a page of ids, keeping the order the ids were given in.
-	 * @param vertexIds The vertex ids to read.
-	 * @param propertiesToReturn The vertex properties to return.
-	 * @param conditions Additional conditions the vertices must match.
-	 * @returns The vertices which exist and match, in the order of the ids.
-	 * @internal
-	 */
-	private async fetchVerticesInOrder(
-		vertexIds: string[],
-		propertiesToReturn: (keyof AuditableItemGraphVertex)[],
-		conditions?: EntityCondition<IAuditableItemGraphVertex>
-	): Promise<Partial<AuditableItemGraphVertex>[]> {
-		if (vertexIds.length === 0) {
-			return [];
-		}
-
-		const idCondition: EntityCondition<AuditableItemGraphVertex> = {
-			property: "id",
-			comparison: ComparisonOperator.In,
-			value: vertexIds
-		};
-
-		const results = await this._vertexStorage.query(
-			Is.empty(conditions)
-				? idCondition
-				: {
-						logicalOperator: LogicalOperator.And,
-						conditions: [idCondition, conditions]
-					},
-			undefined,
-			propertiesToReturn,
-			undefined,
-			vertexIds.length
-		);
-
-		// An In lookup has no guaranteed order, so the index ordering is reapplied here.
-		const vertexById = new Map<string, Partial<AuditableItemGraphVertex>>();
-		for (const entity of results.entities) {
-			if (Is.stringValue(entity.id)) {
-				vertexById.set(entity.id, entity);
-			}
-		}
-
-		const ordered: Partial<AuditableItemGraphVertex>[] = [];
-		for (const vertexId of vertexIds) {
-			const entity = vertexById.get(vertexId);
-			if (!Is.empty(entity)) {
-				ordered.push(entity);
-			}
-		}
-
-		return ordered;
 	}
 
 	/**

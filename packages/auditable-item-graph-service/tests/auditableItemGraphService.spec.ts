@@ -23,14 +23,7 @@ import {
 	ContextIdStore,
 	type IContextIds
 } from "@twin.org/context";
-import {
-	ComponentFactory,
-	Converter,
-	Is,
-	ObjectHelper,
-	RandomHelper,
-	SharedStore
-} from "@twin.org/core";
+import { ComponentFactory, Is, RandomHelper, SharedStore } from "@twin.org/core";
 import { ComparisonOperator, LogicalOperator, SortDirection } from "@twin.org/entity";
 import { MemoryEntityStorageConnector } from "@twin.org/entity-storage-connector-memory";
 import { EntityStorageConnectorFactory } from "@twin.org/entity-storage-models";
@@ -3104,115 +3097,6 @@ describe("AuditableItemGraphService", () => {
 		expect(new Set(collected)).toEqual(new Set(createdIds));
 	});
 
-	test("Returns an index strategy cursor which is opaque and self describing", async () => {
-		const service = new AuditableItemGraphService();
-		for (let i = 0; i < 2; i++) {
-			await service.create({
-				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
-				type: AuditableItemGraphTypes.Vertex,
-				resources: [
-					{
-						type: AuditableItemGraphTypes.Resource,
-						id: `opaque-resource-${i}`,
-						resourceObject: {
-							"@context": "https://www.w3.org/ns/activitystreams",
-							type: "Article",
-							content: `article ${i}`
-						}
-					}
-				]
-			});
-		}
-
-		await waitForProofGeneration(2);
-
-		const page = await service.query(
-			{ resourceTypes: ["Article"] },
-			undefined,
-			undefined,
-			undefined,
-			undefined,
-			undefined,
-			1
-		);
-
-		expect(Is.stringValue(page.cursor)).toEqual(true);
-
-		// An index driven cursor carries the keyset it resumes from, not a storage cursor.
-		const decoded = ObjectHelper.fromBytes<{ s: string; d: string; i: string }>(
-			Converter.base64ToBytes(page.cursor as string)
-		);
-		expect(decoded.s).toEqual("i");
-		expect(Is.stringValue(decoded.d)).toEqual(true);
-		expect(Is.stringValue(decoded.i)).toEqual(true);
-
-		// The keyset names the last vertex returned, so the next page resumes after it.
-		expect(decoded.i).toEqual(extractAigId(page.entries.itemListElement[0].id));
-	});
-
-	test("Rejects a cursor issued for a different query strategy", async () => {
-		const service = new AuditableItemGraphService();
-		for (let i = 0; i < 2; i++) {
-			await service.create({
-				"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
-				type: AuditableItemGraphTypes.Vertex,
-				resources: [
-					{
-						type: AuditableItemGraphTypes.Resource,
-						id: `strategy-resource-${i}`,
-						resourceObject: {
-							"@context": "https://www.w3.org/ns/activitystreams",
-							type: "Event",
-							content: `event ${i}`
-						}
-					}
-				]
-			});
-		}
-
-		await waitForProofGeneration(2);
-
-		const indexPage = await service.query(
-			{ resourceTypes: ["Event"] },
-			undefined,
-			undefined,
-			undefined,
-			undefined,
-			undefined,
-			1
-		);
-		expect(Is.stringValue(indexPage.cursor)).toEqual(true);
-
-		// The same cursor handed to a vertex driven query must not silently restart page one.
-		await expect(
-			service.query(undefined, undefined, undefined, undefined, undefined, indexPage.cursor, 1)
-		).rejects.toMatchObject({
-			message: "auditableItemGraphService.queryingFailed",
-			cause: {
-				message: "auditableItemGraphService.invalidCursor"
-			}
-		});
-	});
-
-	test("Rejects a malformed cursor rather than restarting from the first page", async () => {
-		const service = new AuditableItemGraphService();
-		await service.create({
-			"@context": [AuditableItemGraphContexts.Context, AuditableItemGraphContexts.ContextCommon],
-			type: AuditableItemGraphTypes.Vertex
-		});
-
-		await waitForProofGeneration();
-
-		await expect(
-			service.query(undefined, undefined, undefined, undefined, undefined, "not-a-cursor", 1)
-		).rejects.toMatchObject({
-			message: "auditableItemGraphService.queryingFailed",
-			cause: {
-				message: "auditableItemGraphService.invalidCursor"
-			}
-		});
-	});
-
 	describe("query cursor edge conditions", () => {
 		/**
 		 * Create a bypass vertex carrying one resource of the given type. Bypass mode keeps no
@@ -3245,18 +3129,6 @@ describe("AuditableItemGraphService", () => {
 			});
 		}
 
-		/**
-		 * Decode the strategy discriminator from a cursor.
-		 * @param cursor The cursor to inspect.
-		 * @returns The strategy character.
-		 */
-		function cursorStrategy(cursor?: string): string | undefined {
-			if (!Is.stringValue(cursor)) {
-				return undefined;
-			}
-			return ObjectHelper.fromBytes<{ s?: string }>(Converter.base64ToBytes(cursor)).s;
-		}
-
 		test("Treats an empty cursor as a request for the first page", async () => {
 			const service = new AuditableItemGraphService();
 			await createIndexedVertex(service, "Empty", 0);
@@ -3273,87 +3145,7 @@ describe("AuditableItemGraphService", () => {
 			);
 
 			expect(page.entries.itemListElement).toHaveLength(1);
-			expect(cursorStrategy(page.cursor)).toEqual("i");
-		});
-
-		test("Rejects a cursor which is valid base64 but not an encoded cursor", async () => {
-			const service = new AuditableItemGraphService();
-			await createIndexedVertex(service, "Garbage", 0);
-
-			await expect(
-				service.query(
-					{ resourceTypes: ["Garbage"] },
-					undefined,
-					undefined,
-					undefined,
-					undefined,
-					"AAAA",
-					1
-				)
-			).rejects.toMatchObject({
-				message: "auditableItemGraphService.queryingFailed",
-				cause: {
-					message: "auditableItemGraphService.invalidCursor"
-				}
-			});
-		});
-
-		test("Rejects a cursor which decodes but carries no inner storage cursor", async () => {
-			const service = new AuditableItemGraphService();
-			await createIndexedVertex(service, "Inner", 0);
-
-			const noInner = Converter.bytesToBase64(ObjectHelper.toBytes({ s: "i" }));
-
-			await expect(
-				service.query(
-					{ resourceTypes: ["Inner"] },
-					undefined,
-					undefined,
-					undefined,
-					undefined,
-					noInner,
-					1
-				)
-			).rejects.toMatchObject({
-				message: "auditableItemGraphService.queryingFailed",
-				cause: {
-					message: "auditableItemGraphService.invalidCursor"
-				}
-			});
-		});
-
-		test("Rejects a vertex strategy cursor on an index driven query", async () => {
-			const service = new AuditableItemGraphService();
-			await createIndexedVertex(service, "Reverse", 0);
-			await createIndexedVertex(service, "Reverse", 1);
-
-			const vertexPage = await service.query(
-				undefined,
-				undefined,
-				undefined,
-				undefined,
-				undefined,
-				undefined,
-				1
-			);
-			expect(cursorStrategy(vertexPage.cursor)).toEqual("v");
-
-			await expect(
-				service.query(
-					{ resourceTypes: ["Reverse"] },
-					undefined,
-					undefined,
-					undefined,
-					undefined,
-					vertexPage.cursor,
-					1
-				)
-			).rejects.toMatchObject({
-				message: "auditableItemGraphService.queryingFailed",
-				cause: {
-					message: "auditableItemGraphService.invalidCursor"
-				}
-			});
+			expect(Is.stringValue(page.cursor)).toEqual(true);
 		});
 
 		test("Returns no cursor for an index driven query with no matches", async () => {
@@ -3455,7 +3247,6 @@ describe("AuditableItemGraphService", () => {
 					cursor,
 					1
 				);
-				expect(cursorStrategy(page.cursor) ?? "i").toEqual("i");
 				collected.push(...page.entries.itemListElement.map(e => e.id));
 				cursor = page.cursor;
 				pages++;
@@ -3563,7 +3354,6 @@ describe("AuditableItemGraphService", () => {
 					cursor,
 					1
 				);
-				expect(cursorStrategy(page.cursor) ?? "i").toEqual("i");
 				collected.push(...page.entries.itemListElement.map(e => e.id));
 				cursor = page.cursor;
 				pages++;
@@ -3607,7 +3397,6 @@ describe("AuditableItemGraphService", () => {
 					cursor,
 					1
 				);
-				expect(cursorStrategy(page.cursor) ?? "i").toEqual("i");
 				collected.push(...page.entries.itemListElement.map(e => e.id));
 				cursor = page.cursor;
 				pages++;
@@ -3625,7 +3414,7 @@ describe("AuditableItemGraphService", () => {
 				await createIndexedVertex(service, "Bulk", i);
 			}
 
-			const querySpy = vi.spyOn(vertexIndexStorage, "query");
+			const querySpy = vi.spyOn(vertexIndexStorage, "queryJoin");
 			try {
 				const page = await service.query(
 					{ resourceTypes: ["Bulk"] },
@@ -3641,17 +3430,16 @@ describe("AuditableItemGraphService", () => {
 				expect(Is.stringValue(page.cursor)).toEqual(true);
 
 				// Every read is bounded by the page size, so the 30 matches are never drained.
-				expect(querySpy.mock.calls.length).toBeLessThanOrEqual(2);
+				expect(querySpy.mock.calls.length).toEqual(1);
 				for (const call of querySpy.mock.calls) {
-					expect(call[4]).toBeDefined();
-					expect(call[4]).toBeLessThanOrEqual(3);
+					expect(call[1].limit).toEqual(2);
 				}
 
 				const returned = await Promise.all(
 					querySpy.mock.results.map(async result => (await result.value).entities.length)
 				);
 				for (const count of returned) {
-					expect(count).toBeLessThanOrEqual(3);
+					expect(count).toBeLessThanOrEqual(2);
 				}
 			} finally {
 				querySpy.mockRestore();
