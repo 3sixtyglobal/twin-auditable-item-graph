@@ -399,6 +399,9 @@ importers:
       '@twin.org/core':
         specifier: next
         version: 0.10.1-next.10
+      '@twin.org/crypto':
+        specifier: next
+        version: 0.10.1-next.10
       '@twin.org/data-core':
         specifier: next
         version: 0.10.1-next.1
@@ -442,9 +445,6 @@ importers:
       '@twin.org/background-task-service':
         specifier: next
         version: 0.10.1-next.1
-      '@twin.org/crypto':
-        specifier: next
-        version: 0.10.1-next.10
       '@twin.org/entity-storage-connector-memory':
         specifier: next
         version: 0.10.1-next.9

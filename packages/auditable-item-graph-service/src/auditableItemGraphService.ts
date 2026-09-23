@@ -51,6 +51,7 @@ import {
 	type IPatchOperation,
 	type IValidationFailure
 } from "@twin.org/core";
+import { Blake2b } from "@twin.org/crypto";
 import { DataTypeHelper } from "@twin.org/data-core";
 import {
 	JsonLdDataTypes,
@@ -2465,13 +2466,19 @@ export class AuditableItemGraphService
 
 		for (const [key, entry] of required) {
 			if (!retainedKeys.has(key)) {
-				writeEntries.push({
-					id: Converter.bytesToHex(RandomHelper.generate(16)),
+				const writeEntry = {
 					vertexId: vertex.id,
 					type: entry.type,
 					value: entry.value,
 					dateCreated: vertex.dateCreated,
 					dateModified: indexDateModified
+				};
+
+				writeEntries.push({
+					id: Converter.bytesToHex(
+						Blake2b.sum256(ObjectHelper.toBytes(JsonHelper.canonicalize(writeEntry)))
+					),
+					...writeEntry
 				});
 			}
 		}

@@ -33,6 +33,7 @@
 		"@twin.org/auditable-item-graph-models": "0.10.1-next.2",
 		"@twin.org/context": "next",
 		"@twin.org/core": "next",
+		"@twin.org/crypto": "next",
 		"@twin.org/data-core": "next",
 		"@twin.org/data-json-ld": "next",
 		"@twin.org/entity": "next",
