@@ -15,3 +15,4 @@ export * from "./models/IAuditableItemGraphServiceConfig.js";
 export * from "./models/IAuditableItemGraphServiceConstructorOptions.js";
 export * from "./restEntryPoints.js";
 export * from "./schema.js";
+export * from "./utils/auditableItemGraphVertexIndexHelper.js";

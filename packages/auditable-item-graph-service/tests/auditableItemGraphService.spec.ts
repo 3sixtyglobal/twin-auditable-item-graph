@@ -49,6 +49,7 @@ import type { AuditableItemGraphChangeset } from "../src/entities/auditableItemG
 import type { AuditableItemGraphVertex } from "../src/entities/auditableItemGraphVertex.js";
 import type { AuditableItemGraphVertexIndex } from "../src/entities/auditableItemGraphVertexIndex.js";
 import { initSchema } from "../src/schema.js";
+import { AuditableItemGraphVertexIndexHelper } from "../src/utils/auditableItemGraphVertexIndexHelper.js";
 
 let vertexStorage: MemoryEntityStorageConnector<AuditableItemGraphVertex>;
 let vertexIndexStorage: MemoryEntityStorageConnector<AuditableItemGraphVertexIndex>;
@@ -2914,7 +2915,11 @@ describe("AuditableItemGraphService", () => {
 		const vertexIndexStore = await indexEntriesOfType("alias");
 		expect(vertexIndexStore).toHaveLength(1);
 		expect(vertexIndexStore[0]).toEqual(
-			expect.objectContaining({ type: "alias", value: "mixedcasealias" })
+			expect.objectContaining({
+				type: "alias",
+				value: "mixedcasealias",
+				valueHash: AuditableItemGraphVertexIndexHelper.hashValue("mixedcasealias")
+			})
 		);
 
 		const vertexStore = await vertexStorage.getStore();

@@ -45,9 +45,28 @@ describe("AuditableItemGraphVertexIndex schema", () => {
 			}))
 		).toEqual([
 			{ property: "type", direction: SortDirection.Ascending },
-			{ property: "value", direction: SortDirection.Ascending },
+			{ property: "valueHash", direction: SortDirection.Ascending },
 			{ property: "dateCreated", direction: SortDirection.Descending }
 		]);
+	});
+
+	test("Keeps the composite index key within the MySQL key limit", async () => {
+		// MySQL leads every index with a 255 character partition key and counts 4 bytes per
+		// utf8mb4 character, against a 3072 byte limit on the key.
+		const bytesPerChar = 4;
+		const schema = EntitySchemaHelper.getSchema(AuditableItemGraphVertexIndex);
+		const typeValue = EntitySchemaHelper.getIndexGroups(schema).typeValue;
+		const keyChars = typeValue.reduce(
+			(total, { property }) =>
+				total +
+				(property.maxLength ??
+					(Is.stringValue(property.format)
+						? EntitySchemaHelper.FORMAT_MAX_LENGTHS[property.format]
+						: 0)),
+			255
+		);
+
+		expect(keyChars * bytesPerChar).toBeLessThanOrEqual(3072);
 	});
 
 	test("Indexes the vertexId written on every vertex persist", async () => {

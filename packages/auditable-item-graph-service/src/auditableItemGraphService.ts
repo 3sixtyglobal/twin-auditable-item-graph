@@ -36,7 +36,6 @@ import {
 	BaseError,
 	Coerce,
 	ComponentFactory,
-	Converter,
 	GeneralError,
 	Guards,
 	Is,
@@ -51,7 +50,6 @@ import {
 	type IPatchOperation,
 	type IValidationFailure
 } from "@twin.org/core";
-import { Blake2b } from "@twin.org/crypto";
 import { DataTypeHelper } from "@twin.org/data-core";
 import {
 	JsonLdDataTypes,
@@ -93,6 +91,7 @@ import type { AuditableItemGraphVertex } from "./entities/auditableItemGraphVert
 import type { AuditableItemGraphVertexIndex } from "./entities/auditableItemGraphVertexIndex.js";
 import type { IAuditableItemGraphServiceConstructorOptions } from "./models/IAuditableItemGraphServiceConstructorOptions.js";
 import type { IAuditableItemGraphServiceContext } from "./models/IAuditableItemGraphServiceContext.js";
+import { AuditableItemGraphVertexIndexHelper } from "./utils/auditableItemGraphVertexIndexHelper.js";
 
 /**
  * Class for performing auditable item graph operations.
@@ -2425,7 +2424,7 @@ export class AuditableItemGraphService
 				comparison: ComparisonOperator.Equals,
 				value: vertex.id
 			},
-			["id", "type", "value", "dateCreated", "dateModified"]
+			["id", "type", "value", "valueHash", "dateCreated", "dateModified"]
 		);
 
 		// Collapse by row id first. A paged read can return the same row on more than one page,
@@ -2448,16 +2447,21 @@ export class AuditableItemGraphService
 			const requiredEntry = required.get(key);
 			if (!Is.empty(requiredEntry) && !retainedKeys.has(key)) {
 				retainedKeys.add(key);
-				if (entry.dateCreated !== vertex.dateCreated || entry.dateModified !== indexDateModified) {
-					// Keep the row id so the copied dates are corrected in place rather than duplicated.
-					writeEntries.push({
-						id,
-						vertexId: vertex.id,
-						type: requiredEntry.type,
-						value: requiredEntry.value,
-						dateCreated: vertex.dateCreated,
-						dateModified: indexDateModified
-					});
+				const requiredIndexEntry = AuditableItemGraphVertexIndexHelper.createIndexEntry(
+					vertex.id,
+					requiredEntry.type,
+					requiredEntry.value,
+					vertex.dateCreated,
+					indexDateModified
+				);
+				if (
+					entry.dateCreated !== requiredIndexEntry.dateCreated ||
+					entry.dateModified !== requiredIndexEntry.dateModified ||
+					entry.valueHash !== requiredIndexEntry.valueHash
+				) {
+					// Keep the row id so the copied dates and hash are corrected in place rather than
+					// duplicated.
+					writeEntries.push({ ...requiredIndexEntry, id });
 				}
 			} else {
 				removeIds.push(id);
@@ -2466,20 +2470,15 @@ export class AuditableItemGraphService
 
 		for (const [key, entry] of required) {
 			if (!retainedKeys.has(key)) {
-				const writeEntry = {
-					vertexId: vertex.id,
-					type: entry.type,
-					value: entry.value,
-					dateCreated: vertex.dateCreated,
-					dateModified: indexDateModified
-				};
-
-				writeEntries.push({
-					id: Converter.bytesToHex(
-						Blake2b.sum256(ObjectHelper.toBytes(JsonHelper.canonicalize(writeEntry)))
-					),
-					...writeEntry
-				});
+				writeEntries.push(
+					AuditableItemGraphVertexIndexHelper.createIndexEntry(
+						vertex.id,
+						entry.type,
+						entry.value,
+						vertex.dateCreated,
+						indexDateModified
+					)
+				);
 			}
 		}
 
@@ -2537,7 +2536,8 @@ export class AuditableItemGraphService
 	}
 
 	/**
-	 * Build the condition matching one index type and value.
+	 * Build the condition matching one index type and value. Exact matches are looked up by the
+	 * value hash, a partial match can only be answered by the value itself.
 	 * @param type The index type to match.
 	 * @param comparison The comparison to apply to the value.
 	 * @param value The index value or values to match, already lower cased.
@@ -2549,11 +2549,22 @@ export class AuditableItemGraphService
 		comparison: ComparisonOperator,
 		value: string | string[]
 	): EntityCondition<AuditableItemGraphVertexIndex> {
+		const valueCondition: IComparator =
+			comparison === ComparisonOperator.Includes
+				? { property: "value", comparison, value }
+				: {
+						property: "valueHash",
+						comparison,
+						value: Is.array<string>(value)
+							? value.map(v => AuditableItemGraphVertexIndexHelper.hashValue(v))
+							: AuditableItemGraphVertexIndexHelper.hashValue(value)
+					};
+
 		return {
 			logicalOperator: LogicalOperator.And,
 			conditions: [
 				{ property: "type", comparison: ComparisonOperator.Equals, value: type },
-				{ property: "value", comparison, value }
+				valueCondition
 			]
 		};
 	}
@@ -2674,9 +2685,9 @@ export class AuditableItemGraphService
 						value: AuditableItemGraphService._INDEX_TYPE_ALIAS
 					},
 					{
-						property: "value",
+						property: "valueHash",
 						comparison: ComparisonOperator.Equals,
-						value: aliasId.toLowerCase()
+						value: AuditableItemGraphVertexIndexHelper.hashValue(aliasId)
 					},
 					{
 						property: "vertexId",

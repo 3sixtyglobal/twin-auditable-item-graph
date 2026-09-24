@@ -4,6 +4,10 @@ import { entity, property, SortDirection } from "@twin.org/entity";
 
 /**
  * Class describing the auditable item graph vertex index.
+ *
+ * The composite index is built on a fixed length hash of the value rather than the value itself,
+ * so its key stays within the size limit some databases place on an index key however long the
+ * value is.
  */
 @entity()
 export class AuditableItemGraphVertexIndex {
@@ -33,13 +37,19 @@ export class AuditableItemGraphVertexIndex {
 	/**
 	 * Index value, case folded so lookups do not depend on the column collation.
 	 */
+	@property({ type: "string", maxLength: 255 })
+	public value!: string;
+
+	/**
+	 * The hash of the value, used for exact lookups.
+	 */
 	@property({
 		type: "string",
-		maxLength: 255,
+		maxLength: 27,
 		isSecondary: true,
 		indexGroup: [{ name: "typeValue", direction: SortDirection.Ascending, index: 1 }]
 	})
-	public value!: string;
+	public valueHash!: string;
 
 	/**
 	 * The date/time of when the vertex was created, copied so the index can order and page its
