@@ -12,6 +12,7 @@
 - [AuditableItemGraphVertexIndex](classes/AuditableItemGraphVertexIndex.md)
 - [AuditableItemGraphVertexV0](classes/AuditableItemGraphVertexV0.md)
 - [AuditableItemGraphVertexV1](classes/AuditableItemGraphVertexV1.md)
+- [AuditableItemGraphVertexIndexHelper](classes/AuditableItemGraphVertexIndexHelper.md)
 
 ## Interfaces
 

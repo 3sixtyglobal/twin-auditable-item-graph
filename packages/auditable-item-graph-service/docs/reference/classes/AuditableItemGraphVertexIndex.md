@@ -2,6 +2,10 @@
 
 Class describing the auditable item graph vertex index.
 
+The composite index is built on a fixed length hash of the value rather than the value itself,
+so its key stays within the size limit some databases place on an index key however long the
+value is.
+
 ## Constructors
 
 ### Constructor
@@ -43,6 +47,14 @@ Index type.
 > **value**: `string`
 
 Index value, case folded so lookups do not depend on the column collation.
+
+***
+
+### valueHash {#valuehash}
+
+> **valueHash**: `string`
+
+The hash of the value, used for exact lookups.
 
 ***
 
