@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.10.1-next.4](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.10.1-next.3...auditable-item-graph-service-v0.10.1-next.4) (2026-09-24)
+
+
+### Bug Fixes
+
+* index length overflow ([#158](https://github.com/iotaledger/twin-auditable-item-graph/issues/158)) ([3b21e59](https://github.com/iotaledger/twin-auditable-item-graph/commit/3b21e590fa52416a958fe8eddb6889285f29a8a2))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/auditable-item-graph-models bumped from 0.10.1-next.3 to 0.10.1-next.4
+
 ## [0.10.1-next.3](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.10.1-next.2...auditable-item-graph-service-v0.10.1-next.3) (2026-09-23)
 
 
