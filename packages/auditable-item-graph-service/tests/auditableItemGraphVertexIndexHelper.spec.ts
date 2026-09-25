@@ -111,18 +111,39 @@ describe("AuditableItemGraphVertexIndexHelper", () => {
 				"foo",
 				DATE_MODIFIED,
 				DATE_MODIFIED
-			),
-			AuditableItemGraphVertexIndexHelper.createIndexEntry(
-				VERTEX_ID,
-				"alias",
-				"foo",
-				DATE_CREATED,
-				DATE_CREATED
 			)
 		];
 
 		for (const variant of variants) {
 			expect(variant.id).not.toEqual(base.id);
 		}
+	});
+
+	test("should derive the same id regardless of the modification date", () => {
+		const base = AuditableItemGraphVertexIndexHelper.createIndexEntry(
+			VERTEX_ID,
+			"alias",
+			"foo",
+			DATE_CREATED,
+			DATE_MODIFIED
+		);
+		const modified = AuditableItemGraphVertexIndexHelper.createIndexEntry(
+			VERTEX_ID,
+			"alias",
+			"foo",
+			DATE_CREATED,
+			DATE_CREATED
+		);
+		const unmodified = AuditableItemGraphVertexIndexHelper.createIndexEntry(
+			VERTEX_ID,
+			"alias",
+			"foo",
+			DATE_CREATED
+		);
+
+		expect(modified.id).toEqual(base.id);
+		expect(unmodified.id).toEqual(base.id);
+		expect(modified.dateModified).toEqual(DATE_CREATED);
+		expect(unmodified.dateModified).toBeUndefined();
 	});
 });

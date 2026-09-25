@@ -11,6 +11,7 @@ export class AuditableItemGraphVertexIndexHelper {
 	/**
 	 * Create the index entry for one type and value of a vertex. The value is case folded and
 	 * hashed, and the id is derived from the content so the same entry always produces the same id.
+	 * The modification date is excluded from the id as it is optional and changes over time.
 	 * @param vertexId The id of the vertex the entry refers to.
 	 * @param type The index type.
 	 * @param value The index value.
@@ -27,20 +28,20 @@ export class AuditableItemGraphVertexIndexHelper {
 	): AuditableItemGraphVertexIndex {
 		const foldedValue = AuditableItemGraphVertexIndexHelper.foldValue(value);
 
-		const entry: Omit<AuditableItemGraphVertexIndex, "id"> = {
+		const entry: Omit<AuditableItemGraphVertexIndex, "id" | "dateModified"> = {
 			vertexId,
 			type,
 			value: foldedValue ?? value,
 			valueHash: AuditableItemGraphVertexIndexHelper.hashValue(foldedValue) ?? "",
-			dateCreated,
-			dateModified
+			dateCreated
 		};
 
 		return {
 			id: Converter.bytesToHex(
 				Blake2b.sum256(ObjectHelper.toBytes(JsonHelper.canonicalize(entry)))
 			),
-			...entry
+			...entry,
+			dateModified
 		};
 	}
 
