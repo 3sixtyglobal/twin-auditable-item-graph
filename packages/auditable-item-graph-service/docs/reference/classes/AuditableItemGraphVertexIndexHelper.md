@@ -20,6 +20,7 @@ Helper methods for building auditable item graph vertex index entries.
 
 Create the index entry for one type and value of a vertex. The value is case folded and
 hashed, and the id is derived from the content so the same entry always produces the same id.
+The modification date is excluded from the id as it is optional and changes over time.
 
 #### Parameters
 
