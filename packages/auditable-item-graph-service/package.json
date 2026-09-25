@@ -1,6 +1,6 @@
 {
 	"name": "@twin.org/auditable-item-graph-service",
-	"version": "0.10.1-next.4",
+	"version": "0.10.1-next.5",
 	"description": "Implements graph lifecycle operations and audited change tracking with API route definitions.",
 	"repository": {
 		"type": "git",
@@ -30,7 +30,7 @@
 	},
 	"dependencies": {
 		"@twin.org/api-models": "next",
-		"@twin.org/auditable-item-graph-models": "0.10.1-next.4",
+		"@twin.org/auditable-item-graph-models": "0.10.1-next.5",
 		"@twin.org/context": "next",
 		"@twin.org/core": "next",
 		"@twin.org/crypto": "next",

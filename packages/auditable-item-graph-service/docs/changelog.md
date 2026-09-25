@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.10.1-next.5](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.10.1-next.4...auditable-item-graph-service-v0.10.1-next.5) (2026-09-25)
+
+
+### Bug Fixes
+
+* deterministic indexes ([fbd8deb](https://github.com/iotaledger/twin-auditable-item-graph/commit/fbd8deb59b61ce93a3a955900969977904cfeeb5))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @twin.org/auditable-item-graph-models bumped from 0.10.1-next.4 to 0.10.1-next.5
+
 ## [0.10.1-next.4](https://github.com/iotaledger/twin-auditable-item-graph/compare/auditable-item-graph-service-v0.10.1-next.3...auditable-item-graph-service-v0.10.1-next.4) (2026-09-24)
 
 
