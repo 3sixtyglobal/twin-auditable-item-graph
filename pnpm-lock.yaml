@@ -324,7 +324,7 @@ importers:
         specifier: next
         version: 0.10.1-next.8
       '@twin.org/auditable-item-graph-models':
-        specifier: 0.10.1-next.5
+        specifier: 0.10.1-next.6
         version: link:../auditable-item-graph-models
       '@twin.org/core':
         specifier: next
@@ -391,7 +391,7 @@ importers:
         specifier: next
         version: 0.10.1-next.8
       '@twin.org/auditable-item-graph-models':
-        specifier: 0.10.1-next.5
+        specifier: 0.10.1-next.6
         version: link:../auditable-item-graph-models
       '@twin.org/context':
         specifier: next
