@@ -54,22 +54,6 @@ How the mutations of the vertex are recorded, when absent the vertex behaves as 
 
 ***
 
-### aliasIndex? {#aliasindex}
-
-> `optional` **aliasIndex?**: `string`
-
-Combined alias index for the vertex used for querying.
-
-***
-
-### resourceTypeIndex? {#resourcetypeindex}
-
-> `optional` **resourceTypeIndex?**: `string`
-
-Combined resource type index for the vertex used for querying.
-
-***
-
 ### annotationObject? {#annotationobject}
 
 > `optional` **annotationObject?**: `IJsonLdNodeObject`

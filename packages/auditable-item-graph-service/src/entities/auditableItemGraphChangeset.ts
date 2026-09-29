@@ -11,25 +11,35 @@ export class AuditableItemGraphChangeset {
 	/**
 	 * The id of the changeset.
 	 */
-	@property({ type: "string", isPrimary: true })
+	@property({ type: "string", isPrimary: true, maxLength: 255 })
 	public id!: string;
 
 	/**
 	 * The vertex the changeset belongs to.
 	 */
-	@property({ type: "string", isSecondary: true })
+	@property({
+		type: "string",
+		maxLength: 255,
+		isSecondary: true,
+		indexGroup: [{ name: "vertexDate", direction: SortDirection.Ascending, index: 0 }]
+	})
 	public vertexId!: string;
 
 	/**
 	 * The date/time of when the changeset was created.
 	 */
-	@property({ type: "string", format: "date-time", sortDirection: SortDirection.Descending })
+	@property({
+		type: "string",
+		format: "date-time",
+		sortDirection: SortDirection.Descending,
+		indexGroup: [{ name: "vertexDate", direction: SortDirection.Ascending, index: 1 }]
+	})
 	public dateCreated!: string;
 
 	/**
 	 * The identity of the user who made the changeset.
 	 */
-	@property({ type: "string", optional: true })
+	@property({ type: "string", maxLength: 255, optional: true })
 	public userIdentity?: string;
 
 	/**
@@ -41,7 +51,7 @@ export class AuditableItemGraphChangeset {
 	/**
 	 * The immutable proof id which contains the signature for this changeset.
 	 */
-	@property({ type: "string", optional: true })
+	@property({ type: "string", maxLength: 255, optional: true })
 	public proofId?: string;
 
 	/**

@@ -151,7 +151,8 @@ export interface IAuditableItemGraphComponent extends IComponent {
 	 * @param orderByDirection The direction for the order, defaults to descending.
 	 * @param properties The properties to return, if not provided defaults to id, dateCreated, aliases and object.
 	 * @param cursor The cursor to request the next chunk of entities.
-	 * @param limit Limit the number of entities to return.
+	 * @param limit The maximum number of entities to return, a page can contain fewer so follow
+	 * the cursor until it is absent to read them all.
 	 * @returns The entities, which can be partial if a limited keys list was provided.
 	 */
 	query(

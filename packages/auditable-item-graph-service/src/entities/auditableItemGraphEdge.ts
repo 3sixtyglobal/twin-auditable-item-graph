@@ -11,7 +11,7 @@ export class AuditableItemGraphEdge {
 	/**
 	 * The id of the edge.
 	 */
-	@property({ type: "string" })
+	@property({ type: "string", maxLength: 255 })
 	public id!: string;
 
 	/**
@@ -35,7 +35,7 @@ export class AuditableItemGraphEdge {
 	/**
 	 * The target id of the edge.
 	 */
-	@property({ type: "string" })
+	@property({ type: "string", maxLength: 255 })
 	public targetId!: string;
 
 	/**

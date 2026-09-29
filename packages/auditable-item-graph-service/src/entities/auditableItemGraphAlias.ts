@@ -11,13 +11,13 @@ export class AuditableItemGraphAlias {
 	/**
 	 * The alternative alias for the vertex.
 	 */
-	@property({ type: "string" })
+	@property({ type: "string", maxLength: 255 })
 	public id!: string;
 
 	/**
 	 * The format of the alias for the vertex.
 	 */
-	@property({ type: "string", optional: true })
+	@property({ type: "string", maxLength: 128, optional: true })
 	public aliasFormat?: string;
 
 	/**

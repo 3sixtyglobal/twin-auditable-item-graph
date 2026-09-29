@@ -46,6 +46,7 @@ import {
 import { AuditableItemGraphService } from "../src/auditableItemGraphService.js";
 import type { AuditableItemGraphChangeset } from "../src/entities/auditableItemGraphChangeset.js";
 import type { AuditableItemGraphVertex } from "../src/entities/auditableItemGraphVertex.js";
+import type { AuditableItemGraphVertexIndex } from "../src/entities/auditableItemGraphVertexIndex.js";
 import { initSchema } from "../src/schema.js";
 
 const FIRST_TICK = 1724327716271;
@@ -98,6 +99,7 @@ function makeMockTelemetry(): {
 }
 
 let vertexStorage: MemoryEntityStorageConnector<AuditableItemGraphVertex>;
+let vertexIndexStorage: MemoryEntityStorageConnector<AuditableItemGraphVertexIndex>;
 let changesetStorage: MemoryEntityStorageConnector<AuditableItemGraphChangeset>;
 let immutableProofStorage: MemoryEntityStorageConnector<ImmutableProof>;
 let notarizationStore: Map<string, INotarization>;
@@ -152,6 +154,7 @@ describe("AuditableItemGraphService - metrics", () => {
 
 	afterEach(async () => {
 		await vertexStorage.teardown();
+		await vertexIndexStorage.teardown();
 		await changesetStorage.teardown();
 		await immutableProofStorage.teardown();
 		await backgroundTaskStorage.teardown();
@@ -163,12 +166,21 @@ describe("AuditableItemGraphService - metrics", () => {
 			partitionContextIds: [ContextIdKeys.Tenant],
 			config: { storageKey: "auditable-item-graph-vertex" }
 		});
+		vertexIndexStorage = new MemoryEntityStorageConnector<AuditableItemGraphVertexIndex>({
+			entitySchema: nameof<AuditableItemGraphVertexIndex>(),
+			partitionContextIds: [ContextIdKeys.Tenant],
+			config: { storageKey: "auditable-item-graph-vertex-index" }
+		});
 		changesetStorage = new MemoryEntityStorageConnector<AuditableItemGraphChangeset>({
 			entitySchema: nameof<AuditableItemGraphChangeset>(),
 			partitionContextIds: [ContextIdKeys.Tenant],
 			config: { storageKey: "auditable-item-graph-changeset" }
 		});
 		EntityStorageConnectorFactory.register("auditable-item-graph-vertex", () => vertexStorage);
+		EntityStorageConnectorFactory.register(
+			"auditable-item-graph-vertex-index",
+			() => vertexIndexStorage
+		);
 		EntityStorageConnectorFactory.register(
 			"auditable-item-graph-changeset",
 			() => changesetStorage

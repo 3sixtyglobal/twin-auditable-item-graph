@@ -49,6 +49,19 @@
 
 ## Variables
 
+- [CompiledAuditableItemGraphAuditMode](variables/CompiledAuditableItemGraphAuditMode.md)
+- [CompiledAuditableItemGraphAlias](variables/CompiledAuditableItemGraphAlias.md)
+- [CompiledAuditableItemGraphAuditedElement](variables/CompiledAuditableItemGraphAuditedElement.md)
+- [CompiledAuditableItemGraphChangeset](variables/CompiledAuditableItemGraphChangeset.md)
+- [CompiledAuditableItemGraphChangesetList](variables/CompiledAuditableItemGraphChangesetList.md)
+- [CompiledAuditableItemGraphEdge](variables/CompiledAuditableItemGraphEdge.md)
+- [CompiledAuditableItemGraphListPatch](variables/CompiledAuditableItemGraphListPatch.md)
+- [CompiledAuditableItemGraphPartialVertex](variables/CompiledAuditableItemGraphPartialVertex.md)
+- [CompiledAuditableItemGraphPatchOperation](variables/CompiledAuditableItemGraphPatchOperation.md)
+- [CompiledAuditableItemGraphResource](variables/CompiledAuditableItemGraphResource.md)
+- [CompiledAuditableItemGraphVertex](variables/CompiledAuditableItemGraphVertex.md)
+- [CompiledAuditableItemGraphVertexList](variables/CompiledAuditableItemGraphVertexList.md)
+- [CompiledAuditableItemGraphVertexVersionList](variables/CompiledAuditableItemGraphVertexVersionList.md)
 - [AuditableItemGraphAuditMode](variables/AuditableItemGraphAuditMode.md)
 - [AuditableItemGraphContexts](variables/AuditableItemGraphContexts.md)
 - [AuditableItemGraphMetricIds](variables/AuditableItemGraphMetricIds.md)
