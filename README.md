@@ -13,3 +13,7 @@ The packages are designed to work independently or as a complete stack. You can 
 ## Contributing
 
 To contribute to this package see the guidelines for building and publishing in [CONTRIBUTING](./CONTRIBUTING.md)
+
+## Origin
+
+This repository is derived from the original [iotaledger/twin-auditable-item-graph](https://github.com/iotaledger/twin-auditable-item-graph) repository.

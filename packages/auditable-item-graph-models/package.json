@@ -4,7 +4,7 @@
 	"description": "Defines shared graph data contracts, JSON schemas, and JSON-LD contexts for consistent interoperability.",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/iotaledger/twin-auditable-item-graph.git",
+		"url": "git+https://github.com/3sixtyglobal/twin-auditable-item-graph.git",
 		"directory": "packages/auditable-item-graph-models"
 	},
 	"author": "martyn.janes@iota.org",
@@ -85,7 +85,7 @@
 		"schemas"
 	],
 	"bugs": {
-		"url": "git+https://github.com/iotaledger/twin-auditable-item-graph/issues"
+		"url": "git+https://github.com/3sixtyglobal/twin-auditable-item-graph/issues"
 	},
 	"homepage": "https://twindev.org"
 }

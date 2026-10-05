@@ -4,7 +4,7 @@
 	"description": "Provides a client for interacting with auditable graph endpoints over HTTP.",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/iotaledger/twin-auditable-item-graph.git",
+		"url": "git+https://github.com/3sixtyglobal/twin-auditable-item-graph.git",
 		"directory": "packages/auditable-item-graph-rest-client"
 	},
 	"author": "martyn.janes@iota.org",
@@ -78,7 +78,7 @@
 		"auditable-item-graph"
 	],
 	"bugs": {
-		"url": "git+https://github.com/iotaledger/twin-auditable-item-graph/issues"
+		"url": "git+https://github.com/3sixtyglobal/twin-auditable-item-graph/issues"
 	},
 	"homepage": "https://twindev.org"
 }
