@@ -1,6 +1,6 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import type { IPatchOperation } from "@twin.org/core";
+import type { IPatchOperation } from "@3sixty/core";
 
 /**
  * Event bus payload for vertex updated.

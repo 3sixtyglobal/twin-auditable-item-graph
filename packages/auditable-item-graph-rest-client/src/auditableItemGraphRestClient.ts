@@ -1,13 +1,13 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import { BaseRestClient } from "@twin.org/api-core";
+import { BaseRestClient } from "@3sixty/api-core";
 import {
 	HttpHeaderHelper,
 	HttpParameterHelper,
 	type IBaseRestClientConfig,
 	type ICreatedResponse,
 	type INoContentResponse
-} from "@twin.org/api-models";
+} from "@3sixty/api-models";
 import type {
 	IAuditableItemGraphChangeset,
 	IAuditableItemGraphChangesetGetRequest,
@@ -33,11 +33,11 @@ import type {
 	IAuditableItemGraphVertexList,
 	IAuditableItemGraphVertexVersionList,
 	VerifyDepth
-} from "@twin.org/auditable-item-graph-models";
-import { Coerce, Guards, Urn } from "@twin.org/core";
-import type { EntityCondition, SortDirection } from "@twin.org/entity";
-import { nameof } from "@twin.org/nameof";
-import { HeaderTypes, HttpMethod, MimeTypes } from "@twin.org/web";
+} from "@3sixty/auditable-item-graph-models";
+import { Coerce, Guards, Urn } from "@3sixty/core";
+import type { EntityCondition, SortDirection } from "@3sixty/entity";
+import { nameof } from "@3sixty/nameof";
+import { HeaderTypes, HttpMethod, MimeTypes } from "@3sixty/web";
 
 /**
  * Client for performing auditable item graph through to REST endpoints.

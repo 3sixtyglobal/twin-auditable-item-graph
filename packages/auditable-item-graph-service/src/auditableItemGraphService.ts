@@ -6,7 +6,7 @@ import {
 	type HealthApplicationCallback,
 	type IHealth,
 	type IHealthProviderComponent
-} from "@twin.org/api-models";
+} from "@3sixty/api-models";
 import {
 	AuditableItemGraphAuditMode,
 	AuditableItemGraphContexts,
@@ -29,8 +29,8 @@ import {
 	type IAuditableItemGraphVertex,
 	type IAuditableItemGraphVertexList,
 	type IAuditableItemGraphVertexVersionList
-} from "@twin.org/auditable-item-graph-models";
-import { ContextIdHelper, ContextIdKeys, ContextIdStore } from "@twin.org/context";
+} from "@3sixty/auditable-item-graph-models";
+import { ContextIdHelper, ContextIdKeys, ContextIdStore } from "@3sixty/context";
 import {
 	ArrayHelper,
 	BaseError,
@@ -49,40 +49,40 @@ import {
 	Validation,
 	type IPatchOperation,
 	type IValidationFailure
-} from "@twin.org/core";
-import { DataTypeHelper } from "@twin.org/data-core";
+} from "@3sixty/core";
+import { DataTypeHelper } from "@3sixty/data-core";
 import {
 	JsonLdDataTypes,
 	JsonLdHelper,
 	JsonLdProcessor,
 	type IJsonLdNodeObject
-} from "@twin.org/data-json-ld";
+} from "@3sixty/data-json-ld";
 import {
 	ComparisonOperator,
 	LogicalOperator,
 	SortDirection,
 	type EntityCondition,
 	type IComparator
-} from "@twin.org/entity";
+} from "@3sixty/entity";
 import {
 	EntityStorageConnectorFactory,
 	type IEntityStorageConnector
-} from "@twin.org/entity-storage-models";
-import type { IEventBusComponent } from "@twin.org/event-bus-models";
+} from "@3sixty/entity-storage-models";
+import type { IEventBusComponent } from "@3sixty/event-bus-models";
 import {
 	ImmutableProofContexts,
 	ImmutableProofFailure,
 	ImmutableProofTypes,
 	type IImmutableProofComponent,
 	type IImmutableProofVerification
-} from "@twin.org/immutable-proof-models";
-import { nameof, nameofKebabCase } from "@twin.org/nameof";
+} from "@3sixty/immutable-proof-models";
+import { nameof, nameofKebabCase } from "@3sixty/nameof";
 import {
 	SchemaOrgContexts,
 	SchemaOrgDataTypes,
 	SchemaOrgTypes
-} from "@twin.org/standards-schema-org";
-import { MetricHelper, type ITelemetryComponent } from "@twin.org/telemetry-models";
+} from "@3sixty/standards-schema-org";
+import { MetricHelper, type ITelemetryComponent } from "@3sixty/telemetry-models";
 import type { AuditableItemGraphAlias } from "./entities/auditableItemGraphAlias.js";
 import type { AuditableItemGraphChangeset } from "./entities/auditableItemGraphChangeset.js";
 import type { AuditableItemGraphEdge } from "./entities/auditableItemGraphEdge.js";

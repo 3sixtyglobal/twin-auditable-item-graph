@@ -5,7 +5,7 @@ Use these examples when you want to run graph operations in process, keep an aud
 ## AuditableItemGraphService
 
 ```typescript
-import { AuditableItemGraphService } from '@twin.org/auditable-item-graph-service';
+import { AuditableItemGraphService } from '@3sixty/auditable-item-graph-service';
 
 const service = new AuditableItemGraphService();
 
@@ -13,7 +13,7 @@ console.log(service.className()); // AuditableItemGraphService
 ```
 
 ```typescript
-import { AuditableItemGraphService } from '@twin.org/auditable-item-graph-service';
+import { AuditableItemGraphService } from '@3sixty/auditable-item-graph-service';
 
 const service = new AuditableItemGraphService();
 
@@ -57,8 +57,8 @@ console.log(vertexId); // aig:018f5a6cfd9444d58c7c2d4df1fd0a23
 ```
 
 ```typescript
-import { VerifyDepth } from '@twin.org/auditable-item-graph-models';
-import { AuditableItemGraphService } from '@twin.org/auditable-item-graph-service';
+import { VerifyDepth } from '@3sixty/auditable-item-graph-models';
+import { AuditableItemGraphService } from '@3sixty/auditable-item-graph-service';
 
 const service = new AuditableItemGraphService();
 const vertexId = 'aig:018f5a6cfd9444d58c7c2d4df1fd0a23';
@@ -85,8 +85,8 @@ if (firstChangeset?.id) {
 ```
 
 ```typescript
-import { ComparisonOperator, SortDirection } from '@twin.org/entity';
-import { AuditableItemGraphService } from '@twin.org/auditable-item-graph-service';
+import { ComparisonOperator, SortDirection } from '@3sixty/entity';
+import { AuditableItemGraphService } from '@3sixty/auditable-item-graph-service';
 
 const service = new AuditableItemGraphService();
 
@@ -121,8 +121,8 @@ terminal mode; switching an audited vertex to bypass compacts its history and re
 proofs, and a bypass vertex can never return to audited.
 
 ```typescript
-import { AuditableItemGraphAuditMode } from '@twin.org/auditable-item-graph-models';
-import { AuditableItemGraphService } from '@twin.org/auditable-item-graph-service';
+import { AuditableItemGraphAuditMode } from '@3sixty/auditable-item-graph-models';
+import { AuditableItemGraphService } from '@3sixty/auditable-item-graph-service';
 
 const service = new AuditableItemGraphService();
 
@@ -156,7 +156,7 @@ import {
   AuditableItemGraphEdge,
   AuditableItemGraphResource,
   AuditableItemGraphVertex
-} from '@twin.org/auditable-item-graph-service';
+} from '@3sixty/auditable-item-graph-service';
 
 const alias = new AuditableItemGraphAlias();
 alias.id = 'order-2026-0195';
@@ -195,7 +195,7 @@ console.log(vertex.aliases?.length ?? 0); // 1
 import {
   AuditableItemGraphChangeset,
   AuditableItemGraphPatch
-} from '@twin.org/auditable-item-graph-service';
+} from '@3sixty/auditable-item-graph-service';
 
 const patch = new AuditableItemGraphPatch();
 patch.op = 'replace';
@@ -215,7 +215,7 @@ console.log(changeset.patches.length); // 1
 ## AuditableItemGraphAlias
 
 ```typescript
-import { AuditableItemGraphAlias } from '@twin.org/auditable-item-graph-service';
+import { AuditableItemGraphAlias } from '@3sixty/auditable-item-graph-service';
 
 const alias = new AuditableItemGraphAlias();
 alias.id = 'order-2026-0195';
@@ -228,7 +228,7 @@ console.log(alias.id); // order-2026-0195
 ## AuditableItemGraphResource
 
 ```typescript
-import { AuditableItemGraphResource } from '@twin.org/auditable-item-graph-service';
+import { AuditableItemGraphResource } from '@3sixty/auditable-item-graph-service';
 
 const resource = new AuditableItemGraphResource();
 resource.id = 'resource-order';
@@ -245,7 +245,7 @@ console.log(resource.id); // resource-order
 ## AuditableItemGraphEdge
 
 ```typescript
-import { AuditableItemGraphEdge } from '@twin.org/auditable-item-graph-service';
+import { AuditableItemGraphEdge } from '@3sixty/auditable-item-graph-service';
 
 const edge = new AuditableItemGraphEdge();
 edge.id = 'edge-1';
@@ -259,7 +259,7 @@ console.log(edge.edgeRelationships[0]); // derivedFrom
 ## AuditableItemGraphPatch
 
 ```typescript
-import { AuditableItemGraphPatch } from '@twin.org/auditable-item-graph-service';
+import { AuditableItemGraphPatch } from '@3sixty/auditable-item-graph-service';
 
 const patch = new AuditableItemGraphPatch();
 patch.op = 'add';

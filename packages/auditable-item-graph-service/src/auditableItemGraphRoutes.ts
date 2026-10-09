@@ -10,7 +10,7 @@ import {
 	type INoContentResponse,
 	type IRestRoute,
 	type ITag
-} from "@twin.org/api-models";
+} from "@3sixty/api-models";
 import {
 	AuditableItemGraphContexts,
 	AuditableItemGraphTypes,
@@ -31,12 +31,12 @@ import {
 	type IAuditableItemGraphVersionGetResponse,
 	type IAuditableItemGraphVersionListRequest,
 	type IAuditableItemGraphVersionListResponse
-} from "@twin.org/auditable-item-graph-models";
-import { ContextIdStore } from "@twin.org/context";
-import { Coerce, ComponentFactory, Guards } from "@twin.org/core";
-import { nameof } from "@twin.org/nameof";
-import { SchemaOrgContexts, SchemaOrgTypes } from "@twin.org/standards-schema-org";
-import { HeaderTypes, HttpStatusCode, type IHttpHeaders, MimeTypes } from "@twin.org/web";
+} from "@3sixty/auditable-item-graph-models";
+import { ContextIdStore } from "@3sixty/context";
+import { Coerce, ComponentFactory, Guards } from "@3sixty/core";
+import { nameof } from "@3sixty/nameof";
+import { SchemaOrgContexts, SchemaOrgTypes } from "@3sixty/standards-schema-org";
+import { HeaderTypes, HttpStatusCode, type IHttpHeaders, MimeTypes } from "@3sixty/web";
 
 /**
  * The source used when communicating about these routes.
@@ -349,7 +349,7 @@ export function generateRestRoutesAuditableItemGraph(
 									}
 								],
 								verification: {
-									"@context": "https://schema.twindev.org/immutable-proof/",
+									"@context": "https://schema.3sixty.global/immutable-proof/",
 									type: "ImmutableProofVerification",
 									verified: true
 								}
@@ -401,7 +401,7 @@ export function generateRestRoutesAuditableItemGraph(
 									}
 								],
 								verification: {
-									"@context": "https://schema.twindev.org/immutable-proof/",
+									"@context": "https://schema.3sixty.global/immutable-proof/",
 									type: "ImmutableProofVerification",
 									verified: true
 								}
@@ -483,7 +483,7 @@ export function generateRestRoutesAuditableItemGraph(
 											}
 										],
 										verification: {
-											"@context": "https://schema.twindev.org/immutable-proof/",
+											"@context": "https://schema.3sixty.global/immutable-proof/",
 											type: "ImmutableProofVerification",
 											verified: true
 										}
@@ -541,7 +541,7 @@ export function generateRestRoutesAuditableItemGraph(
 											}
 										],
 										verification: {
-											"@context": "https://schema.twindev.org/immutable-proof/",
+											"@context": "https://schema.3sixty.global/immutable-proof/",
 											type: "ImmutableProofVerification",
 											verified: true
 										}

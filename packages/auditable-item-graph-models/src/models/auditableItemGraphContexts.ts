@@ -9,32 +9,32 @@ export const AuditableItemGraphContexts = {
 	/**
 	 * The canonical RDF namespace URI for Auditable Item Graph.
 	 */
-	Namespace: "https://schema.twindev.org/aig/",
+	Namespace: "https://schema.3sixty.global/aig/",
 
 	/**
 	 * The value to use in context for Auditable Item Graph.
 	 */
-	Context: "https://schema.twindev.org/aig/",
+	Context: "https://schema.3sixty.global/aig/",
 
 	/**
 	 * The JSON-LD Context URL for Auditable Item Graph.
 	 */
-	JsonLdContext: "https://schema.twindev.org/aig/types.jsonld",
+	JsonLdContext: "https://schema.3sixty.global/aig/types.jsonld",
 
 	/**
 	 * The canonical RDF namespace URI for TWIN Common.
 	 */
-	NamespaceCommon: "https://schema.twindev.org/common/",
+	NamespaceCommon: "https://schema.3sixty.global/common/",
 
 	/**
 	 * The value to use in JSON-LD context for TWIN Common.
 	 */
-	ContextCommon: "https://schema.twindev.org/common/",
+	ContextCommon: "https://schema.3sixty.global/common/",
 
 	/**
 	 * The JSON-LD Context URL for TWIN Common.
 	 */
-	JsonLdContextCommon: "https://schema.twindev.org/common/types.jsonld"
+	JsonLdContextCommon: "https://schema.3sixty.global/common/types.jsonld"
 } as const;
 
 /**

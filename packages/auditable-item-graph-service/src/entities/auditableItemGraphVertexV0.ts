@@ -1,7 +1,7 @@
 // Copyright 2026 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import { JsonLdTypes, type IJsonLdNodeObject } from "@twin.org/data-json-ld";
-import { entity, property, SortDirection } from "@twin.org/entity";
+import { JsonLdTypes, type IJsonLdNodeObject } from "@3sixty/data-json-ld";
+import { entity, property, SortDirection } from "@3sixty/entity";
 import type { AuditableItemGraphAlias } from "./auditableItemGraphAlias.js";
 import type { AuditableItemGraphEdge } from "./auditableItemGraphEdge.js";
 import type { AuditableItemGraphResource } from "./auditableItemGraphResource.js";

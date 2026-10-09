@@ -10,6 +10,7 @@
 	"versioning": "prerelease",
 	"prerelease": true,
 	"prerelease-type": "next",
+	"last-release-sha": "08ab7ea5246344f3841fc09abd93f3a8d7dd570b",
 	"packages": {
 		"packages/auditable-item-graph-models": {
 			"package-name": "auditable-item-graph-models",

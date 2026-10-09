@@ -1,4 +1,4 @@
-# TWIN Auditable Item Graph Models
+# 3Sixty Auditable Item Graph Models
 
 This package defines the shared contracts used by the wider graph ecosystem, including typed interfaces, JSON schemas, and JSON-LD contexts.
 
@@ -7,7 +7,7 @@ It provides the common data foundation needed to exchange graph items and audit 
 ## Installation
 
 ```shell
-npm install @twin.org/auditable-item-graph-models
+npm install @3sixty/auditable-item-graph-models
 ```
 
 ## Examples

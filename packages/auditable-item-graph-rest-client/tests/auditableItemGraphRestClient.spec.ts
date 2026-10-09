@@ -4,9 +4,9 @@ import {
 	AuditableItemGraphContexts,
 	AuditableItemGraphTypes,
 	type IAuditableItemGraphVertex
-} from "@twin.org/auditable-item-graph-models";
-import { GuardError, ObjectHelper } from "@twin.org/core";
-import { HttpMethod } from "@twin.org/web";
+} from "@3sixty/auditable-item-graph-models";
+import { GuardError, ObjectHelper } from "@3sixty/core";
+import { HttpMethod } from "@3sixty/web";
 import { AuditableItemGraphRestClient } from "../src/auditableItemGraphRestClient.js";
 import {
 	createdResponse,
@@ -50,19 +50,19 @@ const TEST_CHANGESET = {
 };
 
 const TEST_CHANGESET_LIST = {
-	"@context": ["https://schema.twindev.org/aig/"],
+	"@context": ["https://schema.3sixty.global/aig/"],
 	type: AuditableItemGraphTypes.ChangesetList,
 	changesets: [TEST_CHANGESET]
 };
 
 const TEST_VERTEX_LIST = {
-	"@context": ["https://schema.twindev.org/aig/"],
+	"@context": ["https://schema.3sixty.global/aig/"],
 	type: AuditableItemGraphTypes.VertexList,
 	vertices: [TEST_VERTEX]
 };
 
 const TEST_VERSION_LIST = {
-	"@context": ["https://schema.twindev.org/aig/"],
+	"@context": ["https://schema.3sixty.global/aig/"],
 	type: AuditableItemGraphTypes.VertexVersionList,
 	versions: [{ version: 1, dateCreated: "2024-01-01T00:00:00Z" }]
 };

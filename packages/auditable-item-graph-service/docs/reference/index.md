@@ -1,4 +1,4 @@
-# @twin.org/auditable-item-graph-service
+# @3sixty/auditable-item-graph-service
 
 ## Classes
 

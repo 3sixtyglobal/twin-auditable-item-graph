@@ -6,7 +6,7 @@ Interface describing a set of changes to the vertex.
 
 ### @context? {#context}
 
-> `optional` **@context?**: \[`"https://schema.twindev.org/aig/"`, `"https://schema.twindev.org/common/"`, `...IJsonLdContextDefinitionElement[]`\]
+> `optional` **@context?**: \[`"https://schema.3sixty.global/aig/"`, `"https://schema.3sixty.global/common/"`, `...IJsonLdContextDefinitionElement[]`\]
 
 JSON-LD Context.
 

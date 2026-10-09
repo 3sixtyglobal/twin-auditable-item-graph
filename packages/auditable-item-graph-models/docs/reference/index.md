@@ -1,4 +1,4 @@
-# @twin.org/auditable-item-graph-models
+# @3sixty/auditable-item-graph-models
 
 ## Classes
 

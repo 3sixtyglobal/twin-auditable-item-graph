@@ -1,7 +1,7 @@
 // Copyright 2026 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import { Converter } from "@twin.org/core";
-import { Blake2b } from "@twin.org/crypto";
+import { Converter } from "@3sixty/core";
+import { Blake2b } from "@3sixty/crypto";
 import { AuditableItemGraphVertexIndexHelper } from "../src/utils/auditableItemGraphVertexIndexHelper.js";
 
 const VERTEX_ID = "0101010101010101010101010101010101010101010101010101010101010101";

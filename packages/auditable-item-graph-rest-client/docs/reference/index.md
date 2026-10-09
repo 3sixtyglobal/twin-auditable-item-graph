@@ -1,4 +1,4 @@
-# @twin.org/auditable-item-graph-rest-client
+# @3sixty/auditable-item-graph-rest-client
 
 ## Classes
 

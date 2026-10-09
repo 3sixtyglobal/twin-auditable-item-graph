@@ -5,18 +5,18 @@ Use these examples to initialise data type handling before interacting with grap
 ## AuditableItemGraphDataTypes
 
 ```typescript
-import { DataTypeHandlerFactory } from '@twin.org/data-core';
+import { DataTypeHandlerFactory } from '@3sixty/data-core';
 import {
   AuditableItemGraphContexts,
   AuditableItemGraphDataTypes,
   AuditableItemGraphTypes
-} from '@twin.org/auditable-item-graph-models';
+} from '@3sixty/auditable-item-graph-models';
 
 AuditableItemGraphDataTypes.registerTypes();
 
 const vertexType = `${AuditableItemGraphContexts.Namespace}${AuditableItemGraphTypes.Vertex}`;
 const handler = DataTypeHandlerFactory.get(vertexType);
 
-console.log(vertexType); // https://schema.twindev.org/auditable-item-graph/Vertex
+console.log(vertexType); // https://schema.3sixty.global/auditable-item-graph/Vertex
 console.log(handler.type); // Vertex
 ```

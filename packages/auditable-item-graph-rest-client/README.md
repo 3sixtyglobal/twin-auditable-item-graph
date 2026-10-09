@@ -1,4 +1,4 @@
-# TWIN Auditable Item Graph REST Client
+# 3Sixty Auditable Item Graph REST Client
 
 This package offers a straightforward client for sending auditable graph requests to compatible HTTP endpoints.
 
@@ -7,7 +7,7 @@ It helps applications consume graph, changeset, and query operations without rei
 ## Installation
 
 ```shell
-npm install @twin.org/auditable-item-graph-rest-client
+npm install @3sixty/auditable-item-graph-rest-client
 ```
 
 ## Examples

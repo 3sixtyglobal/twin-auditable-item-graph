@@ -1,7 +1,7 @@
 // Copyright 2026 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import { Converter, Is, JsonHelper, ObjectHelper } from "@twin.org/core";
-import { Blake2b } from "@twin.org/crypto";
+import { Converter, Is, JsonHelper, ObjectHelper } from "@3sixty/core";
+import { Blake2b } from "@3sixty/crypto";
 import type { AuditableItemGraphVertexIndex } from "../entities/auditableItemGraphVertexIndex.js";
 
 /**

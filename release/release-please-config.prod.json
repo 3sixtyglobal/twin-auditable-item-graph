@@ -8,6 +8,7 @@
 	"release-type": "node",
 	"initial-version": "0.0.1",
 	"versioning": "default",
+	"last-release-sha": "7cd38be58af721dd02f06aade517d7f79c5a4e36",
 	"packages": {
 		"packages/auditable-item-graph-models": {
 			"package-name": "auditable-item-graph-models",

@@ -1,40 +1,40 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import { TenantIdContextIdHandler } from "@twin.org/api-tenant-processor";
+import { TenantIdContextIdHandler } from "@3sixty/api-tenant-processor";
 import {
 	AuditableItemGraphContexts,
 	AuditableItemGraphTypes,
 	VerifyDepth
-} from "@twin.org/auditable-item-graph-models";
+} from "@3sixty/auditable-item-graph-models";
 import {
 	type BackgroundTask,
 	BackgroundTaskService,
 	initSchema as initSchemaBackgroundTask
-} from "@twin.org/background-task-service";
+} from "@3sixty/background-task-service";
 import {
 	ContextIdHandlerFactory,
 	ContextIdKeys,
 	ContextIdStore,
 	type IContextIds
-} from "@twin.org/context";
-import { AlreadyExistsError, ComponentFactory, Is } from "@twin.org/core";
-import { MemoryEntityStorageConnector } from "@twin.org/entity-storage-connector-memory";
-import { EntityStorageConnectorFactory } from "@twin.org/entity-storage-models";
-import { DidContextIdHandler } from "@twin.org/identity-models";
-import { ImmutableProofFailure } from "@twin.org/immutable-proof-models";
+} from "@3sixty/context";
+import { AlreadyExistsError, ComponentFactory, Is } from "@3sixty/core";
+import { MemoryEntityStorageConnector } from "@3sixty/entity-storage-connector-memory";
+import { EntityStorageConnectorFactory } from "@3sixty/entity-storage-models";
+import { DidContextIdHandler } from "@3sixty/identity-models";
+import { ImmutableProofFailure } from "@3sixty/immutable-proof-models";
 import {
 	type ImmutableProof,
 	ImmutableProofService,
 	initSchema as initSchemaImmutableProof
-} from "@twin.org/immutable-proof-service";
-import { ModuleHelper } from "@twin.org/modules";
-import { nameof } from "@twin.org/nameof";
-import { NotarizationConnectorFactory, type INotarization } from "@twin.org/notarization-models";
+} from "@3sixty/immutable-proof-service";
+import { ModuleHelper } from "@3sixty/modules";
+import { nameof } from "@3sixty/nameof";
+import { NotarizationConnectorFactory, type INotarization } from "@3sixty/notarization-models";
 import {
 	MetricType,
 	type ITelemetryComponent,
 	type ITelemetryMetric
-} from "@twin.org/telemetry-models";
+} from "@3sixty/telemetry-models";
 import {
 	cleanupTestEnv,
 	setupTestEnv,

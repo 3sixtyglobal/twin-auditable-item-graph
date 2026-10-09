@@ -1,8 +1,8 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import { DataTypeHelper } from "@twin.org/data-core";
-import { JsonLdDataTypes } from "@twin.org/data-json-ld";
-import { ImmutableProofDataTypes } from "@twin.org/immutable-proof-models";
+import { DataTypeHelper } from "@3sixty/data-core";
+import { JsonLdDataTypes } from "@3sixty/data-json-ld";
+import { ImmutableProofDataTypes } from "@3sixty/immutable-proof-models";
 import * as CompiledValidators from "../compiled/validators.js";
 import { AuditableItemGraphContexts } from "../models/auditableItemGraphContexts.js";
 import { AuditableItemGraphTypes } from "../models/auditableItemGraphTypes.js";

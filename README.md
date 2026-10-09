@@ -1,4 +1,4 @@
-# TWIN Auditable Item Graph
+# 3Sixty Auditable Item Graph
 
 This repository provides a modular implementation of an auditable item graph, covering shared models, an in-process service, and an HTTP client. Together, these packages make it easier to represent linked records, capture changes over time, and retrieve verifiable history in a consistent way.
 

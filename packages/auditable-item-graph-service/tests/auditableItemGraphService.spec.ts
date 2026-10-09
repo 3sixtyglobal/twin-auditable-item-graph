@@ -1,7 +1,7 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import { HealthCategory, HealthStatus, type IHealth } from "@twin.org/api-models";
-import { TenantIdContextIdHandler } from "@twin.org/api-tenant-processor";
+import { HealthCategory, HealthStatus, type IHealth } from "@3sixty/api-models";
+import { TenantIdContextIdHandler } from "@3sixty/api-tenant-processor";
 import {
 	AuditableItemGraphAuditMode,
 	AuditableItemGraphContexts,
@@ -11,31 +11,31 @@ import {
 	type IAuditableItemGraphResource,
 	type IAuditableItemGraphVertex,
 	VerifyDepth
-} from "@twin.org/auditable-item-graph-models";
+} from "@3sixty/auditable-item-graph-models";
 import {
 	type BackgroundTask,
 	BackgroundTaskService,
 	initSchema as initSchemaBackgroundTask
-} from "@twin.org/background-task-service";
+} from "@3sixty/background-task-service";
 import {
 	ContextIdHandlerFactory,
 	ContextIdKeys,
 	ContextIdStore,
 	type IContextIds
-} from "@twin.org/context";
-import { ComponentFactory, Is, RandomHelper, SharedStore } from "@twin.org/core";
-import { ComparisonOperator, LogicalOperator, SortDirection } from "@twin.org/entity";
-import { MemoryEntityStorageConnector } from "@twin.org/entity-storage-connector-memory";
-import { EntityStorageConnectorFactory } from "@twin.org/entity-storage-models";
-import { DidContextIdHandler } from "@twin.org/identity-models";
+} from "@3sixty/context";
+import { ComponentFactory, Is, RandomHelper, SharedStore } from "@3sixty/core";
+import { ComparisonOperator, LogicalOperator, SortDirection } from "@3sixty/entity";
+import { MemoryEntityStorageConnector } from "@3sixty/entity-storage-connector-memory";
+import { EntityStorageConnectorFactory } from "@3sixty/entity-storage-models";
+import { DidContextIdHandler } from "@3sixty/identity-models";
 import {
 	type ImmutableProof,
 	ImmutableProofService,
 	initSchema as initSchemaImmutableProof
-} from "@twin.org/immutable-proof-service";
-import { ModuleHelper } from "@twin.org/modules";
-import { nameof } from "@twin.org/nameof";
-import { NotarizationConnectorFactory, type INotarization } from "@twin.org/notarization-models";
+} from "@3sixty/immutable-proof-service";
+import { ModuleHelper } from "@3sixty/modules";
+import { nameof } from "@3sixty/nameof";
+import { NotarizationConnectorFactory, type INotarization } from "@3sixty/notarization-models";
 import {
 	cleanupTestEnv,
 	setupTestEnv,
@@ -557,8 +557,8 @@ describe("AuditableItemGraphService", () => {
 
 		expect(result).toEqual({
 			"@context": [
-				"https://schema.twindev.org/aig/",
-				"https://schema.twindev.org/common/",
+				"https://schema.3sixty.global/aig/",
+				"https://schema.3sixty.global/common/",
 				"https://schema.org"
 			],
 			type: AuditableItemGraphTypes.Vertex,
@@ -629,8 +629,8 @@ describe("AuditableItemGraphService", () => {
 		expect(result.changesets).toEqual({
 			"@context": [
 				"https://schema.org",
-				"https://schema.twindev.org/aig/",
-				"https://schema.twindev.org/common/"
+				"https://schema.3sixty.global/aig/",
+				"https://schema.3sixty.global/common/"
 			],
 			type: ["ItemList", AuditableItemGraphTypes.ChangesetList],
 			itemListElement: [
@@ -760,10 +760,10 @@ describe("AuditableItemGraphService", () => {
 		expect(result).toEqual(
 			expect.objectContaining({
 				"@context": [
-					"https://schema.twindev.org/aig/",
-					"https://schema.twindev.org/common/",
+					"https://schema.3sixty.global/aig/",
+					"https://schema.3sixty.global/common/",
 					"https://schema.org",
-					"https://schema.twindev.org/immutable-proof/"
+					"https://schema.3sixty.global/immutable-proof/"
 				],
 				type: AuditableItemGraphTypes.Changeset,
 				id: changesetUrn,
@@ -1032,10 +1032,10 @@ describe("AuditableItemGraphService", () => {
 
 		expect(result).toEqual({
 			"@context": [
-				"https://schema.twindev.org/aig/",
-				"https://schema.twindev.org/common/",
+				"https://schema.3sixty.global/aig/",
+				"https://schema.3sixty.global/common/",
 				"https://schema.org",
-				"https://schema.twindev.org/immutable-proof/"
+				"https://schema.3sixty.global/immutable-proof/"
 			],
 			type: AuditableItemGraphTypes.Vertex,
 			id,
@@ -1173,10 +1173,10 @@ describe("AuditableItemGraphService", () => {
 
 		expect(result).toEqual({
 			"@context": [
-				"https://schema.twindev.org/aig/",
-				"https://schema.twindev.org/common/",
+				"https://schema.3sixty.global/aig/",
+				"https://schema.3sixty.global/common/",
 				"https://schema.org",
-				"https://schema.twindev.org/immutable-proof/"
+				"https://schema.3sixty.global/immutable-proof/"
 			],
 			id,
 			type: AuditableItemGraphTypes.Vertex,
@@ -1290,10 +1290,10 @@ describe("AuditableItemGraphService", () => {
 
 		expect(result).toEqual({
 			"@context": [
-				"https://schema.twindev.org/aig/",
-				"https://schema.twindev.org/common/",
+				"https://schema.3sixty.global/aig/",
+				"https://schema.3sixty.global/common/",
 				"https://schema.org",
-				"https://schema.twindev.org/immutable-proof/"
+				"https://schema.3sixty.global/immutable-proof/"
 			],
 			id,
 			type: AuditableItemGraphTypes.Vertex,
@@ -1448,10 +1448,10 @@ describe("AuditableItemGraphService", () => {
 
 		expect(result).toEqual({
 			"@context": [
-				"https://schema.twindev.org/aig/",
-				"https://schema.twindev.org/common/",
+				"https://schema.3sixty.global/aig/",
+				"https://schema.3sixty.global/common/",
 				"https://schema.org",
-				"https://schema.twindev.org/immutable-proof/"
+				"https://schema.3sixty.global/immutable-proof/"
 			],
 			id,
 			type: AuditableItemGraphTypes.Vertex,
@@ -1675,10 +1675,10 @@ describe("AuditableItemGraphService", () => {
 
 		expect(result).toEqual({
 			"@context": [
-				"https://schema.twindev.org/aig/",
-				"https://schema.twindev.org/common/",
+				"https://schema.3sixty.global/aig/",
+				"https://schema.3sixty.global/common/",
 				"https://schema.org",
-				"https://schema.twindev.org/immutable-proof/"
+				"https://schema.3sixty.global/immutable-proof/"
 			],
 			id,
 			type: AuditableItemGraphTypes.Vertex,
@@ -2583,10 +2583,10 @@ describe("AuditableItemGraphService", () => {
 
 		expect(result).toEqual({
 			"@context": [
-				"https://schema.twindev.org/aig/",
-				"https://schema.twindev.org/common/",
+				"https://schema.3sixty.global/aig/",
+				"https://schema.3sixty.global/common/",
 				"https://schema.org",
-				"https://schema.twindev.org/immutable-proof/"
+				"https://schema.3sixty.global/immutable-proof/"
 			],
 			id,
 			type: AuditableItemGraphTypes.Vertex,
@@ -2621,8 +2621,8 @@ describe("AuditableItemGraphService", () => {
 			expect.objectContaining({
 				"@context": [
 					"https://schema.org",
-					"https://schema.twindev.org/aig/",
-					"https://schema.twindev.org/common/"
+					"https://schema.3sixty.global/aig/",
+					"https://schema.3sixty.global/common/"
 				],
 				type: ["ItemList", AuditableItemGraphTypes.VertexList]
 			})
@@ -2668,8 +2668,8 @@ describe("AuditableItemGraphService", () => {
 			expect.objectContaining({
 				"@context": [
 					"https://schema.org",
-					"https://schema.twindev.org/aig/",
-					"https://schema.twindev.org/common/"
+					"https://schema.3sixty.global/aig/",
+					"https://schema.3sixty.global/common/"
 				],
 				type: ["ItemList", AuditableItemGraphTypes.VertexList]
 			})
@@ -2732,8 +2732,8 @@ describe("AuditableItemGraphService", () => {
 			expect.objectContaining({
 				"@context": [
 					"https://schema.org",
-					"https://schema.twindev.org/aig/",
-					"https://schema.twindev.org/common/"
+					"https://schema.3sixty.global/aig/",
+					"https://schema.3sixty.global/common/"
 				],
 				type: ["ItemList", AuditableItemGraphTypes.VertexList],
 				itemListElement: [
@@ -2771,8 +2771,8 @@ describe("AuditableItemGraphService", () => {
 			expect.objectContaining({
 				"@context": [
 					"https://schema.org",
-					"https://schema.twindev.org/aig/",
-					"https://schema.twindev.org/common/"
+					"https://schema.3sixty.global/aig/",
+					"https://schema.3sixty.global/common/"
 				],
 				type: ["ItemList", AuditableItemGraphTypes.VertexList],
 				itemListElement: [
@@ -2805,8 +2805,8 @@ describe("AuditableItemGraphService", () => {
 			expect.objectContaining({
 				"@context": [
 					"https://schema.org",
-					"https://schema.twindev.org/aig/",
-					"https://schema.twindev.org/common/"
+					"https://schema.3sixty.global/aig/",
+					"https://schema.3sixty.global/common/"
 				],
 				type: ["ItemList", AuditableItemGraphTypes.VertexList],
 				itemListElement: [
@@ -3564,8 +3564,8 @@ describe("AuditableItemGraphService", () => {
 			expect.objectContaining({
 				"@context": [
 					"https://schema.org",
-					"https://schema.twindev.org/aig/",
-					"https://schema.twindev.org/common/"
+					"https://schema.3sixty.global/aig/",
+					"https://schema.3sixty.global/common/"
 				],
 				type: ["ItemList", AuditableItemGraphTypes.VertexList]
 			})
@@ -3618,8 +3618,8 @@ describe("AuditableItemGraphService", () => {
 			expect.objectContaining({
 				"@context": [
 					"https://schema.org",
-					"https://schema.twindev.org/aig/",
-					"https://schema.twindev.org/common/"
+					"https://schema.3sixty.global/aig/",
+					"https://schema.3sixty.global/common/"
 				],
 				type: ["ItemList", AuditableItemGraphTypes.VertexList],
 				itemListElement: [
@@ -4071,7 +4071,7 @@ describe("AuditableItemGraphService", () => {
 	test("Validation fails when @context is a string instead of array", async () => {
 		const service = new AuditableItemGraphService();
 		const invalidVertex = {
-			"@context": "https://schema.twindev.org/aig/",
+			"@context": "https://schema.3sixty.global/aig/",
 			type: AuditableItemGraphTypes.Vertex
 		} as unknown as Omit<IAuditableItemGraphVertex, "id">;
 		await expect(service.create(invalidVertex)).rejects.toMatchObject({
@@ -4216,7 +4216,7 @@ describe("AuditableItemGraphService", () => {
 
 		expect(result).toEqual(
 			expect.objectContaining({
-				"@context": expect.arrayContaining(["https://schema.twindev.org/aig/"]),
+				"@context": expect.arrayContaining(["https://schema.3sixty.global/aig/"]),
 				type: AuditableItemGraphTypes.Vertex,
 				id,
 				dateCreated: expect.any(String),
@@ -4665,7 +4665,7 @@ describe("AuditableItemGraphService", () => {
 		const result = await service.get(id, { verifySignatureDepth: VerifyDepth.All });
 
 		expect(result.verified).toBeUndefined();
-		expect(result["@context"]).not.toContain("https://schema.twindev.org/immutable-proof/");
+		expect(result["@context"]).not.toContain("https://schema.3sixty.global/immutable-proof/");
 	});
 
 	test("Returns an empty changeset list for a bypass vertex", async () => {

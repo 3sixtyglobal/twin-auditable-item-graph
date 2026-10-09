@@ -6,7 +6,7 @@ Interface describing a list of auditable item graph vertex version numbers.
 
 ### @context {#context}
 
-> **@context**: \[`"https://schema.org"`, `"https://schema.twindev.org/aig/"`, `...IJsonLdContextDefinitionElement[]`\]
+> **@context**: \[`"https://schema.org"`, `"https://schema.3sixty.global/aig/"`, `...IJsonLdContextDefinitionElement[]`\]
 
 JSON-LD Context.
 

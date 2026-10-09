@@ -5,7 +5,7 @@ These snippets show practical request flows for creating, reading, updating, and
 ## AuditableItemGraphRestClient
 
 ```typescript
-import { AuditableItemGraphRestClient } from '@twin.org/auditable-item-graph-rest-client';
+import { AuditableItemGraphRestClient } from '@3sixty/auditable-item-graph-rest-client';
 
 const client = new AuditableItemGraphRestClient({ endpoint: 'http://localhost:8080' });
 
@@ -13,8 +13,8 @@ console.log(client.className()); // AuditableItemGraphRestClient
 ```
 
 ```typescript
-import { VerifyDepth } from '@twin.org/auditable-item-graph-models';
-import { AuditableItemGraphRestClient } from '@twin.org/auditable-item-graph-rest-client';
+import { VerifyDepth } from '@3sixty/auditable-item-graph-models';
+import { AuditableItemGraphRestClient } from '@3sixty/auditable-item-graph-rest-client';
 
 const client = new AuditableItemGraphRestClient({ endpoint: 'http://localhost:8080' });
 
@@ -48,8 +48,8 @@ console.log(vertex.id); // aig:018f5a6cfd9444d58c7c2d4df1fd0a23
 ```
 
 ```typescript
-import { VerifyDepth } from '@twin.org/auditable-item-graph-models';
-import { AuditableItemGraphRestClient } from '@twin.org/auditable-item-graph-rest-client';
+import { VerifyDepth } from '@3sixty/auditable-item-graph-models';
+import { AuditableItemGraphRestClient } from '@3sixty/auditable-item-graph-rest-client';
 
 const client = new AuditableItemGraphRestClient({ endpoint: 'http://localhost:8080' });
 
@@ -83,8 +83,8 @@ if (firstChangeset?.id) {
 ```
 
 ```typescript
-import { AuditableItemGraphRestClient } from '@twin.org/auditable-item-graph-rest-client';
-import { ComparisonOperator, SortDirection } from '@twin.org/entity';
+import { AuditableItemGraphRestClient } from '@3sixty/auditable-item-graph-rest-client';
+import { ComparisonOperator, SortDirection } from '@3sixty/entity';
 
 const client = new AuditableItemGraphRestClient({ endpoint: 'http://localhost:8080' });
 
